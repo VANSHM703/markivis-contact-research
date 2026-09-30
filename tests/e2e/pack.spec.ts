@@ -101,6 +101,8 @@ test.describe("pack off, as the Harbor partner", () => {
     await page.locator("tbody a").first().click();
     await expect(page.getByRole("link", { name: "Notes" })).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Record placement" })).toHaveCount(0);
+    await page.getByRole("link", { name: "Edit details" }).click();
+    await expect(page.getByRole("group", { name: "Contact type" })).toHaveCount(0);
     expect((await page.goto("./settings/off-limits"))?.status()).toBe(404);
     expect((await page.goto("./people/placements/import"))?.status()).toBe(404);
     await page.goto("./settings");

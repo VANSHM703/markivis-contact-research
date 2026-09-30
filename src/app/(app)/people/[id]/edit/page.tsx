@@ -25,6 +25,7 @@ export default async function EditPersonPage({ params }: { params: Promise<{ id:
         action={updatePersonAction.bind(null, p.id)}
         defaults={{ full_name: p.fullName, preferred_name: p.preferredName, linkedin_url: p.linkedinUrl, city: p.city, region: p.region, country: p.country, contact_types: p.contactTypes, is_priority: p.isPriority }}
         submitLabel="Save changes"
+        showContactTypes={execSearchOn(ctx.workspace)}
       />
     </>
   );
