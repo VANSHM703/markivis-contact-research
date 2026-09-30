@@ -1,0 +1,12 @@
+email,event,occurred_at,issue_title,link_url,topics
+mairead.lacroix@wexcombe-group.example.com,click,{{datetime:-20}},Board refresh season,https://demo-search.example.com/insights/board-refresh,Board composition
+mairead.lacroix@wexcombe-group.example.com,click,{{datetime:-12}},Succession in practice,https://demo-search.example.com/insights/succession,CEO succession; Board composition
+mairead.lacroix@wexcombe-group.example.com,click,{{datetime:-3}},What boards ask first,https://demo-search.example.com/insights/first-100-days,Board composition
+mairead.lacroix@wexcombe-group.example.com,open,{{datetime:-3}},What boards ask first,,
+zadie.fairbrother@yarrowdene-holdings.example.com,click,{{datetime:-8}},The CFO agenda,https://demo-search.example.com/insights/cfo-agenda,CFO agenda
+zadie.fairbrother@yarrowdene-holdings.example.com,open,{{datetime:-8}},The CFO agenda,,
+camille.northcott@quarnell-systems.example.com,open,{{datetime:-5}},Board refresh season,,
+anders.kendrick@morvane-industrial.example.com,click,{{datetime:-15}},Five questions for a new CHRO,https://demo-search.example.com/insights/chro,CHRO agenda
+delphine.oyelaran@caldrith-health.example.com,unsubscribe,{{datetime:-2}},Board refresh season,,
+reader@unrelated.example.net,subscribe,{{datetime:-1}},,,
+reader@unrelated.example.net,click,{{datetime:-1}},The CFO agenda,https://demo-search.example.com/insights/cfo-agenda,CFO agenda

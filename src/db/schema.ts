@@ -92,7 +92,7 @@ export const suppressionKind = dmi.enum("suppression_kind", ["email", "linkedin"
 export const suppressionReason = dmi.enum("suppression_reason", ["erasure", "opt_out", "do_not_contact"]);
 export const actorKind = dmi.enum("actor_kind", ["user", "system", "platform_admin"]);
 export const secretKind = dmi.enum("secret_kind", ["apollo_api_key", "hubspot_private_app_token", "newsletter_api_key"]);
-export const queueItemKind = dmi.enum("queue_item_kind", ["data_conflict", "possible_duplicate"]);
+export const queueItemKind = dmi.enum("queue_item_kind", ["data_conflict", "possible_duplicate", "ambiguous_cik"]);
 export const queueItemStatus = dmi.enum("queue_item_status", ["pending", "resolved"]);
 export const aiCallStatus = dmi.enum("ai_call_status", ["ok", "error"]);
 export const interestSource = dmi.enum("interest_source", ["first_party", "manual", "ai", "apollo"]);
@@ -444,11 +444,34 @@ export const feeds = dmi.table(
     config: jsonb().notNull().default({}),
     enabled: boolean().notNull().default(true),
     lastRunAt: timestamp(tz),
+    /** When the last run finished without error; `since` for the next incremental fetch. */
+    lastSuccessAt: timestamp(tz),
     lastError: text(),
+    /** Runs that failed in a row. Three or more raise an adapter health alert (BRD 19). */
+    consecutiveFailures: integer().notNull().default(0),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [index().on(t.workspaceId, t.sourceType)],
+);
+
+/**
+ * Metered third-party usage per workspace and month: Apollo credits (BRD 8.1 credit guard).
+ * AI spend is tracked per call in ai_calls. Not in BRD 6; see DECISIONS.md.
+ */
+export const usageCounters = dmi.table(
+  "usage_counters",
+  {
+    id: id(),
+    workspaceId: workspaceRef(),
+    provider: text().notNull(),
+    period: text().notNull(),
+    units: integer().notNull().default(0),
+    alertedAt: timestamp(tz),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex().on(t.workspaceId, t.provider, t.period), check("usage_counters_period", sql`${t.period} ~ '^[0-9]{4}-[0-9]{2}$'`)],
 );
 
 export const rawItems = dmi.table(

@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const ROUTES = ["", "actions", "queue", "queue?tab=conflicts", "people", "people/new", "people/import", "companies", "companies/new", "search?q=example", "signals", "paths", "coverage", "settings"];
+const ROUTES = ["", "actions", "queue", "queue?tab=conflicts", "people", "people/new", "people/import", "companies", "companies/new", "search?q=example", "signals", "paths", "coverage", "settings", "settings/sources"];
 
 // BEAM_DESIGN_LANGUAGE.md section 2.4: zero horizontal scroll at these widths.
 const WIDTHS = [320, 360, 390, 414, 768, 1024, 1440];

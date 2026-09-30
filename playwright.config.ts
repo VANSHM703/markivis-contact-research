@@ -12,6 +12,8 @@ export const E2E_ENV = {
   AUTH_SECRET: "e2e-tests-only",
   DATABASE_URL: process.env.E2E_DATABASE_URL ?? "postgres://dmi_app:dmi_app@localhost:5432/dmi_e2e",
   DATABASE_MIGRATE_URL: process.env.E2E_DATABASE_MIGRATE_URL ?? "postgres://dmi:dmi@localhost:5432/dmi_e2e",
+  JOBS_DATABASE_URL: process.env.E2E_JOBS_DATABASE_URL ?? "postgres://dmi_jobs:dmi_jobs@localhost:5432/dmi_e2e",
+  TOKEN_ENCRYPTION_KEY: Buffer.alloc(32, 2).toString("base64"),
 };
 
 export default defineConfig({

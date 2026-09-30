@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:idx="urn:atom-extension:indexing">
+<id>tag:google.com,2005:reader/user/00000000000000000000/state/com.google/alerts/0000000000000000000</id>
+<title>Google Alert - tracked executives (demo)</title>
+<link href="https://www.google.com/alerts/feeds/00000000000000000000/0000000000000000000" rel="self"></link>
+<updated>{{datetime:0}}</updated>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a01</id>
+<title type="html">&lt;b&gt;Delphine Oyelaran&lt;/b&gt; leads Westfield High to state title</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fsports%2Fcoach&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-1}}</published>
+<updated>{{datetime:-1}}</updated>
+<content type="html">Coach &lt;b&gt;Delphine Oyelaran&lt;/b&gt; guided the Westfield High School football team to its first state championship in a decade.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a02</id>
+<title type="html">Local painter &lt;b&gt;Odile Oyelaran&lt;/b&gt; opens retrospective</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Farts%2Fgallery&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-2}}</published>
+<updated>{{datetime:-2}}</updated>
+<content type="html">The painter &lt;b&gt;Odile Oyelaran&lt;/b&gt; opened a retrospective at a small gallery on the coast.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a03</id>
+<title type="html">&lt;b&gt;Brevik Harlow Foods&lt;/b&gt; beats estimates as Bram Greaves outlines growth plan</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fbusiness%2Fearnings&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-1}}</published>
+<updated>{{datetime:-1}}</updated>
+<content type="html">Bram Greaves, chief executive of Brevik Harlow Foods, said the company would invest in new markets.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a04</id>
+<title type="html">&lt;b&gt;Esme Trevelyan&lt;/b&gt; said to be weighing exit from Glenmara Packaging GmbH</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fbusiness%2Frumour&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-3}}</published>
+<updated>{{datetime:-3}}</updated>
+<content type="html">People familiar with the matter said Esme Trevelyan is considering leaving Glenmara Packaging GmbH. The company declined to comment.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a05</id>
+<title type="html">&lt;b&gt;Morvane Industrial&lt;/b&gt; opens new headquarters</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fbusiness%2Foffice&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-4}}</published>
+<updated>{{datetime:-4}}</updated>
+<content type="html">Morvane Industrial moved into a new headquarters building downtown.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a06</id>
+<title type="html">&lt;b&gt;Ashvale Dental Partners&lt;/b&gt; appoints new chief executive</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fbusiness%2Fappointment-repeat&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-2}}</published>
+<updated>{{datetime:-2}}</updated>
+<content type="html">Ashvale Dental Partners named a new chief executive this week, according to a company statement.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a07</id>
+<title type="html">&lt;b&gt;Heddrick Water&lt;/b&gt; restructuring to cut jobs</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fbusiness%2Flayoffs&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-5}}</published>
+<updated>{{datetime:-5}}</updated>
+<content type="html">Heddrick Water will cut about 8 percent of its workforce.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a08</id>
+<title type="html">&lt;b&gt;Ettrick Lane Insurance Services&lt;/b&gt; hiring surge in technology roles</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fbusiness%2Fhiring&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-6}}</published>
+<updated>{{datetime:-6}}</updated>
+<content type="html">Ettrick Lane Insurance Services has posted more than 60 technology roles this month.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a09</id>
+<title type="html">&lt;b&gt;Hollisk Security&lt;/b&gt; wins workplace award</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fbusiness%2Faward&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-7}}</published>
+<updated>{{datetime:-7}}</updated>
+<content type="html">Hollisk Security was recognised as a top workplace in its region.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a10</id>
+<title type="html">Storm expected to bring heavy rain</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fweather&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-1}}</published>
+<updated>{{datetime:-1}}</updated>
+<content type="html">Forecasters expect heavy rain across the region this weekend.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a11</id>
+<title type="html">New phones announced at trade show</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Ftech%2Fphones&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-2}}</published>
+<updated>{{datetime:-2}}</updated>
+<content type="html">Several manufacturers announced new phones at a trade show.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a12</id>
+<title type="html">Markets close higher on rate hopes</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Fmarkets&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-3}}</published>
+<updated>{{datetime:-3}}</updated>
+<content type="html">Stocks closed higher as investors weighed the outlook for interest rates.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a13</id>
+<title type="html">City approves new park</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Flocal%2Fpark&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-4}}</published>
+<updated>{{datetime:-4}}</updated>
+<content type="html">The city council approved plans for a new park.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a14</id>
+<title type="html">Airline adds routes for winter</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Ftravel&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-5}}</published>
+<updated>{{datetime:-5}}</updated>
+<content type="html">An airline added new routes for the winter season.</content>
+<author><name></name></author>
+</entry>
+<entry>
+<id>tag:google.com,2013:googlealerts/feed:demo-a15</id>
+<title type="html">Restaurant week returns</title>
+<link href="https://www.google.com/url?rct=j&amp;sa=t&amp;url=https%3A%2F%2Fnews.example.net%2Ffood&amp;ct=ga&amp;usg=AOvVaw0example"></link>
+<published>{{datetime:-6}}</published>
+<updated>{{datetime:-6}}</updated>
+<content type="html">Restaurant week returns with discounted menus across the city.</content>
+<author><name></name></author>
+</entry>
+</feed>

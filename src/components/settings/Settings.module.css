@@ -1,0 +1,27 @@
+.stack { display: grid; gap: var(--space-4); }
+/* The form's children join the action row; the result takes its own line below the buttons. */
+.health { display: contents; }
+.health [role="status"] { flex-basis: 100%; order: 10; }
+.health [role="status"]:empty { display: none; }
+.okText { font-size: var(--caption); color: var(--signal-ok); }
+.warnText { font-size: var(--caption); color: var(--signal-warn); }
+.detail { display: block; margin-top: var(--space-1); color: var(--text-muted); overflow-wrap: anywhere; }
+.feedList { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.feed {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 360px); grid-template-areas: "name facts" "actions actions";
+  gap: var(--space-4); align-items: start; padding: var(--space-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-md);
+}
+.feed > :nth-child(1) { grid-area: name; }
+.feed > :nth-child(2) { grid-area: facts; margin: 0; }
+.feed > :nth-child(3) { grid-area: actions; }
+.feed dd { white-space: nowrap; }
+.feedName { font-weight: 600; }
+.feedActions { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-start; padding-top: var(--space-3); border-top: 1px solid var(--border-subtle); }
+.meter { display: grid; gap: var(--space-2); }
+.track { height: 8px; border-radius: var(--radius-pill); background: var(--border-subtle); overflow: hidden; }
+.bar { height: 100%; background: var(--lime); border-radius: var(--radius-pill); }
+.sections { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-4); }
+.section { display: grid; gap: var(--space-2); align-content: start; text-decoration: none; color: inherit; }
+a.section:hover { border-color: var(--accent); }
+.later { color: var(--text-muted); }
+@media (max-width: 760px) { .feed { grid-template-columns: minmax(0, 1fr); grid-template-areas: "name" "facts" "actions"; } .feed dd { white-space: normal; } }

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/forms/FormState";
 import { withWorkspace } from "@/db/client";
 import { resolveCompany } from "@/domain/matching";
+import { enqueueQuietly } from "@/jobs/enqueue";
 import { MergeError, mergePersons, unmergePerson } from "@/domain/merge";
 import { addRole, createCompany, DuplicateLinkedinError, endRole, findOrCreateCompany, updateCompany, updatePerson, upsertPerson, type Actor, type SourceNote } from "@/domain/records";
 import { SuppressedError } from "@/domain/suppression";
@@ -76,6 +77,8 @@ export async function createPersonAction(_prev: FormState, formData: FormData): 
       values: stringValues(raw),
     };
   }
+  // On-demand Apollo enrichment of the new person (BRD 8.1); essential under the credit guard.
+  await enqueueQuietly("ingest.apollo", { workspaceId: ctx.workspace.id, personIds: [result.personId] });
   redirect(`/people/${result.personId}?notice=${result.possibleDuplicateOf ? "person_created_possible_duplicate" : "person_created"}`);
 }
 
@@ -185,6 +188,7 @@ export async function createCompanyAction(_prev: FormState, formData: FormData):
   if ("existing" in result) {
     return { message: "This company is already in the workspace, so nothing was added.", link: { href: `/companies/${result.existing}`, label: "Open its record" }, values: stringValues(raw) };
   }
+  await enqueueQuietly("ingest.apollo", { workspaceId: ctx.workspace.id, companyIds: [result.id] });
   redirect(`/companies/${result.id}?notice=company_created`);
 }
 
@@ -212,6 +216,7 @@ function toCompanyInput(c: ReturnType<typeof companySchema.parse>) {
     employeeCount: c.employee_count,
     clientStatus: c.client_status,
     isSponsor: c.is_sponsor,
+    leadershipPageUrls: c.leadership_page_urls,
   };
 }
 

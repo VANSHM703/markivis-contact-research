@@ -13,8 +13,9 @@ Relationship intelligence inside BEAM: one trusted record of every senior decisi
 | M0 Orientation: stack, CI, Docker, design tokens, app shell | Done |
 | M1 Foundations: tenancy, auth, roles, audit log, schema, seed data | Done |
 | M2 Records: people, companies, roles, field sources, manual entry, CSV imports, matching | Done |
-| M3 Ingestion: source adapters and the job scheduler | Next |
-| M4 to M10 | Not started |
+| M3 Ingestion: source adapters and the job scheduler | Done |
+| M4 Pipeline and validation: extraction, matching, dedupe, confidence, lanes, the queue | Next |
+| M5 to M10 | Not started |
 
 ## Run it locally
 
@@ -26,7 +27,8 @@ psql -d postgres -f db/bootstrap.sql   # roles dmi, dmi_app, dmi_system; databas
 cp .env.example .env                   # then set AUTH_SECRET
 npm install
 npm run demo:reset                     # migrate from scratch and load the demo workspaces
-npm run dev
+npm run dev                            # the web app
+npm run worker                         # in a second terminal: queued jobs and the schedule
 ```
 
 Open http://localhost:3000/intelligence. In mock mode (`DATA_MODE=mock`, the default) the sign-in page lists the demo users, and a "Mock data" badge shows in the top bar. Every name, company and email in the demo data is fictional.
@@ -60,6 +62,12 @@ CI runs all of these on every push and pull request (`.github/workflows/ci.yml`)
 
 People, then "Import target list". Download the template from that page for the columns (only `company_name` is required). The preview shows what will happen to every row before anything is saved; possible duplicates and conflicting values go to Queue, under "Conflicts and duplicates".
 
+## Sources
+
+Settings, Sources shows every source's health and lets you check a connection or run it now (the worker must be running). In mock mode every source reads the fictional fixtures under `fixtures/`; regenerate them with `npm run fixtures:generate` after changing the seed. Each adapter's README, under `src/ingest/adapters/`, describes its behaviour and links the provider documentation it follows.
+
+Going live needs, per workspace: the client's Apollo API key (entered in Settings, Sources), and for the deployment `SEC_USER_AGENT` (organization name and a contact email) and `TOKEN_ENCRYPTION_KEY`.
+
 ## Configuration
 
 Copy `.env.example` to `.env`. The full list of variables is in BRD section 20.1. The app is served under `APP_BASE_PATH` (default `/intelligence`) so it can sit behind the BEAM reverse proxy.
@@ -70,11 +78,15 @@ Copy `.env.example` to `.env`. The full list of variables is in BRD section 20.1
 db/
   bootstrap.sql   database roles and databases (run once per cluster, as a superuser)
   migrations/     generated schema plus the hand-written row-level security migration
-scripts/          migrate, setup (compose), demo:reset
+fixtures/         mock-mode data for every adapter, generated from the seed
+scripts/          migrate, setup (compose), demo:reset, generate-fixtures
 src/
   app/            (app) signed-in routes, (auth) sign-in, api/v1 JSON routes
   db/             schema, scoped query layer, seed generator
-  domain/         matching, provenance, records, merge, suppression, titles, CSV imports
+  domain/         matching, provenance, records, merge, suppression, titles, CSV imports, secrets
+  ingest/         source adapters (SEC, wires, alerts, pages, Apollo, newsletter), transports, run loop
+  jobs/           pg-boss queue, schedule (BRD 8.9), handlers
+  worker/         the worker process
   components/
     shell/        top bar, brand lockup, sidebar, mobile drawer, search, user menu
     ui/           page header, empty state, readout band

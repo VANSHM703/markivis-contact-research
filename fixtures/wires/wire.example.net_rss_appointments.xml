@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+<title>Appointments wire (demo)</title>
+<link>https://wire.example.net/</link>
+<description>Fictional press releases for BEAM Decision-Maker Intelligence mock mode.</description>
+<item>
+<title>Ashvale Dental Partners Names Hollis Jessop Chief Executive Officer</title>
+<link>https://wire.example.net/news/1001</link>
+<guid isPermaLink="false">wire-1001</guid>
+<pubDate>{{rfc822:-2}}</pubDate>
+<description>&lt;p&gt;Ashvale Dental Partners, a portfolio company of Aldermoor Capital Partners, today announced that Hollis Jessop has joined the company as Chief Executive Officer. Hollis Jessop was previously Chief Financial Officer of Silvaran Retail Group.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Hollis Jessop to Lead Ashvale Dental Partners as CEO</title>
+<link>https://wire.example.net/news/1002</link>
+<guid isPermaLink="false">wire-1002</guid>
+<pubDate>{{rfc822:-2}}</pubDate>
+<description>&lt;p&gt;Aldermoor Capital Partners portfolio company Ashvale Dental Partners has appointed Hollis Jessop as its new chief executive, effective immediately.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Ashvale Dental Partners Appoints New Chief Executive</title>
+<link>https://wire.example.net/news/1003</link>
+<guid isPermaLink="false">wire-1003</guid>
+<pubDate>{{rfc822:-1}}</pubDate>
+<description>&lt;p&gt;Ashvale Dental Partners said Hollis Jessop has been appointed Chief Executive Officer. The appointment follows a search led by the board.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Glenmara Packaging GmbH Promotes Niall Esposito</title>
+<link>https://wire.example.net/news/1004</link>
+<guid isPermaLink="false">wire-1004</guid>
+<pubDate>{{rfc822:-3}}</pubDate>
+<description>&lt;p&gt;Glenmara Packaging GmbH announced that Niall Esposito has been promoted to Chief Operating Officer, with responsibility for plants in Bavaria and Saxony.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Zoltan Sandoval to Leave Wexcombe Group</title>
+<link>https://wire.example.net/news/1005</link>
+<guid isPermaLink="false">wire-1005</guid>
+<pubDate>{{rfc822:-4}}</pubDate>
+<description>&lt;p&gt;Wexcombe Group announced that Chief Financial Officer Zoltan Sandoval will leave the company at the end of the quarter. A search for a successor is under way.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Blackwren Equity Agrees to Acquire Faircliff Education</title>
+<link>https://wire.example.net/news/1006</link>
+<guid isPermaLink="false">wire-1006</guid>
+<pubDate>{{rfc822:-5}}</pubDate>
+<description>&lt;p&gt;Blackwren Equity has signed a definitive agreement to acquire a majority stake in Faircliff Education from Cindervale Partners. Terms were not disclosed.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Quenby Robotics Raises $85 Million Series C</title>
+<link>https://wire.example.net/news/1007</link>
+<guid isPermaLink="false">wire-1007</guid>
+<pubDate>{{rfc822:-6}}</pubDate>
+<description>&lt;p&gt;Quenby Robotics today announced an $85 million Series C financing to expand its manufacturing capacity and grow its leadership team.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Penhallow Financial plc to Acquire Orlanda Hotels</title>
+<link>https://wire.example.net/news/1008</link>
+<guid isPermaLink="false">wire-1008</guid>
+<pubDate>{{rfc822:-7}}</pubDate>
+<description>&lt;p&gt;Penhallow Financial plc announced it will acquire Orlanda Hotels in an all-cash transaction expected to close next quarter.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Heddrick Water Announces Restructuring</title>
+<link>https://wire.example.net/news/1009</link>
+<guid isPermaLink="false">wire-1009</guid>
+<pubDate>{{rfc822:-8}}</pubDate>
+<description>&lt;p&gt;Heddrick Water will reduce its workforce by about 8 percent as part of a restructuring plan.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Dellavar Building Products Expands Into Europe</title>
+<link>https://wire.example.net/news/1010</link>
+<guid isPermaLink="false">wire-1010</guid>
+<pubDate>{{rfc822:-9}}</pubDate>
+<description>&lt;p&gt;Dellavar Building Products opened its first European headquarters in Amsterdam and plans to hire a regional leadership team.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Rafferty Marchetti Named to Finance Leaders List</title>
+<link>https://wire.example.net/news/1011</link>
+<guid isPermaLink="false">wire-1011</guid>
+<pubDate>{{rfc822:-10}}</pubDate>
+<description>&lt;p&gt;Rafferty Marchetti, Chief Financial Officer of Tessaline Energy Corp., was named to this year's list of 50 finance leaders to watch.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Teodor Northcott to Keynote Portfolio Leadership Summit</title>
+<link>https://wire.example.net/news/1012</link>
+<guid isPermaLink="false">wire-1012</guid>
+<pubDate>{{rfc822:-11}}</pubDate>
+<description>&lt;p&gt;Teodor Northcott, Chief Executive Officer of Brisk Harbor Pet Care, will deliver the opening keynote at the Portfolio Leadership Summit in Chicago on {{date:+21}}.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Ostrana Software and Kelvaro Networks Announce Partnership</title>
+<link>https://wire.example.net/news/1013</link>
+<guid isPermaLink="false">wire-1013</guid>
+<pubDate>{{rfc822:-12}}</pubDate>
+<description>&lt;p&gt;Ostrana Software and Kelvaro Networks announced a strategic partnership to integrate their platforms.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Tamsworth Aerospace Appoints Evander Holloway-Price Chief Financial Officer</title>
+<link>https://tamsworth-aerospace.example.com/news/cfo-appointment</link>
+<guid isPermaLink="false">wire-1014</guid>
+<pubDate>{{rfc822:-2}}</pubDate>
+<description>&lt;p&gt;Tamsworth Aerospace today announced the appointment of Evander Holloway-Price as Chief Financial Officer, effective {{date:+15}}.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Example Widgets Names New Marketing Chief</title>
+<link>https://wire.example.net/news/1015</link>
+<guid isPermaLink="false">wire-1015</guid>
+<pubDate>{{rfc822:-3}}</pubDate>
+<description>&lt;p&gt;Example Widgets, a maker of home goods, named a new chief marketing officer.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Regional Bank Reports Record Deposits</title>
+<link>https://wire.example.net/news/1016</link>
+<guid isPermaLink="false">wire-1016</guid>
+<pubDate>{{rfc822:-4}}</pubDate>
+<description>&lt;p&gt;A regional bank reported record deposits for the quarter.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Industry Survey Finds Rising Demand for Interim Executives</title>
+<link>https://wire.example.net/news/1017</link>
+<guid isPermaLink="false">wire-1017</guid>
+<pubDate>{{rfc822:-5}}</pubDate>
+<description>&lt;p&gt;A survey of 400 companies found rising demand for interim executives in finance and operations.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Sample Foods Opens New Distribution Center</title>
+<link>https://wire.example.net/news/1018</link>
+<guid isPermaLink="false">wire-1018</guid>
+<pubDate>{{rfc822:-6}}</pubDate>
+<description>&lt;p&gt;Sample Foods opened a distribution center in Ohio.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Conference Announces Speaker Lineup</title>
+<link>https://wire.example.net/news/1019</link>
+<guid isPermaLink="false">wire-1019</guid>
+<pubDate>{{rfc822:-7}}</pubDate>
+<description>&lt;p&gt;The annual supply chain conference announced its speaker lineup for next spring.&lt;/p&gt;</description>
+</item>
+<item>
+<title>Nonprofit Names Executive Director</title>
+<link>https://wire.example.net/news/1020</link>
+<guid isPermaLink="false">wire-1020</guid>
+<pubDate>{{rfc822:-8}}</pubDate>
+<description>&lt;p&gt;A community nonprofit named a new executive director after a national search.&lt;/p&gt;</description>
+</item>
+</channel>
+</rss>

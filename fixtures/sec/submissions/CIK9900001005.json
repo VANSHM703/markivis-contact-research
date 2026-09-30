@@ -1,0 +1,70 @@
+{
+  "cik": "9900001005",
+  "entityType": "operating",
+  "name": "Ulvera Materials",
+  "tickers": [
+    "ULVM"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "9900001005-26-000021",
+        "9900001005-26-000022",
+        "9900001005-26-000023",
+        "9900001005-26-000024"
+      ],
+      "filingDate": [
+        "{{date:-9}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "reportDate": [
+        "{{date:-9}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "acceptanceDateTime": [
+        "{{datetime:-9}}",
+        "{{datetime:-20}}",
+        "{{datetime:-35}}",
+        "{{datetime:-400}}"
+      ],
+      "act": [
+        "34",
+        "34",
+        "34",
+        "34"
+      ],
+      "form": [
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ],
+      "items": [
+        "5.02",
+        "2.02,9.01",
+        "",
+        "5.02"
+      ],
+      "primaryDocument": [
+        "d8k.htm",
+        "d8k-earnings.htm",
+        "d10q.htm",
+        "d8k-old.htm"
+      ],
+      "primaryDocDescription": [
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ]
+    },
+    "files": []
+  }
+}

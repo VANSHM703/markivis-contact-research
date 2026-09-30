@@ -1,0 +1,70 @@
+{
+  "cik": "9900001001",
+  "entityType": "operating",
+  "name": "Brevik Harlow Foods",
+  "tickers": [
+    "BHFD"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "9900001001-26-000006",
+        "9900001001-26-000007",
+        "9900001001-26-000008",
+        "9900001001-26-000009"
+      ],
+      "filingDate": [
+        "{{date:-3}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "reportDate": [
+        "{{date:-3}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "acceptanceDateTime": [
+        "{{datetime:-3}}",
+        "{{datetime:-20}}",
+        "{{datetime:-35}}",
+        "{{datetime:-400}}"
+      ],
+      "act": [
+        "34",
+        "34",
+        "34",
+        "34"
+      ],
+      "form": [
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ],
+      "items": [
+        "5.02,7.01,9.01",
+        "2.02,9.01",
+        "",
+        "5.02"
+      ],
+      "primaryDocument": [
+        "d8k.htm",
+        "d8k-earnings.htm",
+        "d10q.htm",
+        "d8k-old.htm"
+      ],
+      "primaryDocDescription": [
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ]
+    },
+    "files": []
+  }
+}

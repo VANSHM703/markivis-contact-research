@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { CheckboxGroup, FormGrid, FormSection, SelectField, TextField } from "@/components/forms/Field";
+import { CheckboxGroup, FormGrid, FormSection, SelectField, TextArea, TextField } from "@/components/forms/Field";
 import { EMPTY_FORM_STATE, type FormState } from "@/components/forms/FormState";
 import { FormSummary } from "@/components/forms/FormSummary";
 import { SubmitButton } from "@/components/forms/SubmitButton";
@@ -21,6 +21,7 @@ export interface CompanyDefaults {
   employee_count?: string;
   client_status?: string;
   is_sponsor?: boolean;
+  leadership_page_urls?: string;
 }
 
 export function CompanyForm({ action, defaults = {}, submitLabel }: { action: (state: FormState, formData: FormData) => Promise<FormState>; defaults?: CompanyDefaults; submitLabel: string }) {
@@ -43,6 +44,7 @@ export function CompanyForm({ action, defaults = {}, submitLabel }: { action: (s
           <TextField name="employee_count" label="Employees" inputMode="numeric" defaultValue={v("employee_count")} error={e.employee_count} />
           <TextField name="ticker" label="Ticker" help="Public companies only." defaultValue={v("ticker")} error={e.ticker} />
           <TextField name="sec_cik" label="SEC CIK" inputMode="numeric" help="Lets the platform watch this company's SEC filings." defaultValue={v("sec_cik")} error={e.sec_cik} />
+          <TextArea name="leadership_page_urls" label="Leadership and board pages" rows={2} placeholder="https://example.com/leadership" help="One per line. Checked weekly for changes to the leadership team and board." defaultValue={v("leadership_page_urls")} error={e.leadership_page_urls} />
           <CheckboxGroup name="is_sponsor" legend="Private equity" options={[{ value: "on", label: "This is a PE sponsor" }]} defaultValues={sponsor ? ["on"] : []} />
         </FormGrid>
       </FormSection>

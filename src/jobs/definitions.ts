@@ -1,0 +1,76 @@
+/**
+ * The job schedule (BRD 8.9). Times are workspace time unless the entry pins a time zone.
+ * Jobs whose milestone has not been built yet are listed for completeness and not scheduled.
+ */
+import type { SourceType } from "@/ingest/types";
+
+export interface ScheduleEntry {
+  /** Distinguishes several crons for one job, for example SEC business hours and otherwise. */
+  slot: string;
+  cron: string;
+  /** Fixed time zone; omit to use the workspace's own. */
+  tz?: string;
+}
+
+export interface JobDefinition {
+  name: string;
+  schedules: ScheduleEntry[];
+  /** For ingest jobs: the source they run. */
+  source?: SourceType;
+  /** Milestone that implements it; only built jobs are scheduled and worked. */
+  builtIn: "M3" | "M4" | "M5" | "M7" | "M8" | "M9" | "M10";
+  /** Per-workspace (data carries workspaceId) or once for the whole deployment. */
+  scope: "workspace" | "platform";
+  notes?: string;
+}
+
+const EASTERN = "America/New_York";
+
+export const JOBS: JobDefinition[] = [
+  {
+    name: "ingest.sec",
+    source: "sec_8k",
+    builtIn: "M3",
+    scope: "workspace",
+    // Every 30 minutes, 06:00 to 22:00 US Eastern on business days; every 2 hours otherwise.
+    schedules: [
+      { slot: "business", cron: "*/30 6-21 * * 1-5", tz: EASTERN },
+      { slot: "weeknight", cron: "0 0,2,4,22 * * 1-5", tz: EASTERN },
+      { slot: "weekend", cron: "0 */2 * * 0,6", tz: EASTERN },
+    ],
+  },
+  { name: "ingest.wires", source: "press_wire", builtIn: "M3", scope: "workspace", schedules: [{ slot: "every30", cron: "*/30 * * * *" }] },
+  { name: "ingest.alerts", source: "google_alert", builtIn: "M3", scope: "workspace", schedules: [{ slot: "hourly", cron: "0 * * * *" }] },
+  { name: "ingest.pages", source: "leadership_page", builtIn: "M3", scope: "workspace", schedules: [{ slot: "weekly", cron: "0 3 * * 1" }], notes: "Jittered per company." },
+  { name: "ingest.apollo", source: "apollo", builtIn: "M3", scope: "workspace", schedules: [{ slot: "weekly", cron: "0 2 * * 0" }], notes: "Also on demand when a person or company is added. Credit guard." },
+  { name: "ingest.newsletter", source: "newsletter", builtIn: "M3", scope: "workspace", schedules: [{ slot: "daily", cron: "0 4 * * *" }], notes: "Also immediately on CSV upload." },
+  { name: "records.status", builtIn: "M3", scope: "workspace", schedules: [{ slot: "daily", cron: "30 0 * * *" }], notes: "People whose last role ended 90 days ago become no_current_role (BRD 7.3)." },
+  { name: "scheduler.sync", builtIn: "M3", scope: "platform", schedules: [{ slot: "every10", cron: "*/10 * * * *", tz: "UTC" }], notes: "Reconciles per-workspace schedules with the workspace list." },
+  { name: "pipeline.process", builtIn: "M4", scope: "workspace", schedules: [], notes: "Continuous, triggered by new raw items, batches of 25." },
+  { name: "validation.spot_check", builtIn: "M4", scope: "workspace", schedules: [{ slot: "weekly", cron: "0 5 * * 1" }] },
+  { name: "stats.sources", builtIn: "M4", scope: "workspace", schedules: [{ slot: "weekly", cron: "30 5 * * 1" }] },
+  { name: "actions.sla", builtIn: "M5", scope: "workspace", schedules: [{ slot: "hourly", cron: "0 * * * *" }] },
+  { name: "digest.daily", builtIn: "M5", scope: "workspace", schedules: [{ slot: "daily", cron: "0 8 * * *" }], notes: "At the workspace digest_time." },
+  { name: "capture.mail", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }] },
+  { name: "capture.calendar", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }] },
+  { name: "rel.score", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "0 1 * * *" }] },
+  { name: "rel.connections", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "30 1 * * *" }] },
+  { name: "rel.quiet", builtIn: "M8", scope: "workspace", schedules: [{ slot: "daily", cron: "0 6 * * *" }] },
+  { name: "briefs.generate", builtIn: "M9", scope: "workspace", schedules: [{ slot: "hourly", cron: "15 * * * *" }] },
+  { name: "crm.sync", builtIn: "M9", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }] },
+  { name: "compliance.retention", builtIn: "M10", scope: "workspace", schedules: [{ slot: "monthly", cron: "0 9 1-7 * 1" }], notes: "First Monday of the month." },
+];
+
+const BUILT = new Set(["M3"]);
+export const ACTIVE_JOBS = JOBS.filter((j) => BUILT.has(j.builtIn));
+
+/** pg-boss schedule keys allow letters, digits, _ - . / only. */
+export const scheduleKey = (workspaceId: string, slot: string) => `${workspaceId}.${slot}`;
+
+export interface IngestJobData {
+  workspaceId: string;
+  feedId?: string;
+  /** Apollo on-demand enrichment (essential under the credit guard). */
+  personIds?: string[];
+  companyIds?: string[];
+}

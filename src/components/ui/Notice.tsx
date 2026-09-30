@@ -26,6 +26,13 @@ const NOTICES: Record<string, { text: string; tone: "ok" | "warn" }> = {
   kept_separate: { text: "Kept as separate people.", tone: "ok" },
   item_gone: { text: "Someone has already resolved that item.", tone: "warn" },
   not_allowed: { text: "Your role does not allow that action.", tone: "warn" },
+  run_queued: { text: "Run queued. The worker picks it up within a minute; refresh to see the result.", tone: "ok" },
+  queue_unavailable: { text: "Couldn't queue the run: the job database is not reachable. Check that the worker is set up.", tone: "warn" },
+  source_not_runnable: { text: "That source cannot be run from here.", tone: "warn" },
+  feed_enabled: { text: "Source switched on.", tone: "ok" },
+  feed_disabled: { text: "Source switched off. It will not run until it is switched on again.", tone: "ok" },
+  feed_added: { text: "Feed added. It runs on its schedule, or use Run now.", tone: "ok" },
+  apollo_key_saved: { text: "Apollo key saved. It is stored encrypted and cannot be shown again.", tone: "ok" },
 };
 
 export function Notice({ notice }: { notice?: string | string[] }) {

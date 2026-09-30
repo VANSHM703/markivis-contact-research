@@ -1,0 +1,61 @@
+{
+  "cik": "9900001013",
+  "entityType": "operating",
+  "name": "Heddrick Water",
+  "tickers": [
+    "HDWR"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "9900001013-26-000050",
+        "9900001013-26-000051",
+        "9900001013-26-000052"
+      ],
+      "filingDate": [
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "reportDate": [
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "acceptanceDateTime": [
+        "{{datetime:-20}}",
+        "{{datetime:-35}}",
+        "{{datetime:-400}}"
+      ],
+      "act": [
+        "34",
+        "34",
+        "34"
+      ],
+      "form": [
+        "8-K",
+        "10-Q",
+        "8-K"
+      ],
+      "items": [
+        "2.02,9.01",
+        "",
+        "5.02"
+      ],
+      "primaryDocument": [
+        "d8k-earnings.htm",
+        "d10q.htm",
+        "d8k-old.htm"
+      ],
+      "primaryDocDescription": [
+        "8-K",
+        "10-Q",
+        "8-K"
+      ]
+    },
+    "files": []
+  }
+}

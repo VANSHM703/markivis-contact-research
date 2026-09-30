@@ -17,7 +17,14 @@ ARG APP_BASE_PATH=/intelligence
 ENV APP_BASE_PATH=${APP_BASE_PATH}
 RUN npm run build
 
-# Web app image. The worker image is added in milestone M3 from the same base.
+# Worker: queued jobs and the schedule (BRD 4.3). Runs the TypeScript source with tsx.
+FROM tools AS worker
+ENV NODE_ENV=production
+RUN addgroup -S app && adduser -S app -G app && chown -R app:app /app
+USER app
+CMD ["npx", "tsx", "src/worker/index.ts"]
+
+# Web app image.
 FROM node:24-alpine AS web
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0

@@ -1,0 +1,102 @@
+{
+  "0": {
+    "cik_str": 9900001000,
+    "ticker": "QRNL",
+    "title": "QUARNELL SYSTEMS, INC."
+  },
+  "1": {
+    "cik_str": 9900001001,
+    "ticker": "BHFD",
+    "title": "BREVIK HARLOW FOODS"
+  },
+  "2": {
+    "cik_str": 9900001002,
+    "ticker": "TSLE",
+    "title": "TESSALINE ENERGY CORP."
+  },
+  "3": {
+    "cik_str": 9900001003,
+    "ticker": "MRVN",
+    "title": "MORVANE INDUSTRIAL"
+  },
+  "4": {
+    "cik_str": 9900001004,
+    "ticker": "CLDH",
+    "title": "CALDRITH HEALTH"
+  },
+  "5": {
+    "cik_str": 9900001005,
+    "ticker": "ULVM",
+    "title": "ULVERA MATERIALS"
+  },
+  "6": {
+    "cik_str": 9900001006,
+    "ticker": "PNHF",
+    "title": "PENHALLOW FINANCIAL PLC"
+  },
+  "7": {
+    "cik_str": 9900001007,
+    "ticker": "DRYL",
+    "title": "DRAYMOOR LOGISTICS"
+  },
+  "8": {
+    "cik_str": 9900001008,
+    "ticker": "OSTR",
+    "title": "OSTRANA SOFTWARE"
+  },
+  "9": {
+    "cik_str": 9900001009,
+    "ticker": "KLVN",
+    "title": "KELVARO NETWORKS"
+  },
+  "10": {
+    "cik_str": 9900001010,
+    "ticker": "VRNC",
+    "title": "VARNHOLD CHEMICALS"
+  },
+  "11": {
+    "cik_str": 9900001011,
+    "ticker": "SLVR",
+    "title": "SILVARAN RETAIL GROUP"
+  },
+  "12": {
+    "cik_str": 9900001012,
+    "ticker": "TMSA",
+    "title": "TAMSWORTH AEROSPACE"
+  },
+  "13": {
+    "cik_str": 9900001013,
+    "ticker": "HDWR",
+    "title": "HEDDRICK WATER"
+  },
+  "14": {
+    "cik_str": 9900001014,
+    "ticker": "NVSM",
+    "title": "NORVESSA MEDICAL"
+  },
+  "15": {
+    "cik_str": 9900005000,
+    "ticker": "SDLO",
+    "title": "SUNDIAL ORTHOPEDICS"
+  },
+  "16": {
+    "cik_str": 9900005001,
+    "ticker": "TRNW",
+    "title": "TARNWICK CABLE"
+  },
+  "17": {
+    "cik_str": 9900009001,
+    "ticker": "LMRX",
+    "title": "LUMERIX THERAPEUTICS INC"
+  },
+  "18": {
+    "cik_str": 9900009002,
+    "ticker": "HXC",
+    "title": "HARLAN EXAMPLE CORP"
+  },
+  "19": {
+    "cik_str": 9900009003,
+    "ticker": "HXCP",
+    "title": "HARLAN EXAMPLE CORP"
+  }
+}

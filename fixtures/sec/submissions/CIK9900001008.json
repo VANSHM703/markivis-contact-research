@@ -1,0 +1,79 @@
+{
+  "cik": "9900001008",
+  "entityType": "operating",
+  "name": "Ostrana Software",
+  "tickers": [
+    "OSTR"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "9900001008-26-000033",
+        "9900001008-26-000034",
+        "9900001008-26-000035",
+        "9900001008-26-000036",
+        "9900001008-26-000037"
+      ],
+      "filingDate": [
+        "{{date:-5}}",
+        "{{date:-16}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "reportDate": [
+        "{{date:-5}}",
+        "{{date:-16}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "acceptanceDateTime": [
+        "{{datetime:-5}}",
+        "{{datetime:-16}}",
+        "{{datetime:-20}}",
+        "{{datetime:-35}}",
+        "{{datetime:-400}}"
+      ],
+      "act": [
+        "34",
+        "34",
+        "34",
+        "34",
+        "34"
+      ],
+      "form": [
+        "8-K",
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ],
+      "items": [
+        "5.02",
+        "5.02,5.07",
+        "2.02,9.01",
+        "",
+        "5.02"
+      ],
+      "primaryDocument": [
+        "d8k.htm",
+        "d8k.htm",
+        "d8k-earnings.htm",
+        "d10q.htm",
+        "d8k-old.htm"
+      ],
+      "primaryDocDescription": [
+        "8-K",
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ]
+    },
+    "files": []
+  }
+}

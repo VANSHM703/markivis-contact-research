@@ -1,0 +1,407 @@
+{
+  "quarnell-systems.example.com": {
+    "id": "apollo-org-quarnell-systems.example.com",
+    "name": "Quarnell Systems, Inc.",
+    "primary_domain": "quarnell-systems.example.com",
+    "website_url": "https://quarnell-systems.example.com",
+    "estimated_num_employees": 6760,
+    "industry": "software",
+    "country": "United States"
+  },
+  "brevik-harlow-foods.example.com": {
+    "id": "apollo-org-brevik-harlow-foods.example.com",
+    "name": "Brevik Harlow Foods",
+    "primary_domain": "brevik-harlow-foods.example.com",
+    "website_url": "https://brevik-harlow-foods.example.com",
+    "estimated_num_employees": 3640,
+    "industry": "consumer goods",
+    "country": "United States"
+  },
+  "tessaline-energy.example.com": {
+    "id": "apollo-org-tessaline-energy.example.com",
+    "name": "Tessaline Energy Corp.",
+    "primary_domain": "tessaline-energy.example.com",
+    "website_url": "https://tessaline-energy.example.com",
+    "estimated_num_employees": 24960,
+    "industry": "energy",
+    "country": "United States"
+  },
+  "morvane-industrial.example.com": {
+    "id": "apollo-org-morvane-industrial.example.com",
+    "name": "Morvane Industrial",
+    "primary_domain": "morvane-industrial.example.com",
+    "website_url": "https://morvane-industrial.example.com",
+    "estimated_num_employees": 24960,
+    "industry": "industrials",
+    "country": "United States"
+  },
+  "caldrith-health.example.com": {
+    "id": "apollo-org-caldrith-health.example.com",
+    "name": "Caldrith Health",
+    "primary_domain": "caldrith-health.example.com",
+    "website_url": "https://caldrith-health.example.com",
+    "estimated_num_employees": 12480,
+    "industry": "healthcare",
+    "country": "United States"
+  },
+  "ulvera-materials.example.com": {
+    "id": "apollo-org-ulvera-materials.example.com",
+    "name": "Ulvera Materials",
+    "primary_domain": "ulvera-materials.example.com",
+    "website_url": "https://ulvera-materials.example.com",
+    "estimated_num_employees": 12480,
+    "industry": "materials",
+    "country": "United States"
+  },
+  "penhallow-financial.example.com": {
+    "id": "apollo-org-penhallow-financial.example.com",
+    "name": "Penhallow Financial plc",
+    "primary_domain": "penhallow-financial.example.com",
+    "website_url": "https://penhallow-financial.example.com",
+    "estimated_num_employees": 12480,
+    "industry": "financial services",
+    "country": "GB"
+  },
+  "draymoor-logistics.example.com": {
+    "id": "apollo-org-draymoor-logistics.example.com",
+    "name": "Draymoor Logistics",
+    "primary_domain": "draymoor-logistics.example.com",
+    "website_url": "https://draymoor-logistics.example.com",
+    "estimated_num_employees": 12480,
+    "industry": "transportation",
+    "country": "United States"
+  },
+  "ostrana-software.example.com": {
+    "id": "apollo-org-ostrana-software.example.com",
+    "name": "Ostrana Software",
+    "primary_domain": "ostrana-software.example.com",
+    "website_url": "https://ostrana-software.example.com",
+    "estimated_num_employees": 24960,
+    "industry": "software",
+    "country": "United States"
+  },
+  "kelvaro-networks.example.com": {
+    "id": "apollo-org-kelvaro-networks.example.com",
+    "name": "Kelvaro Networks",
+    "primary_domain": "kelvaro-networks.example.com",
+    "website_url": "https://kelvaro-networks.example.com",
+    "estimated_num_employees": 1248,
+    "industry": "telecommunications",
+    "country": "United States"
+  },
+  "varnhold-chemicals.example.com": {
+    "id": "apollo-org-varnhold-chemicals.example.com",
+    "name": "Varnhold Chemicals",
+    "primary_domain": "varnhold-chemicals.example.com",
+    "website_url": "https://varnhold-chemicals.example.com",
+    "estimated_num_employees": 24960,
+    "industry": "chemicals",
+    "country": "United States"
+  },
+  "silvaran-retail-group.example.com": {
+    "id": "apollo-org-silvaran-retail-group.example.com",
+    "name": "Silvaran Retail Group",
+    "primary_domain": "silvaran-retail-group.example.com",
+    "website_url": "https://silvaran-retail-group.example.com",
+    "estimated_num_employees": 12480,
+    "industry": "retail",
+    "country": "United States"
+  },
+  "tamsworth-aerospace.example.com": {
+    "id": "apollo-org-tamsworth-aerospace.example.com",
+    "name": "Tamsworth Aerospace",
+    "primary_domain": "tamsworth-aerospace.example.com",
+    "website_url": "https://tamsworth-aerospace.example.com",
+    "estimated_num_employees": 6760,
+    "industry": "aerospace",
+    "country": "United States"
+  },
+  "heddrick-water.example.com": {
+    "id": "apollo-org-heddrick-water.example.com",
+    "name": "Heddrick Water",
+    "primary_domain": "heddrick-water.example.com",
+    "website_url": "https://heddrick-water.example.com",
+    "estimated_num_employees": 1872,
+    "industry": "utilities",
+    "country": "United States"
+  },
+  "norvessa-medical.example.com": {
+    "id": "apollo-org-norvessa-medical.example.com",
+    "name": "Norvessa Medical",
+    "primary_domain": "norvessa-medical.example.com",
+    "website_url": "https://norvessa-medical.example.com",
+    "estimated_num_employees": 1872,
+    "industry": "medical devices",
+    "country": "United States"
+  },
+  "ashvale-dental-partners.example.com": {
+    "id": "apollo-org-ashvale-dental-partners.example.com",
+    "name": "Ashvale Dental Partners",
+    "primary_domain": "ashvale-dental-partners.example.com",
+    "website_url": "https://ashvale-dental-partners.example.com",
+    "estimated_num_employees": 631,
+    "industry": "healthcare services",
+    "country": "United States"
+  },
+  "brisk-harbor-pet-care.example.com": {
+    "id": "apollo-org-brisk-harbor-pet-care.example.com",
+    "name": "Brisk Harbor Pet Care",
+    "primary_domain": "brisk-harbor-pet-care.example.com",
+    "website_url": "https://brisk-harbor-pet-care.example.com",
+    "estimated_num_employees": 1772,
+    "industry": "consumer services",
+    "country": "United States"
+  },
+  "corrimont-labs.example.com": {
+    "id": "apollo-org-corrimont-labs.example.com",
+    "name": "Corrimont Labs",
+    "primary_domain": "corrimont-labs.example.com",
+    "website_url": "https://corrimont-labs.example.com",
+    "estimated_num_employees": 1488,
+    "industry": "life sciences",
+    "country": "United States"
+  },
+  "dellavar-building-products.example.com": {
+    "id": "apollo-org-dellavar-building-products.example.com",
+    "name": "Dellavar Building Products",
+    "primary_domain": "dellavar-building-products.example.com",
+    "website_url": "https://dellavar-building-products.example.com",
+    "estimated_num_employees": 654,
+    "industry": "building products",
+    "country": "United States"
+  },
+  "ettrick-lane-insurance-services.example.com": {
+    "id": "apollo-org-ettrick-lane-insurance-services.example.com",
+    "name": "Ettrick Lane Insurance Services",
+    "primary_domain": "ettrick-lane-insurance-services.example.com",
+    "website_url": "https://ettrick-lane-insurance-services.example.com",
+    "estimated_num_employees": 1967,
+    "industry": "insurance",
+    "country": "United States"
+  },
+  "faircliff-education.example.com": {
+    "id": "apollo-org-faircliff-education.example.com",
+    "name": "Faircliff Education",
+    "primary_domain": "faircliff-education.example.com",
+    "website_url": "https://faircliff-education.example.com",
+    "estimated_num_employees": 1430,
+    "industry": "education",
+    "country": "United States"
+  },
+  "glenmara-packaging-gmbh.example.com": {
+    "id": "apollo-org-glenmara-packaging-gmbh.example.com",
+    "name": "Glenmara Packaging GmbH",
+    "primary_domain": "glenmara-packaging-gmbh.example.com",
+    "website_url": "https://glenmara-packaging-gmbh.example.com",
+    "estimated_num_employees": 1718,
+    "industry": "packaging",
+    "country": "DE"
+  },
+  "hollisk-security.example.com": {
+    "id": "apollo-org-hollisk-security.example.com",
+    "name": "Hollisk Security",
+    "primary_domain": "hollisk-security.example.com",
+    "website_url": "https://hollisk-security.example.com",
+    "estimated_num_employees": 768,
+    "industry": "security services",
+    "country": "United States"
+  },
+  "innesmoor-home-services.example.com": {
+    "id": "apollo-org-innesmoor-home-services.example.com",
+    "name": "Innesmoor Home Services",
+    "primary_domain": "innesmoor-home-services.example.com",
+    "website_url": "https://innesmoor-home-services.example.com",
+    "estimated_num_employees": 488,
+    "industry": "home services",
+    "country": "United States"
+  },
+  "jorvale-specialty-chemicals.example.com": {
+    "id": "apollo-org-jorvale-specialty-chemicals.example.com",
+    "name": "Jorvale Specialty Chemicals",
+    "primary_domain": "jorvale-specialty-chemicals.example.com",
+    "website_url": "https://jorvale-specialty-chemicals.example.com",
+    "estimated_num_employees": 1257,
+    "industry": "chemicals",
+    "country": "United States"
+  },
+  "kestrine-fleet-services.example.com": {
+    "id": "apollo-org-kestrine-fleet-services.example.com",
+    "name": "Kestrine Fleet Services",
+    "primary_domain": "kestrine-fleet-services.example.com",
+    "website_url": "https://kestrine-fleet-services.example.com",
+    "estimated_num_employees": 1321,
+    "industry": "transportation",
+    "country": "United States"
+  },
+  "loramere-clinics.example.com": {
+    "id": "apollo-org-loramere-clinics.example.com",
+    "name": "Loramere Clinics",
+    "primary_domain": "loramere-clinics.example.com",
+    "website_url": "https://loramere-clinics.example.com",
+    "estimated_num_employees": 566,
+    "industry": "healthcare services",
+    "country": "United States"
+  },
+  "maddox-verne-apparel.example.com": {
+    "id": "apollo-org-maddox-verne-apparel.example.com",
+    "name": "Maddox Verne Apparel",
+    "primary_domain": "maddox-verne-apparel.example.com",
+    "website_url": "https://maddox-verne-apparel.example.com",
+    "estimated_num_employees": 294,
+    "industry": "apparel",
+    "country": "United States"
+  },
+  "nethercote-farms.example.com": {
+    "id": "apollo-org-nethercote-farms.example.com",
+    "name": "Nethercote Farms",
+    "primary_domain": "nethercote-farms.example.com",
+    "website_url": "https://nethercote-farms.example.com",
+    "estimated_num_employees": 1084,
+    "industry": "agriculture",
+    "country": "United States"
+  },
+  "orlanda-hotels.example.com": {
+    "id": "apollo-org-orlanda-hotels.example.com",
+    "name": "Orlanda Hotels",
+    "primary_domain": "orlanda-hotels.example.com",
+    "website_url": "https://orlanda-hotels.example.com",
+    "estimated_num_employees": 381,
+    "industry": "hospitality",
+    "country": "United States"
+  },
+  "pellingham-engineering.example.com": {
+    "id": "apollo-org-pellingham-engineering.example.com",
+    "name": "Pellingham Engineering",
+    "primary_domain": "pellingham-engineering.example.com",
+    "website_url": "https://pellingham-engineering.example.com",
+    "estimated_num_employees": 1300,
+    "industry": "engineering",
+    "country": "United States"
+  },
+  "quenby-robotics.example.com": {
+    "id": "apollo-org-quenby-robotics.example.com",
+    "name": "Quenby Robotics",
+    "primary_domain": "quenby-robotics.example.com",
+    "website_url": "https://quenby-robotics.example.com",
+    "estimated_num_employees": 1179,
+    "industry": "robotics",
+    "country": "United States"
+  },
+  "rostrevor-media.example.com": {
+    "id": "apollo-org-rostrevor-media.example.com",
+    "name": "Rostrevor Media",
+    "primary_domain": "rostrevor-media.example.com",
+    "website_url": "https://rostrevor-media.example.com",
+    "estimated_num_employees": 1029,
+    "industry": "media",
+    "country": "United States"
+  },
+  "sallowmere-wines.example.com": {
+    "id": "apollo-org-sallowmere-wines.example.com",
+    "name": "Sallowmere Wines",
+    "primary_domain": "sallowmere-wines.example.com",
+    "website_url": "https://sallowmere-wines.example.com",
+    "estimated_num_employees": 1343,
+    "industry": "beverages",
+    "country": "United States"
+  },
+  "thistlegate-construction.example.com": {
+    "id": "apollo-org-thistlegate-construction.example.com",
+    "name": "Thistlegate Construction",
+    "primary_domain": "thistlegate-construction.example.com",
+    "website_url": "https://thistlegate-construction.example.com",
+    "estimated_num_employees": 1116,
+    "industry": "construction",
+    "country": "United States"
+  },
+  "aldermoor-capital-partners.example.com": {
+    "id": "apollo-org-aldermoor-capital-partners.example.com",
+    "name": "Aldermoor Capital Partners",
+    "primary_domain": "aldermoor-capital-partners.example.com",
+    "website_url": "https://aldermoor-capital-partners.example.com",
+    "estimated_num_employees": 119,
+    "industry": "private equity",
+    "country": "United States"
+  },
+  "blackwren-equity.example.com": {
+    "id": "apollo-org-blackwren-equity.example.com",
+    "name": "Blackwren Equity",
+    "primary_domain": "blackwren-equity.example.com",
+    "website_url": "https://blackwren-equity.example.com",
+    "estimated_num_employees": 178,
+    "industry": "private equity",
+    "country": "United States"
+  },
+  "cindervale-partners.example.com": {
+    "id": "apollo-org-cindervale-partners.example.com",
+    "name": "Cindervale Partners",
+    "primary_domain": "cindervale-partners.example.com",
+    "website_url": "https://cindervale-partners.example.com",
+    "estimated_num_employees": 165,
+    "industry": "private equity",
+    "country": "United States"
+  },
+  "wexcombe-group.example.com": {
+    "id": "apollo-org-wexcombe-group.example.com",
+    "name": "Wexcombe Group",
+    "primary_domain": "wexcombe-group.example.com",
+    "website_url": "https://wexcombe-group.example.com",
+    "estimated_num_employees": 1639,
+    "industry": "industrials",
+    "country": "United States"
+  },
+  "yarrowdene-holdings.example.com": {
+    "id": "apollo-org-yarrowdene-holdings.example.com",
+    "name": "Yarrowdene Holdings",
+    "primary_domain": "yarrowdene-holdings.example.com",
+    "website_url": "https://yarrowdene-holdings.example.com",
+    "estimated_num_employees": 2666,
+    "industry": "financial services",
+    "country": "United States"
+  },
+  "pellucid-grain.example.org": {
+    "id": "apollo-org-pellucid-grain.example.org",
+    "name": "Pellucid Grain Co.",
+    "primary_domain": "pellucid-grain.example.org",
+    "website_url": "https://pellucid-grain.example.org",
+    "estimated_num_employees": 1216,
+    "industry": "agriculture",
+    "country": "United States"
+  },
+  "ravelstone-freight.example.org": {
+    "id": "apollo-org-ravelstone-freight.example.org",
+    "name": "Ravelstone Freight",
+    "primary_domain": "ravelstone-freight.example.org",
+    "website_url": "https://ravelstone-freight.example.org",
+    "estimated_num_employees": 890,
+    "industry": "transportation",
+    "country": "United States"
+  },
+  "sundial-orthopedics.example.org": {
+    "id": "apollo-org-sundial-orthopedics.example.org",
+    "name": "Sundial Orthopedics",
+    "primary_domain": "sundial-orthopedics.example.org",
+    "website_url": "https://sundial-orthopedics.example.org",
+    "estimated_num_employees": 24960,
+    "industry": "medical devices",
+    "country": "United States"
+  },
+  "tarnwick-cable.example.org": {
+    "id": "apollo-org-tarnwick-cable.example.org",
+    "name": "Tarnwick Cable",
+    "primary_domain": "tarnwick-cable.example.org",
+    "website_url": "https://tarnwick-cable.example.org",
+    "estimated_num_employees": 1248,
+    "industry": "telecommunications",
+    "country": "United States"
+  },
+  "umberlea-foods.example.org": {
+    "id": "apollo-org-umberlea-foods.example.org",
+    "name": "Umberlea Foods",
+    "primary_domain": "umberlea-foods.example.org",
+    "website_url": "https://umberlea-foods.example.org",
+    "estimated_num_employees": 901,
+    "industry": "consumer goods",
+    "country": "United States"
+  }
+}

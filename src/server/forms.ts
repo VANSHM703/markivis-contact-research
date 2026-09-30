@@ -129,6 +129,11 @@ export const companySchema = z.object({
     .transform((v) => (v ? Number(v.replace(/,/g, "")) : null)),
   client_status: z.enum(["client", "prospect", "none"]),
   is_sponsor: z.boolean().default(false),
+  leadership_page_urls: z
+    .string()
+    .transform((v) => v.split(/\s+/).map((u) => u.trim()).filter(Boolean))
+    .refine((urls) => urls.every((u) => /^https?:\/\/\S+$/.test(u)), "Each address must start with https://.")
+    .refine((urls) => urls.length <= 5, "Add at most five pages."),
 });
 
 /** Reads a FormData into a plain object: repeated keys become arrays, checkboxes become booleans. */
@@ -154,7 +159,7 @@ export function parseForm<T extends z.ZodObject>(schema: T, raw: Record<string, 
   return schema.safeParse(filled);
 }
 
-const FIELD_NAMES: Record<string, string> = { linkedin_url: "LinkedIn profile", business_email: "business email", effective_on: "start date", ended_on: "end date", source_note: "note", source_url: "link", sec_cik: "SEC CIK", hq_country: "headquarters country", target_tier: "target tier" };
+const FIELD_NAMES: Record<string, string> = { leadership_page_urls: "leadership pages", linkedin_url: "LinkedIn profile", business_email: "business email", effective_on: "start date", ended_on: "end date", source_note: "note", source_url: "link", sec_cik: "SEC CIK", hq_country: "headquarters country", target_tier: "target tier" };
 
 /** Turns Zod issues into one message per field, keeping the submitted values for re-display. */
 export function invalid(error: z.ZodError, raw: Record<string, unknown>): FormState {

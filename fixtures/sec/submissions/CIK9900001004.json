@@ -1,0 +1,70 @@
+{
+  "cik": "9900001004",
+  "entityType": "operating",
+  "name": "Caldrith Health",
+  "tickers": [
+    "CLDH"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "9900001004-26-000017",
+        "9900001004-26-000018",
+        "9900001004-26-000019",
+        "9900001004-26-000020"
+      ],
+      "filingDate": [
+        "{{date:-8}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "reportDate": [
+        "{{date:-8}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "acceptanceDateTime": [
+        "{{datetime:-8}}",
+        "{{datetime:-20}}",
+        "{{datetime:-35}}",
+        "{{datetime:-400}}"
+      ],
+      "act": [
+        "34",
+        "34",
+        "34",
+        "34"
+      ],
+      "form": [
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ],
+      "items": [
+        "5.02",
+        "2.02,9.01",
+        "",
+        "5.02"
+      ],
+      "primaryDocument": [
+        "d8k.htm",
+        "d8k-earnings.htm",
+        "d10q.htm",
+        "d8k-old.htm"
+      ],
+      "primaryDocDescription": [
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ]
+    },
+    "files": []
+  }
+}

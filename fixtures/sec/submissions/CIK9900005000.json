@@ -1,0 +1,61 @@
+{
+  "cik": "9900005000",
+  "entityType": "operating",
+  "name": "Sundial Orthopedics",
+  "tickers": [
+    "SDLO"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "9900005000-26-000056",
+        "9900005000-26-000057",
+        "9900005000-26-000058"
+      ],
+      "filingDate": [
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "reportDate": [
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "acceptanceDateTime": [
+        "{{datetime:-20}}",
+        "{{datetime:-35}}",
+        "{{datetime:-400}}"
+      ],
+      "act": [
+        "34",
+        "34",
+        "34"
+      ],
+      "form": [
+        "8-K",
+        "10-Q",
+        "8-K"
+      ],
+      "items": [
+        "2.02,9.01",
+        "",
+        "5.02"
+      ],
+      "primaryDocument": [
+        "d8k-earnings.htm",
+        "d10q.htm",
+        "d8k-old.htm"
+      ],
+      "primaryDocDescription": [
+        "8-K",
+        "10-Q",
+        "8-K"
+      ]
+    },
+    "files": []
+  }
+}

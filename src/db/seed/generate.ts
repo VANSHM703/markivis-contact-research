@@ -553,6 +553,7 @@ function generateWorkspace(
     { id: rng.uuid(), workspaceId, sourceType: "google_alert", name: "Google Alerts: tracked executives", config: { urls: ["https://alerts.example.net/feeds/demo-executives"] } },
     { id: rng.uuid(), workspaceId, sourceType: "leadership_page", name: "Leadership and board pages", config: {} },
     { id: rng.uuid(), workspaceId, sourceType: "newsletter", name: "Newsletter events (CSV)", config: { format: "csv" } },
+    { id: rng.uuid(), workspaceId, sourceType: "apollo", name: "Apollo enrichment", config: {} },
   ];
 
   // --- Interactions ---------------------------------------------------------------------------

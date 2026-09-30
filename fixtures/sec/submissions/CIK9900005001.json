@@ -1,0 +1,61 @@
+{
+  "cik": "9900005001",
+  "entityType": "operating",
+  "name": "Tarnwick Cable",
+  "tickers": [
+    "TRNW"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "9900005001-26-000059",
+        "9900005001-26-000060",
+        "9900005001-26-000061"
+      ],
+      "filingDate": [
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "reportDate": [
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "acceptanceDateTime": [
+        "{{datetime:-20}}",
+        "{{datetime:-35}}",
+        "{{datetime:-400}}"
+      ],
+      "act": [
+        "34",
+        "34",
+        "34"
+      ],
+      "form": [
+        "8-K",
+        "10-Q",
+        "8-K"
+      ],
+      "items": [
+        "2.02,9.01",
+        "",
+        "5.02"
+      ],
+      "primaryDocument": [
+        "d8k-earnings.htm",
+        "d10q.htm",
+        "d8k-old.htm"
+      ],
+      "primaryDocDescription": [
+        "8-K",
+        "10-Q",
+        "8-K"
+      ]
+    },
+    "files": []
+  }
+}

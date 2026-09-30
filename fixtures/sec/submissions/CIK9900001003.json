@@ -1,0 +1,70 @@
+{
+  "cik": "9900001003",
+  "entityType": "operating",
+  "name": "Morvane Industrial",
+  "tickers": [
+    "MRVN"
+  ],
+  "exchanges": [
+    "Nasdaq"
+  ],
+  "filings": {
+    "recent": {
+      "accessionNumber": [
+        "9900001003-26-000013",
+        "9900001003-26-000014",
+        "9900001003-26-000015",
+        "9900001003-26-000016"
+      ],
+      "filingDate": [
+        "{{date:-6}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "reportDate": [
+        "{{date:-6}}",
+        "{{date:-20}}",
+        "{{date:-35}}",
+        "{{date:-400}}"
+      ],
+      "acceptanceDateTime": [
+        "{{datetime:-6}}",
+        "{{datetime:-20}}",
+        "{{datetime:-35}}",
+        "{{datetime:-400}}"
+      ],
+      "act": [
+        "34",
+        "34",
+        "34",
+        "34"
+      ],
+      "form": [
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ],
+      "items": [
+        "5.02,8.01,9.01",
+        "2.02,9.01",
+        "",
+        "5.02"
+      ],
+      "primaryDocument": [
+        "d8k.htm",
+        "d8k-earnings.htm",
+        "d10q.htm",
+        "d8k-old.htm"
+      ],
+      "primaryDocDescription": [
+        "8-K",
+        "8-K",
+        "10-Q",
+        "8-K"
+      ]
+    },
+    "files": []
+  }
+}

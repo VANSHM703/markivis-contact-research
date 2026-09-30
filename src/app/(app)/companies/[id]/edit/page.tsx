@@ -34,6 +34,7 @@ export default async function EditCompanyPage({ params }: { params: Promise<{ id
           employee_count: c.employeeCount !== null ? String(c.employeeCount) : "",
           client_status: c.clientStatus,
           is_sponsor: c.isSponsor,
+          leadership_page_urls: c.leadershipPageUrls.join("\n"),
         }}
         submitLabel="Save changes"
       />

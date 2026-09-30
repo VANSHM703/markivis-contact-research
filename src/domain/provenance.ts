@@ -60,7 +60,8 @@ export async function observeField(tx: Tx, o: FieldObservation): Promise<Observa
     // The shown value is confirmed: refresh the same source's row, or keep another source's
     // agreement as corroboration.
     const sameSource = existing.find((r) => r.value === o.value && r.sourceType === o.sourceType);
-    if (sameSource) await tx.update(fieldSources).set({ lastCheckedAt: now }).where(eq(fieldSources.id, sameSource.id));
+    // The same source re-reporting a value may re-grade it (Apollo: verified, later guessed).
+    if (sameSource) await tx.update(fieldSources).set({ lastCheckedAt: now, confidence: o.confidence, sourceUrl: o.sourceUrl ?? sameSource.sourceUrl }).where(eq(fieldSources.id, sameSource.id));
     else await tx.insert(fieldSources).values({ ...row, isCurrent: false });
     return { outcome: "unchanged", current: current.value };
   }
