@@ -42,6 +42,19 @@ export async function connectMockAction(p: string): Promise<void> {
   redirect(`${PAGE}?notice=connected`);
 }
 
+/** Mock mode: allow sending from the demo mailbox (live mode reconnects with the send permission). */
+export async function allowMockSendingAction(p: string): Promise<void> {
+  const ctx = await require("mailbox.connect");
+  const name = provider(p);
+  await withWorkspace(ctx.workspace.id, async (tx) => {
+    const [c] = await tx.select().from(oauthConnections).where(and(eq(oauthConnections.userId, ctx.user.id), eq(oauthConnections.provider, name))).limit(1);
+    if (!c || !c.scopes.includes("mock")) return;
+    await tx.update(oauthConnections).set({ scopes: Array.from(new Set([...c.scopes, "mock-send"])) }).where(eq(oauthConnections.id, c.id));
+    await audit(tx, { workspaceId: ctx.workspace.id, actorUserId: ctx.user.id, actorKind: "user", action: "connection.sending_allowed", entityType: "oauth_connection", entityId: c.id });
+  });
+  redirect(`${PAGE}?notice=sending_allowed`);
+}
+
 export async function disconnectAction(p: string): Promise<void> {
   const ctx = await require("mailbox.connect");
   await withWorkspace(ctx.workspace.id, (tx) => revokeConnection(tx, actorOf(ctx), provider(p)));

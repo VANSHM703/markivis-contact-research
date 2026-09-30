@@ -6,7 +6,7 @@
 import { getDataMode } from "@/config/env";
 import { closeDatabase } from "@/db/client";
 import { loadSeed } from "@/db/seed";
-import { stageDemoActions } from "@/db/seed/demo-actions";
+import { stageDemoActions, stageDemoBriefs } from "@/db/seed/demo-actions";
 import { stageDemoCapture } from "@/db/seed/demo-capture";
 import { stageDemoRelationships } from "@/db/seed/demo-relationships";
 import { runSource } from "@/ingest/run";
@@ -29,6 +29,8 @@ async function main() {
     const rel = await stageDemoRelationships(demo);
     console.log(`Relationships: ${rel.connections} connections derived; bands ${JSON.stringify(rel.bands)}; ${rel.quiet} going-quiet alerts.`);
     const staged = await stageDemoActions(demo);
+    const briefsMade = await stageDemoBriefs(demo);
+    console.log(`Briefs: ${briefsMade} written for meetings in the next two days.`);
     console.log(`Actions staged: ${Object.values(staged).filter(Boolean).length} (awaiting approval, sent, escalated, lawful basis needed).`);
   }
   console.log("Sign in at /intelligence/sign-in as any of:");

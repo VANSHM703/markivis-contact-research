@@ -126,3 +126,57 @@ export interface ResearchInput {
 export const RESEARCH_SYSTEM = `You check a reported leadership change for a research validator.
 
 Search the web for up to three independent sources, published within 30 days of the event, that confirm or contradict the claim. Report them with the report_research tool: verdict, sources (url, title, published date, whether each supports the claim) and one sentence for the validator. Never confirm on your own judgement: if the sources do not settle it, the verdict is inconclusive.`;
+
+// ---------------------------------------------------------------------------------------------
+// meeting_brief (BRD 12.6, 17.3): seven sections, each at most 80 words
+// ---------------------------------------------------------------------------------------------
+
+export const PROMPT_VERSION_BRIEF = "brief.v1";
+
+export const BRIEF_HEADINGS = ["Who they are", "What changed recently", "Our history", "What they care about", "Mutual connections", "Open items", "Suggested talking points"] as const;
+export const NOTHING_ON_RECORD = "Nothing on record.";
+const words = (s: string) => (s.trim() ? s.trim().split(/\s+/).length : 0);
+const section = z.string().refine((s) => words(s) <= 80, "Keep each section to 80 words or fewer.");
+
+export const briefOutputSchema = z.object({
+  who_they_are: section,
+  what_changed_recently: section,
+  our_history: section,
+  what_they_care_about: section,
+  mutual_connections: section,
+  open_items: section,
+  suggested_talking_points: z.array(z.string()).length(3, "Give exactly three talking points.").refine((xs) => words(xs.join(" ")) <= 80, "Keep the talking points to 80 words or fewer."),
+});
+export type BriefOutput = z.infer<typeof briefOutputSchema>;
+
+export interface BriefInput {
+  person: { fullName: string; role: string | null; company: string | null; country: string | null };
+  roles: { title: string; company: string; from: string | null; to: string | null; status: string }[];
+  signals: { headline: string; date: string | null; about: "person" | "company" }[];
+  /** Metadata only; private subjects are removed before this is built. */
+  interactions: { channel: string; date: string; direction: string; subject: string | null }[];
+  relationship: { band: string; score: number; factors: string[] } | null;
+  paths: { explanation: string }[];
+  interests: { topic: string; source: string }[];
+  contentSent: { title: string; date: string }[];
+  openActions: { type: string; headline: string | null; due: string }[];
+  meeting: { title: string | null; startsAt: string } | null;
+}
+
+export const BRIEF_SYSTEM = `You write a one-page meeting brief for a partner at an executive search firm.
+
+Rules:
+- Use only the facts in the context. Never invent history, titles, dates or names.
+- Each section is at most 80 words, plain sentences, no headings inside.
+- When the context has nothing for a section, write exactly "${NOTHING_ON_RECORD}"
+- Suggested talking points: exactly three short points grounded in the context.
+- Never mention how information was detected or collected.`;
+
+/** The brief as markdown with exactly the seven headings (BRD 17.3). */
+export function briefMarkdown(out: BriefOutput): string {
+  const body = [out.who_they_are, out.what_changed_recently, out.our_history, out.what_they_care_about, out.mutual_connections, out.open_items];
+  const parts = BRIEF_HEADINGS.slice(0, 6).map((h, i) => `## ${h}\n\n${body[i]!.trim() || NOTHING_ON_RECORD}`);
+  const points = out.suggested_talking_points.filter((p) => p.trim());
+  parts.push(`## ${BRIEF_HEADINGS[6]}\n\n${points.length ? points.map((p) => `- ${p.trim()}`).join("\n") : NOTHING_ON_RECORD}`);
+  return parts.join("\n\n");
+}

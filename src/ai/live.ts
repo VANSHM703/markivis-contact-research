@@ -9,6 +9,8 @@
  * - Sonnet calls opt into the server-side refusal fallback (`fallbacks: "default"`, beta
  *   `server-side-fallback-2026-07-01`). A refusal that survives it is an AiOutputError, and the
  *   item goes to a person.
+ * - Briefs (BRD 17.3 proposes temperature 0.2) also run on effort instead, with the seven sections
+ *   as structured fields so the headings and word limits are checked, not trusted.
  * - Research uses the web search server tool (`web_search_20260209`) plus a strict reporting
  *   tool, with `tool_choice: auto` and a check that the report was made; `pause_turn` is resumed.
  */
@@ -18,6 +20,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { z } from "zod";
 import { AiOutputError, MODELS, type AiAdapter, type AiCallRecord, type AiResult } from "./adapter";
 import {
+  BRIEF_SYSTEM, briefOutputSchema, PROMPT_VERSION_BRIEF, type BriefInput,
   DRAFT_SYSTEM, draftOutputSchema, EXTRACT_BODY_LIMIT, EXTRACT_SYSTEM, extractOutputSchema, PROMPT_VERSION_DRAFT, PROMPT_VERSION_EXTRACT,
   PROMPT_VERSION_RESEARCH, RESEARCH_SYSTEM, researchOutputSchema, EXTRACTABLE_TYPES,
   type DraftInput, type ExtractInput,
@@ -136,6 +139,22 @@ export function createLiveAi(client = new Anthropic()): AiAdapter {
           system: DRAFT_SYSTEM,
           messages,
           output_config: { effort: "medium", format: betaZodOutputFormat(draftOutputSchema) },
+        });
+        return { parsed: response.parsed_output, text: textOf(response.content), usage: response.usage, stopReason: response.stop_reason };
+      });
+    },
+
+    async meetingBrief(input: BriefInput) {
+      const model = MODELS.write();
+      return structured("meeting_brief", model, PROMPT_VERSION_BRIEF, briefOutputSchema, `Context (use only these facts):\n${JSON.stringify(input, null, 2)}\n\nWrite the brief.`, async (messages) => {
+        const response = await client.beta.messages.parse({
+          model,
+          max_tokens: 8_000,
+          betas: [FALLBACK_BETA],
+          fallbacks: "default",
+          system: BRIEF_SYSTEM,
+          messages,
+          output_config: { effort: "low", format: betaZodOutputFormat(briefOutputSchema) },
         });
         return { parsed: response.parsed_output, text: textOf(response.content), usage: response.usage, stopReason: response.stop_reason };
       });

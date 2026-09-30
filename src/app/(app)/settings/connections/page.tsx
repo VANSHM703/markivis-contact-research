@@ -9,7 +9,9 @@ import { APP_BASE_PATH } from "@/config/product";
 import { getDataMode } from "@/config/env";
 import { formatDateIn, formatTimeIn } from "@/lib/format/labels";
 import { connectionsFor } from "@/server/capture";
-import { addExclusionAction, connectMockAction, disconnectAction, removeExclusionAction, syncNowAction } from "@/server/capture-actions";
+import { canSend } from "@/outreach/mailbox";
+import { can } from "@/lib/permissions";
+import { addExclusionAction, allowMockSendingAction, connectMockAction, disconnectAction, removeExclusionAction, syncNowAction } from "@/server/capture-actions";
 import { allowed, pageContext } from "@/server/guards";
 import styles from "@/components/settings/Settings.module.css";
 
@@ -49,12 +51,20 @@ export default async function ConnectionsPage({ searchParams }: { searchParams: 
                 {c?.accountEmail && active ? <div><dt>Mailbox</dt><dd className="t-meta">{c.accountEmail}{c.scopes.includes("mock") ? " (demo)" : ""}</dd></div> : null}
                 {active ? <div><dt>Mail last synced</dt><dd className="t-meta">{when(c.lastSyncAt)}</dd></div> : null}
                 {active ? <div><dt>Calendar last synced</dt><dd className="t-meta">{when(c.calendarSyncedAt)}</dd></div> : null}
+                {active ? <div><dt>Sending approved emails</dt><dd>{canSend(c.scopes) ? <StatePill tone="ok">Allowed</StatePill> : <StatePill tone="neutral">Not allowed</StatePill>}</dd></div> : null}
               </dl>
               {c?.errorMessage ? <p className={styles.warnText}>{c.errorMessage}</p> : null}
               <div className="btn-row">
                 {active ? (
                   <>
                     <form action={syncNowAction.bind(null, p.key)}><SubmitButton variant="ghost">Sync now</SubmitButton></form>
+                    {!canSend(c.scopes) && can(ctx.role, "messages.send") ? (
+                      c.scopes.includes("mock") ? (
+                        <form action={allowMockSendingAction.bind(null, p.key)}><SubmitButton variant="ghost">Allow sending</SubmitButton></form>
+                      ) : (
+                        <a className="btn btn--ghost" href={`${APP_BASE_PATH}/api/v1/connections/${p.key}/start?send=1`}>Allow sending</a>
+                      )
+                    ) : null}
                     <form action={disconnectAction.bind(null, p.key)}><SubmitButton variant="danger">Disconnect</SubmitButton></form>
                   </>
                 ) : mock ? (

@@ -29,6 +29,10 @@ export default async function PacksPage({ searchParams }: { searchParams: Promis
               Executive search: contact types, off-limits rules, placements, confidential mandate notes, succession watch
             </label>
             <label className={formStyles.check}>
+              <input type="checkbox" name="crm_hubspot" defaultChecked={ctx.workspace.flags["crm.hubspot"] === true} />
+              HubSpot sync (P1): contacts, bands and logged interactions out; unsubscribes and title changes in
+            </label>
+            <label className={formStyles.check}>
               <input type="checkbox" name="pe_mapping" defaultChecked={pe} />
               PE sponsor mapping (Release 3: only the data model exists today)
             </label>

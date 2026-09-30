@@ -1,0 +1,7 @@
+.brief { display: grid; gap: var(--space-3); }
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-3); }
+.head h2 { margin: 0; }
+.body { display: grid; gap: var(--space-2); max-width: var(--measure-lede, 62ch); }
+.body h3 { margin: var(--space-3) 0 0; }
+.body p, .body ul { margin: 0; color: var(--text-secondary); }
+.body ul { padding-left: var(--space-5); }

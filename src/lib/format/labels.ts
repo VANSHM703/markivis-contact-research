@@ -50,6 +50,7 @@ export const SOURCE_TYPE_LABELS: Record<string, string> = {
   manual: "Manual",
   ai_research: "AI research",
   event_site: "Event website",
+  crm: "CRM",
 };
 
 /** Signal types in sentence case for the interface (BRD 9.3). */

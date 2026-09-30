@@ -1,0 +1,34 @@
+{
+  "results": [
+    {
+      "id": "hs-9001",
+      "properties": {
+        "email": "hugo.pemberton@cindervale-partners.example.com",
+        "jobtitle": "Executive Vice President, Operating Partner",
+        "company": null,
+        "hs_email_optout": "false"
+      },
+      "updatedAt": "{{datetime:0}}"
+    },
+    {
+      "id": "hs-9002",
+      "properties": {
+        "email": "tamsin.vaughn@cindervale-partners.example.com",
+        "jobtitle": "Managing Director",
+        "company": null,
+        "hs_email_optout": "true"
+      },
+      "updatedAt": "{{datetime:0}}"
+    },
+    {
+      "id": "hs-9003",
+      "properties": {
+        "email": "someone.else@unrelated.example.org",
+        "jobtitle": "Office Manager",
+        "company": null,
+        "hs_email_optout": "false"
+      },
+      "updatedAt": "{{datetime:0}}"
+    }
+  ]
+}

@@ -3,7 +3,7 @@
  * Tokens are encrypted at rest; revoking deletes them at once and stops sync. In mock mode a
  * connection has no tokens and reads fixtures.
  */
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { getDataMode } from "@/config/env";
 import { withWorkspace, type Tx } from "@/db/client";
 import { oauthConnections } from "@/db/schema";
@@ -30,14 +30,15 @@ export async function saveConnection(
     status: "active" as const,
     accountEmail: input.accountEmail.toLowerCase(),
     errorMessage: null,
-    deltaCursor: null,
-    lastSyncAt: null,
-    calendarSyncedAt: null,
   };
   const [row] = await tx
     .insert(oauthConnections)
     .values({ workspaceId: input.workspaceId, userId: input.userId, provider: input.provider, ...values })
-    .onConflictDoUpdate({ target: [oauthConnections.workspaceId, oauthConnections.userId, oauthConnections.provider], set: values })
+    .onConflictDoUpdate({
+      target: [oauthConnections.workspaceId, oauthConnections.userId, oauthConnections.provider],
+      // Reconnecting the same mailbox (for example to allow sending) keeps its sync position.
+      set: { ...values, deltaCursor: sql`case when ${oauthConnections.accountEmail} = ${values.accountEmail} then ${oauthConnections.deltaCursor} else null end` },
+    })
     .returning({ id: oauthConnections.id });
   await audit(tx, { workspaceId: input.workspaceId, actorUserId: input.userId, actorKind: "user", action: "connection.connected", entityType: "oauth_connection", entityId: row!.id, after: { provider: input.provider, scopes: values.scopes, mock: !!input.mock } });
   return row!.id;
@@ -58,13 +59,11 @@ export function isMockConnection(c: Pick<Connection, "scopes">): boolean {
   return c.scopes.includes("mock");
 }
 
-/** The provider for a connection: fixtures for a mock connection, the live API otherwise. */
-export function providerFor(c: Connection, options: { http?: HttpClient; now?: () => Date } = {}): CaptureProvider {
+/** An access token getter for a live connection: refreshed a minute before expiry, and saved. */
+export function providerAccessToken(c: Connection, http: HttpClient): () => Promise<string> {
   const provider = c.provider as CaptureProviderName;
-  if (isMockConnection(c) || getDataMode() === "mock") return createMockProvider(provider, c.accountEmail ?? "", options.now);
-  const http = options.http ?? liveHttp({ timeoutMs: 30_000 });
   let tokens: TokenSet | null = c.tokenCiphertext ? (JSON.parse(decryptSecret(c.tokenCiphertext)) as TokenSet) : null;
-  const accessToken = async () => {
+  return async () => {
     if (!tokens) throw new Error("This connection has no tokens. Connect it again.");
     if (tokens.expiresAt - Date.now() < 60_000) {
       tokens = await refreshTokens(http, oauthConfig(provider), tokens);
@@ -73,5 +72,13 @@ export function providerFor(c: Connection, options: { http?: HttpClient; now?: (
     }
     return tokens.accessToken;
   };
+}
+
+/** The provider for a connection: fixtures for a mock connection, the live API otherwise. */
+export function providerFor(c: Connection, options: { http?: HttpClient; now?: () => Date } = {}): CaptureProvider {
+  const provider = c.provider as CaptureProviderName;
+  if (isMockConnection(c) || getDataMode() === "mock") return createMockProvider(provider, c.accountEmail ?? "", options.now);
+  const http = options.http ?? liveHttp({ timeoutMs: 30_000 });
+  const accessToken = providerAccessToken(c, http);
   return provider === "microsoft" ? createMicrosoftProvider(http, accessToken) : createGoogleProvider(http, accessToken);
 }

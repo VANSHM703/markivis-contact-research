@@ -19,8 +19,8 @@ Relationship intelligence inside BEAM: one trusted record of every senior decisi
 | M6 Executive search pack: contact types, off-limits, placements, confidential notes, succession watch | Done |
 | M7 Capture: Microsoft 365 mail and calendar, Google (P1), privacy controls | Done |
 | M8 Relationships: scoring, calibration, going quiet, connections, paths, coverage | Done |
-| M9 Outputs and sync: briefs, sending from the mailbox, reply detection, outcomes, HubSpot (P1) | Next |
-| M10 | Not started |
+| M9 Outputs and sync: briefs, sending from the mailbox, reply detection, outcomes, HubSpot (P1) | Done |
+| M10 Compliance and hardening: consent, suppression, erasure, export, retention, security, performance, accessibility | Next |
 
 ## Run it locally
 
@@ -74,6 +74,10 @@ Collected items go through the pipeline (BRD 9): a name match, AI extraction, ma
 ## Actions, Today and the digest
 
 Confirmed priority 1 and 2 changes create actions with an AI draft, after the pre-action checks (BRD 12.2): do not contact, opt-outs, a lawful basis for EU, EEA and UK contacts, and off-limits for candidate approaches. Actions opens each one in a drawer: edit the draft, submit it for approval (outreach owners), approve and send (partners), mark it done or dismiss it with a reason, and record the outcome. In mock mode sending uses a mock mailbox and logs the outbound email on the person. The daily digest and alerts are listed in Settings, Email log; in mock mode nothing leaves the machine, and in live mode they need `SMTP_URL` and `MAIL_FROM`. Service levels, the digest time, the daily send limit and the style guide are in Settings, Service levels and style guide.
+
+## Briefs, sending and HubSpot
+
+The day before a meeting with a tracked person, a one-page brief is written, attached to the meeting, emailed to its owner and linked from the digest; the person page's Brief tab shows it, and "Prepare a brief" writes one on demand. Approved emails go out from the partner's own mailbox once "Allow sending" is on under Mailbox and calendar. A reply in the same conversation, or a later meeting, records the outcome automatically. HubSpot sync (optional) is under Settings, CRM, and needs a platform admin to switch it on.
 
 ## Relationships
 

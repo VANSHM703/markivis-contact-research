@@ -133,7 +133,7 @@ export default async function TodayPage({ searchParams }: { searchParams: Promis
               <ul className={styles.items}>
                 {p.meetings.map((m) => (
                   <li key={m.id} className={styles.item}>
-                    <Link href={m.personId ? `/people/${m.personId}` : "/"} className={styles.itemLink}>
+                    <Link href={m.personId ? `/people/${m.personId}${m.briefId ? `?tab=brief&brief=${m.briefId}` : "?tab=brief"}` : "/"} className={styles.itemLink}>
                       <span className="t-meta">{formatTimeIn(m.startsAt, tz)}</span>
                       <span className={styles.itemText}>
                         <span className={styles.itemWho}>{m.title ?? "Meeting"}</span>

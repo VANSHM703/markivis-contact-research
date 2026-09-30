@@ -32,3 +32,13 @@ Capture uses `gmail.metadata` (headers only) and `calendar.events.readonly`. Goo
 - The partner can mark a thread or a contact private: those interactions count toward scores, but only partners see their subjects and summaries.
 - Disconnecting deletes the stored tokens at once and stops sync. Tokens are encrypted at rest with `TOKEN_ENCRYPTION_KEY`.
 - If client IT refuses mailbox access, switch off the workspace flags `capture.microsoft` and `capture.google` and log interactions by hand (BRD 25, question 4).
+
+## Sending approved emails
+
+Sending uses the partner's own mailbox and a separate permission, asked for only when the partner chooses "Allow sending" under Mailbox and calendar: `Mail.Send` for Microsoft 365 (add it to the app registration's delegated permissions), `gmail.send` for Google. The daily limit per mailbox is under Settings, Service levels and style guide.
+
+## HubSpot (optional)
+
+1. In HubSpot, create a private app with the scopes `crm.objects.contacts.read`, `crm.objects.contacts.write` and `crm.schemas.contacts.write` (for the two custom properties the sync creates: `dmi_relationship_band` and `dmi_last_two_way_touch`).
+2. A platform admin switches on "HubSpot sync" on Settings, Packs.
+3. A partner or data steward saves the token on Settings, CRM, and presses Sync now. After that it runs every 15 minutes.

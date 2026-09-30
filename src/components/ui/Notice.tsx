@@ -117,6 +117,13 @@ const NOTICES: Record<string, { text: string; tone: "ok" | "warn" }> = {
   bands_invalid: { text: "Couldn't save: band thresholds are whole numbers, strong above warm above cooling above cold, and cold at least 1.", tone: "warn" },
   calibration_saved: { text: "Ranking saved. The correlation below compares it with the computed scores.", tone: "ok" },
   calibration_invalid: { text: "Couldn't save: rank at least 5 people, using each number from 1 to 30 once.", tone: "warn" },
+  brief_ready: { text: "Brief ready.", tone: "ok" },
+  brief_failed: { text: "Couldn't write the brief just now. Try again in a few minutes.", tone: "warn" },
+  sending_allowed: { text: "Sending allowed. Approved emails now go out from this mailbox.", tone: "ok" },
+  crm_saved: { text: "HubSpot token saved. It is stored encrypted and cannot be shown again.", tone: "ok" },
+  crm_synced: { text: "HubSpot synced.", tone: "ok" },
+  crm_failed: { text: "Couldn't sync with HubSpot. The message below says why.", tone: "warn" },
+  crm_off: { text: "HubSpot sync is switched off for this workspace. A platform admin can switch it on.", tone: "warn" },
   action_refused: { text: "Couldn't create the action: this person must not be contacted, or the company is off-limits for this approach.", tone: "warn" },
 };
 

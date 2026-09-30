@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/forms/SubmitButton";
 import { Chip } from "@/components/ui/Chip";
 import { Notice } from "@/components/ui/Notice";
 import { Tabs } from "@/components/ui/Tabs";
+import { BriefTab } from "@/components/briefs/BriefTab";
 import { Interactions } from "@/components/capture/Interactions";
 import { ConnectionsTab } from "@/components/relationships/ConnectionsTab";
 import { PathList } from "@/components/relationships/PathList";
@@ -79,7 +80,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
   const canNotes = packOn && can(ctx.role, "mandate_notes.view");
   const rel = await personRelationship(ctx, person.id);
   const canCreateAction = can(ctx.role, "messages.send") && !mergedInto && person.status !== "do_not_contact" && person.isTracked;
-  const tab = query.tab === "record" ? "record" : query.tab === "notes" && canNotes ? "notes" : query.tab === "interactions" ? "interactions" : query.tab === "connections" ? "connections" : "overview";
+  const tab = query.tab === "record" ? "record" : query.tab === "notes" && canNotes ? "notes" : query.tab === "interactions" ? "interactions" : query.tab === "connections" ? "connections" : query.tab === "brief" || query.brief ? "brief" : "overview";
   const primary = roles.find((r) => r.isPrimary);
   const editor = can(ctx.role, "records.edit") && !mergedInto;
   const merger = can(ctx.role, "persons.merge");
@@ -140,6 +141,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
           { key: "overview", label: "Overview", href: `/people/${person.id}` },
           { key: "interactions", label: "Interactions", href: `/people/${person.id}?tab=interactions` },
           { key: "connections", label: "Connections", href: `/people/${person.id}?tab=connections` },
+          { key: "brief", label: "Brief", href: `/people/${person.id}?tab=brief` },
           { key: "record", label: "Record", href: `/people/${person.id}?tab=record` },
           ...(canNotes ? [{ key: "notes", label: "Notes", href: `/people/${person.id}?tab=notes` }] : []),
         ]}
@@ -229,6 +231,8 @@ export default async function PersonPage({ params, searchParams }: Props) {
             </dl>
           </section>
         </div>
+      ) : tab === "brief" ? (
+        <BriefTab workspaceId={ctx.workspace.id} personId={person.id} briefId={typeof query.brief === "string" ? query.brief : undefined} tz={ctx.workspace.timezone} canPrepare={can(ctx.role, "messages.send")} />
       ) : tab === "connections" ? (
         <ConnectionsTab personId={person.id} connections={rel.connections} canEdit={editor} />
       ) : tab === "interactions" ? (

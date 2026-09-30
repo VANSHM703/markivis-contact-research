@@ -242,9 +242,9 @@ export async function sendAction(actor: FlowActor, actionId: string, options: { 
     await recordBlock(actor.workspaceId, actionId, error);
     throw error;
   });
-  const sender = options.sender ?? getMailboxSender();
   let sent;
   try {
+    const sender = options.sender ?? (await getMailboxSender(actor.workspaceId, prepared.from.userId));
     sent = await sender.send({ fromUserId: prepared.from.userId, fromEmail: prepared.from.email, to: prepared.to, subject: prepared.draft.subject ?? "", body: prepared.draft.body });
   } catch (error) {
     const message = (error as Error).message.slice(0, 1000);

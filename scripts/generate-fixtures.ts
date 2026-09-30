@@ -714,11 +714,34 @@ async function capture(): Promise<Record<string, number>> {
   return { jordan_messages: mail.length, jordan_tracked: tracked.length };
 }
 
+// ---------------------------------------------------------------------------------------------
+// CRM (BRD 15): contacts changed in the mock HubSpot since the last sync
+// ---------------------------------------------------------------------------------------------
+
+/** One tracked contact with a different job title (a conflict), one who unsubscribed, one unknown. */
+async function crm(): Promise<number> {
+  const withEmail = demo.roles.filter((r) => r.isPrimary && r.status === "current" && r.businessEmail && r.emailStatus === "verified");
+  const retitled = withEmail[withEmail.length - 1]!;
+  const optedOut = withEmail[withEmail.length - 2]!;
+  const contact = (id: string, email: string, jobtitle: string | null, optout: boolean) => ({
+    id,
+    properties: { email, jobtitle, company: null, hs_email_optout: optout ? "true" : "false" },
+    updatedAt: "{{datetime:0}}",
+  });
+  const results = [
+    contact("hs-9001", retitled.businessEmail!, `Executive Vice President, ${retitled.title}`, false),
+    contact("hs-9002", optedOut.businessEmail!, optedOut.title, true),
+    contact("hs-9003", "someone.else@unrelated.example.org", "Office Manager", false),
+  ];
+  await put("crm/hubspot/contacts.json", json({ results }));
+  return results.length;
+}
+
 async function main() {
-  for (const dir of ["sec", "wires", "alerts", "pages", "apollo", "newsletter", "licensed", "news_api", "warn", "job_postings", "ai", "capture"]) await rm(path.join(ROOT, dir), { recursive: true, force: true });
+  for (const dir of ["sec", "wires", "alerts", "pages", "apollo", "newsletter", "licensed", "news_api", "warn", "job_postings", "ai", "capture", "crm"]) await rm(path.join(ROOT, dir), { recursive: true, force: true });
   const counts = { sec_502_filings: await sec(), wire_items: await wires(), alert_items: await alerts(), pages_changed: await pages(), apollo_people: await apollo(), newsletter_events: await newsletter() };
   await release3();
-  console.log({ ...counts, ai_extractions: await aiFixtures(), capture: await capture() });
+  console.log({ ...counts, ai_extractions: await aiFixtures(), capture: await capture(), crm_contacts: await crm() });
 }
 
 main().catch((error: unknown) => {

@@ -31,3 +31,4 @@ a.section:hover { border-color: var(--accent); }
 .readoutRows div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); padding: 9px 12px; background: var(--surface-sunken); border-radius: var(--radius-md); align-items: center; }
 .readoutRows dt { font-size: var(--body-sm); color: var(--text-muted); }
 .readoutRows dd { margin: 0; overflow-wrap: anywhere; text-align: right; }
+@media (max-width: 560px) { .readoutRows div { grid-template-columns: minmax(0, 1fr); } .readoutRows dd { text-align: left; } }

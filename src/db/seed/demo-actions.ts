@@ -3,9 +3,11 @@
  * Actions screen, Today and the digest show each state: one draft awaiting approval, one email
  * already sent, one escalated, and one blocked until a lawful basis is recorded. Mock mode only.
  */
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, isNull, lte, sql } from "drizzle-orm";
 import { withWorkspace } from "@/db/client";
-import { actions, consents, drafts, persons, workspaceMembers } from "@/db/schema";
+import { actions, calendarEvents, consents, drafts, interactions, oauthConnections, persons, roles, workspaceMembers } from "@/db/schema";
+import { applyMailDelta } from "@/capture/capture";
+import { generateBrief } from "@/domain/briefs";
 import { approveAndSend, submitForApproval, type FlowActor } from "@/domain/action-flow";
 import { createManualAction, dueDate } from "@/domain/actions";
 import { runSla } from "@/domain/sla";
@@ -18,6 +20,33 @@ export interface StagedActions {
   sent: string | null;
   escalated: string | null;
   lawfulBasis: string | null;
+}
+
+/**
+ * The person replies to the staged email (BRD 12.7, acceptance scenario 19): an inbound message in
+ * the same conversation, read through Jordan's demo mailbox, sets the outcome to replied.
+ */
+async function stageReply(workspaceId: string, partnerId: string, actionId: string, now: Date): Promise<void> {
+  await withWorkspace(workspaceId, async (tx) => {
+    const [c] = await tx.select().from(oauthConnections).where(eq(oauthConnections.userId, partnerId)).limit(1);
+    const [action] = await tx.select({ personId: actions.personId }).from(actions).where(eq(actions.id, actionId)).limit(1);
+    if (!c || !action?.personId) return;
+    const [sent] = await tx.select({ threadKey: interactions.threadKey, subject: interactions.subject }).from(interactions).where(and(eq(interactions.personId, action.personId), eq(interactions.direction, "outbound"), eq(interactions.channel, "email"))).orderBy(desc(interactions.occurredAt)).limit(1);
+    const [role] = await tx.select({ email: roles.businessEmail }).from(roles).where(and(eq(roles.personId, action.personId), eq(roles.isPrimary, true))).limit(1);
+    if (!sent?.threadKey || !role?.email) return;
+    const replyAt = new Date(now.getTime() + 60_000);
+    await applyMailDelta(tx, c, [{ id: `demo-reply-${actionId}`, internetMessageId: `<demo-reply-${actionId}@mail.example.net>`, conversationId: sent.threadKey, sentAt: replyAt.toISOString(), from: role.email, to: [c.accountEmail!], cc: [], subject: `Re: ${sent.subject ?? ""}` }], c.deltaCursor ?? "mock:1", replyAt);
+  });
+}
+
+/** Briefs for the demo's meetings in the next two days, so the Brief tab and digest have content. */
+export async function stageDemoBriefs(workspaceId: string, now = new Date()): Promise<number> {
+  const events = await withWorkspace(workspaceId, (tx) =>
+    tx.select({ id: calendarEvents.id, personIds: calendarEvents.personIds }).from(calendarEvents).where(and(isNull(calendarEvents.briefId), gte(calendarEvents.startsAt, now), lte(calendarEvents.startsAt, new Date(now.getTime() + 2 * 86_400_000)), sql`cardinality(${calendarEvents.personIds}) > 0`)),
+  );
+  let made = 0;
+  for (const e of events) if ((await generateBrief(workspaceId, e.personIds[0]!, { calendarEventId: e.id, now })).kind === "made") made++;
+  return made;
 }
 
 export async function stageDemoActions(workspaceId: string, now = new Date()): Promise<StagedActions> {
@@ -47,6 +76,7 @@ export async function stageDemoActions(workspaceId: string, now = new Date()): P
   if (second) {
     await approveAndSend(partner, second.id, { sender: mockMailboxSender(), now });
     staged.sent = second.id;
+    await stageReply(workspaceId, partner.userId, second.id, now);
   }
   if (third) {
     await withWorkspace(workspaceId, (tx) => tx.update(actions).set({ dueAt: addWorkingDays(now, -3) }).where(eq(actions.id, third.id)));

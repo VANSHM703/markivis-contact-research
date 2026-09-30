@@ -7,7 +7,7 @@
 import { readJsonFixture } from "@/ingest/fixtures";
 import { normaliseCompanyName, normaliseName } from "@/lib/normalise";
 import type { AiAdapter, AiCallRecord } from "./adapter";
-import { PROMPT_VERSION_DRAFT, PROMPT_VERSION_EXTRACT, PROMPT_VERSION_RESEARCH, type ExtractOutput } from "./contracts";
+import { NOTHING_ON_RECORD, PROMPT_VERSION_BRIEF, PROMPT_VERSION_DRAFT, PROMPT_VERSION_EXTRACT, PROMPT_VERSION_RESEARCH, type ExtractOutput } from "./contracts";
 
 interface ExtractFixture extends Omit<ExtractOutput, "person_candidate_id" | "company_candidate_id"> {
   person_name: string | null;
@@ -50,6 +50,29 @@ export function createMockAi(now: () => Date): AiAdapter {
       return {
         output: { subject: input.channel === "email" ? (input.signal ? `Congratulations` : "Catching up") : null, body, used_content_item: !!input.contentItem, rationale: "Mock mode: a template, not a model." },
         call: call("draft_message", PROMPT_VERSION_DRAFT),
+      };
+    },
+
+    async meetingBrief(input) {
+      const first = input.person.fullName.split(" ")[0];
+      const or = (s: string | null | undefined) => (s && s.trim() ? s : NOTHING_ON_RECORD);
+      const role = input.person.role ? `${input.person.role}${input.person.company ? ` at ${input.person.company}` : ""}` : null;
+      const last = input.interactions[0];
+      return {
+        output: {
+          who_they_are: or(role ? `[Mock brief] ${input.person.fullName}, ${role}.${input.roles.length > 1 ? ` Before that: ${input.roles.slice(1, 3).map((r) => `${r.title}, ${r.company}`).join("; ")}.` : ""}` : null),
+          what_changed_recently: or(input.signals.slice(0, 2).map((s) => s.headline).join(". ")),
+          our_history: or(last ? `${input.interactions.length} interactions on record; the latest was a ${last.channel.replace("_", " ")} on ${last.date}.${input.relationship ? ` Relationship: ${input.relationship.band}, ${input.relationship.score} / 100.` : ""}` : null),
+          what_they_care_about: or(input.interests.map((i) => i.topic).join(", ")),
+          mutual_connections: or(input.paths[0]?.explanation),
+          open_items: or(input.openActions.map((a) => a.headline ?? a.type).join("; ")),
+          suggested_talking_points: [
+            input.signals[0] ? `Ask ${first} how the change is landing: ${input.signals[0].headline}.` : `Ask ${first} what is on the leadership agenda this quarter.`,
+            input.interests[0] ? `Share a view on ${input.interests[0].topic.toLowerCase()}.` : "Ask what would make the next year a success.",
+            "Agree a clear next step before the meeting ends.",
+          ],
+        },
+        call: call("meeting_brief", PROMPT_VERSION_BRIEF),
       };
     },
 

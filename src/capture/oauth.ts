@@ -45,7 +45,7 @@ export function oauthConfig(provider: CaptureProviderName, env: Env = process.en
   const clientId = env.AUTH_GOOGLE_CLIENT_ID;
   const clientSecret = env.AUTH_GOOGLE_CLIENT_SECRET;
   if (!clientId || !clientSecret) throw new OAuthNotConfiguredError("Google is not set up: set AUTH_GOOGLE_CLIENT_ID and AUTH_GOOGLE_CLIENT_SECRET.");
-  return { clientId, clientSecret, authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth", tokenUrl: "https://oauth2.googleapis.com/token", scopes: GOOGLE_SCOPES };
+  return { clientId, clientSecret, authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth", tokenUrl: "https://oauth2.googleapis.com/token", scopes: options.send ? [...GOOGLE_SCOPES, "https://www.googleapis.com/auth/gmail.send"] : GOOGLE_SCOPES };
 }
 
 const b64url = (buf: Buffer) => buf.toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");

@@ -5,9 +5,10 @@
  * that involve a tracked person. Everything else is dropped in memory: no row, no log line,
  * nothing about it is stored (acceptance scenario 11). Idempotent on the provider's ids.
  */
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import { withWorkspace, type Tx } from "@/db/client";
-import { calendarEvents, captureExclusions, interactions, oauthConnections, persons, privacyMarks, roles, users, workspaces } from "@/db/schema";
+import { actions, calendarEvents, captureExclusions, interactions, oauthConnections, persons, privacyMarks, roles, users, workspaces } from "@/db/schema";
+import { audit } from "@/lib/audit";
 import { HttpError, type HttpClient } from "@/ingest/http";
 import { log } from "@/lib/log";
 import { providerFor, type Connection } from "./connections";
@@ -88,6 +89,72 @@ export interface MailRunResult {
   messages: number;
   involvingTracked: number;
   created: number;
+  /** Sent actions marked replied (BRD 12.7). */
+  replies: number;
+}
+
+const SENT_MATCH_WINDOW = 15 * 60_000;
+
+/**
+ * Graph's sendMail returns no id, so a message sent from here is logged at once with a provisional
+ * id and no thread. When capture reads it back from Sent Items (same person, same subject, within
+ * 15 minutes), that interaction takes the real id and conversation instead of a second row.
+ */
+async function linkSentMessage(tx: Tx, c: Connection, m: CapturedMessage, personId: string): Promise<boolean> {
+  const at = new Date(m.sentAt).getTime();
+  const [pending] = await tx
+    .select({ id: interactions.id })
+    .from(interactions)
+    .where(
+      and(
+        eq(interactions.personId, personId),
+        eq(interactions.channel, "email"),
+        eq(interactions.direction, "outbound"),
+        isNull(interactions.threadKey),
+        sql`${interactions.externalId} like 'sent:%'`,
+        sql`${interactions.subject} is not distinct from ${m.subject}`,
+        sql`${interactions.occurredAt} between ${new Date(at - SENT_MATCH_WINDOW)} and ${new Date(at + SENT_MATCH_WINDOW)}`,
+      ),
+    )
+    .limit(1);
+  if (!pending) return false;
+  await tx.update(interactions).set({ threadKey: m.conversationId, externalId: `${m.internetMessageId}|${personId}`, provider: c.provider }).where(eq(interactions.id, pending.id));
+  return true;
+}
+
+/**
+ * Reply detection (BRD 12.7, acceptance scenario 19): an inbound message in the conversation of a
+ * message this tool sent sets that action's outcome to replied, unless one is already recorded.
+ */
+async function markReplied(tx: Tx, personId: string, threadKey: string, at: Date): Promise<number> {
+  const rows = await tx
+    .update(actions)
+    .set({ outcome: "replied", outcomeAt: at })
+    .where(
+      and(
+        eq(actions.personId, personId),
+        inArray(actions.status, ["sent", "done"]),
+        eq(actions.outcome, "none"),
+        // The sent message: an outbound interaction in this thread logged when the draft was sent.
+        sql`exists (select 1 from dmi.drafts d join dmi.interactions i on i.person_id = ${personId} and i.thread_key = ${threadKey} and i.direction = 'outbound'
+          and i.occurred_at between d.sent_at - interval '15 minutes' and d.sent_at + interval '15 minutes'
+          where d.action_id = ${actions.id} and d.sent_at is not null and d.sent_at <= ${at})`,
+      ),
+    )
+    .returning({ id: actions.id, workspaceId: actions.workspaceId });
+  for (const r of rows) await audit(tx, { workspaceId: r.workspaceId, actorUserId: null, actorKind: "system", action: "action.outcome", entityType: "action", entityId: r.id, after: { outcome: "replied", detected: "reply in the same conversation" } });
+  return rows.length;
+}
+
+/** A meeting with the person after the message was sent sets the outcome to meeting (BRD 12.7). */
+async function markMeeting(tx: Tx, personId: string, startsAt: Date): Promise<number> {
+  const rows = await tx
+    .update(actions)
+    .set({ outcome: "meeting", outcomeAt: startsAt })
+    .where(and(eq(actions.personId, personId), inArray(actions.status, ["sent", "done"]), inArray(actions.outcome, ["none", "no_reply", "replied"]), sql`exists (select 1 from dmi.drafts d where d.action_id = ${actions.id} and d.sent_at is not null and d.sent_at < ${startsAt})`))
+    .returning({ id: actions.id, workspaceId: actions.workspaceId });
+  for (const r of rows) await audit(tx, { workspaceId: r.workspaceId, actorUserId: null, actorKind: "system", action: "action.outcome", entityType: "action", entityId: r.id, after: { outcome: "meeting", detected: "meeting on the calendar" } });
+  return rows.length;
 }
 
 /** Writes the interactions for one delta page and advances the cursor, in one transaction. */
@@ -95,11 +162,14 @@ export async function applyMailDelta(tx: Tx, c: Connection, messages: CapturedMe
   const ctx = await context(tx, c);
   let involving = 0;
   let created = 0;
+  let replies = 0;
   for (const m of messages) {
     const matches = matchMessage(m, ctx.index, ctx.ours, ctx.exclusions);
     if (matches.length === 0) continue;
     involving++;
     for (const match of matches) {
+      // A message this tool sent (BRD 12.5): adopt it rather than log it twice, and learn its thread.
+      if (match.direction === "outbound" && (await linkSentMessage(tx, c, m, match.personId))) continue;
       const rows = await tx
         .insert(interactions)
         .values({
@@ -120,10 +190,11 @@ export async function applyMailDelta(tx: Tx, c: Connection, messages: CapturedMe
         .onConflictDoNothing({ target: [interactions.workspaceId, interactions.provider, interactions.externalId] })
         .returning({ id: interactions.id });
       created += rows.length;
+      if (rows.length && match.direction === "inbound" && m.conversationId) replies += await markReplied(tx, match.personId, m.conversationId, new Date(m.sentAt));
     }
   }
   await tx.update(oauthConnections).set({ deltaCursor: cursor, lastSyncAt: now, errorMessage: null, status: "active" }).where(eq(oauthConnections.id, c.id));
-  return { messages: messages.length, involvingTracked: involving, created };
+  return { messages: messages.length, involvingTracked: involving, created, replies };
 }
 
 export interface CalendarRunResult {
@@ -148,6 +219,7 @@ export async function applyCalendar(tx: Tx, c: Connection, events: CapturedEvent
     if (people.size === 0) continue;
     withTracked++;
     const personIds = Array.from(people.keys());
+    for (const personId of personIds) await markMeeting(tx, personId, new Date(e.startsAt));
     await tx
       .insert(calendarEvents)
       .values({ workspaceId: c.workspaceId, userId: c.userId, provider: c.provider, externalId: e.id, startsAt: new Date(e.startsAt), endsAt: new Date(e.endsAt), title: e.title, attendeeEmails: e.attendees, personIds })

@@ -50,6 +50,13 @@
       "when": 1790769847350,
       "tag": "0006_capture",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790777664988,
+      "tag": "0007_outputs",
+      "breakpoints": true
     }
   ]
 }

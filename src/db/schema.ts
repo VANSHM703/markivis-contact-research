@@ -54,7 +54,7 @@ export const capturedBy = dmi.enum("captured_by", ["auto", "manual", "import"]);
 export const oauthStatus = dmi.enum("oauth_status", ["active", "revoked", "error"]);
 export const sourceType = dmi.enum("source_type", [
   "apollo", "sec_8k", "press_wire", "google_alert", "leadership_page", "newsletter", "event_site",
-  "manual", "ai_research", "licensed", "news_api", "warn", "job_postings",
+  "manual", "ai_research", "licensed", "news_api", "warn", "job_postings", "crm",
 ]);
 export const rawItemOutcome = dmi.enum("raw_item_outcome", ["irrelevant", "signal_created", "signal_merged", "record_updated", "error"]);
 export const subjectType = dmi.enum("subject_type", ["person", "company"]);
@@ -84,7 +84,7 @@ export const draftChannel = dmi.enum("draft_channel", ["email", "linkedin_messag
 export const draftAuthor = dmi.enum("draft_author", ["ai", "user"]);
 /** Whether an action approaches the person as a client contact or as a candidate (BRD 12.2 step 4). */
 export const actionPurpose = dmi.enum("action_purpose", ["client", "candidate"]);
-export const notificationKind = dmi.enum("notification_kind", ["digest", "p1_change", "auto_confirm_suspended", "budget_80"]);
+export const notificationKind = dmi.enum("notification_kind", ["digest", "p1_change", "auto_confirm_suspended", "budget_80", "brief"]);
 export const notificationStatus = dmi.enum("notification_status", ["queued", "sent", "failed"]);
 export const band = dmi.enum("band", ["strong", "warm", "cooling", "cold", "none"]);
 export const offLimitsScope = dmi.enum("off_limits_scope", ["company", "function", "level_and_above"]);
@@ -985,4 +985,24 @@ export const privacyMarks = dmi.table(
     updatedAt: updatedAt(),
   },
   (t) => [uniqueIndex().on(t.workspaceId, t.kind, t.key)],
+);
+
+/**
+ * Records mirrored to a CRM (BRD 15): which of our people, companies, interactions and sent
+ * drafts exist in the CRM, under which CRM id, and when they were last pushed. Not in BRD 6.
+ */
+export const crmLinks = dmi.table(
+  "crm_links",
+  {
+    id: id(),
+    workspaceId: workspaceRef(),
+    provider: text().notNull(),
+    entityType: text().notNull(),
+    entityId: uuid().notNull(),
+    crmId: text().notNull(),
+    syncedAt: timestamp(tz).notNull().defaultNow(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex().on(t.workspaceId, t.provider, t.entityType, t.entityId), index().on(t.workspaceId, t.provider, t.crmId)],
 );

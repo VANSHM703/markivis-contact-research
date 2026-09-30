@@ -3,10 +3,10 @@
  * call is recorded in ai_calls with purpose, model, prompt version, tokens, cost and latency.
  */
 import { getDataMode, type DataMode } from "@/config/env";
-import type { DraftInput, DraftOutput, ExtractInput, ExtractOutput, ResearchInput, ResearchOutput } from "./contracts";
+import type { BriefInput, BriefOutput, DraftInput, DraftOutput, ExtractInput, ExtractOutput, ResearchInput, ResearchOutput } from "./contracts";
 
 export interface AiCallRecord {
-  purpose: "extract_signal" | "draft_message" | "research_more";
+  purpose: "extract_signal" | "draft_message" | "research_more" | "meeting_brief";
   model: string;
   promptVersion: string;
   inputTokens: number | null;
@@ -27,6 +27,7 @@ export interface AiAdapter {
   extractSignal(input: ExtractInput): Promise<AiResult<ExtractOutput>>;
   draftMessage(input: DraftInput): Promise<AiResult<DraftOutput>>;
   researchMore(input: ResearchInput): Promise<AiResult<ResearchOutput>>;
+  meetingBrief(input: BriefInput): Promise<AiResult<BriefOutput>>;
 }
 
 /** The AI could not produce valid output after one retry; the item goes to review (BRD 17.1). */

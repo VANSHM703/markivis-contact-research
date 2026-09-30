@@ -176,11 +176,12 @@ export async function setPacksAction(formData: FormData): Promise<void> {
   if (!ctx.user.isPlatformAdmin) redirect("/?notice=not_allowed");
   const execSearch = formData.get("exec_search") === "on";
   const peMapping = formData.get("pe_mapping") === "on";
+  const hubspot = formData.get("crm_hubspot") === "on";
   await withSystem("platform_admin", async (tx) => {
     const [ws] = await tx.select({ packs: workspaces.packs, flags: workspaces.flags }).from(workspaces).where(eq(workspaces.id, ctx.workspace.id)).limit(1);
     const before = { packs: ws!.packs, flags: ws!.flags };
     const packs = { ...(ws!.packs as object), exec_search: execSearch, pe_mapping: peMapping };
-    const flags = { ...(ws!.flags as object), "pack.exec_search": execSearch, "pack.pe_mapping": peMapping };
+    const flags = { ...(ws!.flags as object), "pack.exec_search": execSearch, "pack.pe_mapping": peMapping, "crm.hubspot": hubspot };
     await tx.update(workspaces).set({ packs, flags }).where(eq(workspaces.id, ctx.workspace.id));
     await audit(tx, { workspaceId: ctx.workspace.id, actorUserId: ctx.user.id, actorKind: "platform_admin", action: "workspace.packs_changed", entityType: "workspace", entityId: ctx.workspace.id, before, after: { packs, flags } });
   });

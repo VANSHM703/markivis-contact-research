@@ -23,6 +23,7 @@ const SECTIONS: Section[] = [
   { title: "Signal priorities", body: "Priority by signal type, with dismissal counts.", later: "M10" },
   { title: "Scoring", body: "Relationship score weights, bands and calibration.", href: "/settings/scoring" },
   { title: "Service levels and style guide", body: "Due dates, the digest time, the daily send limit and how drafts are written.", href: "/settings/workflow" },
+  { title: "CRM", body: "HubSpot sync: token, status and Sync now.", href: "/settings/crm" },
   { title: "Email log", body: "Digests and alerts, with their delivery status.", href: "/settings/email" },
   { title: "Topics and content", body: "Topic vocabulary and the content library.", later: "M9" },
   { title: "Consent and suppression", body: "Lawful basis, opt-outs and erasure.", later: "M10" },

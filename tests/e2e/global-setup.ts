@@ -20,8 +20,9 @@ export default async function globalSetup(config: FullConfig) {
   await stageDemoCapture(demo);
   const { stageDemoRelationships } = await import("../../src/db/seed/demo-relationships");
   await stageDemoRelationships(demo);
-  const { stageDemoActions } = await import("../../src/db/seed/demo-actions");
+  const { stageDemoActions, stageDemoBriefs } = await import("../../src/db/seed/demo-actions");
   await stageDemoActions(demo);
+  await stageDemoBriefs(demo);
   await closeDatabase();
 
   const baseURL = config.projects[0]!.use.baseURL!;
