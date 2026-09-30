@@ -8,6 +8,7 @@ import { GlobalSearch } from "./GlobalSearch";
 import { MobileNav } from "./MobileNav";
 import { SidebarNav, type NavCounts } from "./SidebarNav";
 import { UserMenu } from "./UserMenu";
+import { can } from "@/lib/permissions";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import styles from "./AppShell.module.css";
 
@@ -50,6 +51,7 @@ export function AppShell({ ctx, counts, children }: AppShellProps) {
             workspaceName={ctx.workspace.name}
             signOutAction={signOutAction}
             packsHref={ctx.user.isPlatformAdmin ? "/settings/packs" : null}
+            connectionsHref={can(ctx.role, "mailbox.connect") ? "/settings/connections" : null}
           />
         </div>
       </header>

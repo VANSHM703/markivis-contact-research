@@ -1,0 +1,621 @@
+{
+  "messages": [
+    {
+      "id": "mock-5",
+      "internetMessageId": "<mock-5.1@mail.example.net>",
+      "conversationId": "conv-u0",
+      "sentAt": "{{datetime:-1}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "lee.whitford@demo-search.example.com"
+      ],
+      "cc": [
+        "priya.raman@markivis.example.com"
+      ],
+      "subject": "Weekly market brief 1"
+    },
+    {
+      "id": "mock-6",
+      "internetMessageId": "<mock-6.2@mail.example.net>",
+      "conversationId": "conv-u1",
+      "sentAt": "{{datetime:-2}}",
+      "from": "events@conference.example.org",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Your invoice is ready 2"
+    },
+    {
+      "id": "mock-7",
+      "internetMessageId": "<mock-7.3@mail.example.net>",
+      "conversationId": "conv-u2",
+      "sentAt": "{{datetime:-3}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Team offsite logistics 3"
+    },
+    {
+      "id": "mock-8",
+      "internetMessageId": "<mock-8.4@mail.example.net>",
+      "conversationId": "conv-u3",
+      "sentAt": "{{datetime:-4}}",
+      "from": "sam.family@family.example.net",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Travel itinerary 4"
+    },
+    {
+      "id": "mock-9",
+      "internetMessageId": "<mock-9.5@mail.example.net>",
+      "conversationId": "conv-u4",
+      "sentAt": "{{datetime:-5}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Dinner on Saturday? 5"
+    },
+    {
+      "id": "mock-10",
+      "internetMessageId": "<mock-10.6@mail.example.net>",
+      "conversationId": "conv-u5",
+      "sentAt": "{{datetime:-6}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "noreply@bank.example.net"
+      ],
+      "cc": [],
+      "subject": "Quarterly numbers draft 6"
+    },
+    {
+      "id": "mock-11",
+      "internetMessageId": "<mock-11.7@mail.example.net>",
+      "conversationId": "conv-u6",
+      "sentAt": "{{datetime:-7}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Password reset 7"
+    },
+    {
+      "id": "mock-12",
+      "internetMessageId": "<mock-12.8@mail.example.net>",
+      "conversationId": "conv-u7",
+      "sentAt": "{{datetime:-8}}",
+      "from": "digest@news.example.net",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [
+        "lee.whitford@demo-search.example.com"
+      ],
+      "subject": "Webinar reminder 8"
+    },
+    {
+      "id": "mock-13",
+      "internetMessageId": "<mock-13.9@mail.example.net>",
+      "conversationId": "conv-u8",
+      "sentAt": "{{datetime:-9}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Expense report 9"
+    },
+    {
+      "id": "mock-14",
+      "internetMessageId": "<mock-14.10@mail.example.net>",
+      "conversationId": "conv-u9",
+      "sentAt": "{{datetime:-10}}",
+      "from": "billing@software.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Holiday schedule 10"
+    },
+    {
+      "id": "mock-15",
+      "internetMessageId": "<mock-15.11@mail.example.net>",
+      "conversationId": "conv-u10",
+      "sentAt": "{{datetime:-11}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "finance@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Printer is fixed 11"
+    },
+    {
+      "id": "mock-1",
+      "internetMessageId": "<mock-1.2@mail.example.net>",
+      "conversationId": "conv-a1",
+      "sentAt": "{{datetime:-2}}",
+      "from": "mairead.lacroix@wexcombe-group.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Re: Board dinner next month"
+    },
+    {
+      "id": "mock-16",
+      "internetMessageId": "<mock-16.12@mail.example.net>",
+      "conversationId": "conv-u11",
+      "sentAt": "{{datetime:-12}}",
+      "from": "concierge@travel.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Reading list 12"
+    },
+    {
+      "id": "mock-17",
+      "internetMessageId": "<mock-17.13@mail.example.net>",
+      "conversationId": "conv-u12",
+      "sentAt": "{{datetime:-13}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Weekly market brief 13"
+    },
+    {
+      "id": "mock-18",
+      "internetMessageId": "<mock-18.14@mail.example.net>",
+      "conversationId": "conv-u13",
+      "sentAt": "{{datetime:-14}}",
+      "from": "hello@newsletter.example.org",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Your invoice is ready 14"
+    },
+    {
+      "id": "mock-19",
+      "internetMessageId": "<mock-19.15@mail.example.net>",
+      "conversationId": "conv-u14",
+      "sentAt": "{{datetime:-15}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [
+        "it-help@demo-search.example.com"
+      ],
+      "subject": "Team offsite logistics 15"
+    },
+    {
+      "id": "mock-20",
+      "internetMessageId": "<mock-20.16@mail.example.net>",
+      "conversationId": "conv-u15",
+      "sentAt": "{{datetime:-16}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "events@conference.example.org"
+      ],
+      "cc": [],
+      "subject": "Travel itinerary 16"
+    },
+    {
+      "id": "mock-21",
+      "internetMessageId": "<mock-21.17@mail.example.net>",
+      "conversationId": "conv-u16",
+      "sentAt": "{{datetime:-17}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Dinner on Saturday? 17"
+    },
+    {
+      "id": "mock-22",
+      "internetMessageId": "<mock-22.18@mail.example.net>",
+      "conversationId": "conv-u17",
+      "sentAt": "{{datetime:-18}}",
+      "from": "sam.family@family.example.net",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Quarterly numbers draft 18"
+    },
+    {
+      "id": "mock-23",
+      "internetMessageId": "<mock-23.19@mail.example.net>",
+      "conversationId": "conv-u18",
+      "sentAt": "{{datetime:-19}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Password reset 19"
+    },
+    {
+      "id": "mock-24",
+      "internetMessageId": "<mock-24.20@mail.example.net>",
+      "conversationId": "conv-u19",
+      "sentAt": "{{datetime:-20}}",
+      "from": "noreply@bank.example.net",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Webinar reminder 20"
+    },
+    {
+      "id": "mock-25",
+      "internetMessageId": "<mock-25.21@mail.example.net>",
+      "conversationId": "conv-u20",
+      "sentAt": "{{datetime:-21}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "lee.whitford@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Expense report 21"
+    },
+    {
+      "id": "mock-26",
+      "internetMessageId": "<mock-26.22@mail.example.net>",
+      "conversationId": "conv-u21",
+      "sentAt": "{{datetime:-22}}",
+      "from": "digest@news.example.net",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [
+        "finance@demo-search.example.com"
+      ],
+      "subject": "Holiday schedule 22"
+    },
+    {
+      "id": "mock-27",
+      "internetMessageId": "<mock-27.23@mail.example.net>",
+      "conversationId": "conv-u22",
+      "sentAt": "{{datetime:-23}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Printer is fixed 23"
+    },
+    {
+      "id": "mock-2",
+      "internetMessageId": "<mock-2.3@mail.example.net>",
+      "conversationId": "conv-b1",
+      "sentAt": "{{datetime:-3}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "zadie.fairbrother@yarrowdene-holdings.example.com"
+      ],
+      "cc": [],
+      "subject": "Following up on our conversation"
+    },
+    {
+      "id": "mock-28",
+      "internetMessageId": "<mock-28.24@mail.example.net>",
+      "conversationId": "conv-u23",
+      "sentAt": "{{datetime:-24}}",
+      "from": "billing@software.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Reading list 24"
+    },
+    {
+      "id": "mock-29",
+      "internetMessageId": "<mock-29.25@mail.example.net>",
+      "conversationId": "conv-u24",
+      "sentAt": "{{datetime:-25}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Weekly market brief 25"
+    },
+    {
+      "id": "mock-30",
+      "internetMessageId": "<mock-30.26@mail.example.net>",
+      "conversationId": "conv-u25",
+      "sentAt": "{{datetime:-26}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "concierge@travel.example.com"
+      ],
+      "cc": [],
+      "subject": "Your invoice is ready 26"
+    },
+    {
+      "id": "mock-31",
+      "internetMessageId": "<mock-31.27@mail.example.net>",
+      "conversationId": "conv-u26",
+      "sentAt": "{{datetime:-27}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Team offsite logistics 27"
+    },
+    {
+      "id": "mock-32",
+      "internetMessageId": "<mock-32.28@mail.example.net>",
+      "conversationId": "conv-u27",
+      "sentAt": "{{datetime:-28}}",
+      "from": "hello@newsletter.example.org",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Travel itinerary 28"
+    },
+    {
+      "id": "mock-33",
+      "internetMessageId": "<mock-33.1@mail.example.net>",
+      "conversationId": "conv-u28",
+      "sentAt": "{{datetime:-1}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [
+        "priya.raman@markivis.example.com"
+      ],
+      "subject": "Dinner on Saturday? 29"
+    },
+    {
+      "id": "mock-34",
+      "internetMessageId": "<mock-34.2@mail.example.net>",
+      "conversationId": "conv-u29",
+      "sentAt": "{{datetime:-2}}",
+      "from": "events@conference.example.org",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Quarterly numbers draft 30"
+    },
+    {
+      "id": "mock-35",
+      "internetMessageId": "<mock-35.3@mail.example.net>",
+      "conversationId": "conv-u30",
+      "sentAt": "{{datetime:-3}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "finance@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Password reset 31"
+    },
+    {
+      "id": "mock-36",
+      "internetMessageId": "<mock-36.4@mail.example.net>",
+      "conversationId": "conv-u31",
+      "sentAt": "{{datetime:-4}}",
+      "from": "sam.family@family.example.net",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Webinar reminder 32"
+    },
+    {
+      "id": "mock-37",
+      "internetMessageId": "<mock-37.5@mail.example.net>",
+      "conversationId": "conv-u32",
+      "sentAt": "{{datetime:-5}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Expense report 33"
+    },
+    {
+      "id": "mock-38",
+      "internetMessageId": "<mock-38.6@mail.example.net>",
+      "conversationId": "conv-u33",
+      "sentAt": "{{datetime:-6}}",
+      "from": "noreply@bank.example.net",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Holiday schedule 34"
+    },
+    {
+      "id": "mock-3",
+      "internetMessageId": "<mock-3.4@mail.example.net>",
+      "conversationId": "conv-c1",
+      "sentAt": "{{datetime:-4}}",
+      "from": "office@harcourt-legal.example.net",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [
+        "camille.northcott@quarnell-systems.example.com"
+      ],
+      "subject": "Introductions ahead of the Camille meeting"
+    },
+    {
+      "id": "mock-39",
+      "internetMessageId": "<mock-39.7@mail.example.net>",
+      "conversationId": "conv-u34",
+      "sentAt": "{{datetime:-7}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Printer is fixed 35"
+    },
+    {
+      "id": "mock-40",
+      "internetMessageId": "<mock-40.8@mail.example.net>",
+      "conversationId": "conv-u35",
+      "sentAt": "{{datetime:-8}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "digest@news.example.net"
+      ],
+      "cc": [
+        "lee.whitford@demo-search.example.com"
+      ],
+      "subject": "Reading list 36"
+    },
+    {
+      "id": "mock-41",
+      "internetMessageId": "<mock-41.9@mail.example.net>",
+      "conversationId": "conv-u36",
+      "sentAt": "{{datetime:-9}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Weekly market brief 37"
+    },
+    {
+      "id": "mock-42",
+      "internetMessageId": "<mock-42.10@mail.example.net>",
+      "conversationId": "conv-u37",
+      "sentAt": "{{datetime:-10}}",
+      "from": "billing@software.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Your invoice is ready 38"
+    },
+    {
+      "id": "mock-43",
+      "internetMessageId": "<mock-43.11@mail.example.net>",
+      "conversationId": "conv-u38",
+      "sentAt": "{{datetime:-11}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Team offsite logistics 39"
+    },
+    {
+      "id": "mock-44",
+      "internetMessageId": "<mock-44.12@mail.example.net>",
+      "conversationId": "conv-u39",
+      "sentAt": "{{datetime:-12}}",
+      "from": "concierge@travel.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Travel itinerary 40"
+    },
+    {
+      "id": "mock-45",
+      "internetMessageId": "<mock-45.13@mail.example.net>",
+      "conversationId": "conv-u40",
+      "sentAt": "{{datetime:-13}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "lee.whitford@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Dinner on Saturday? 41"
+    },
+    {
+      "id": "mock-46",
+      "internetMessageId": "<mock-46.14@mail.example.net>",
+      "conversationId": "conv-u41",
+      "sentAt": "{{datetime:-14}}",
+      "from": "hello@newsletter.example.org",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Quarterly numbers draft 42"
+    },
+    {
+      "id": "mock-47",
+      "internetMessageId": "<mock-47.15@mail.example.net>",
+      "conversationId": "conv-u42",
+      "sentAt": "{{datetime:-15}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [
+        "it-help@demo-search.example.com"
+      ],
+      "subject": "Password reset 43"
+    },
+    {
+      "id": "mock-48",
+      "internetMessageId": "<mock-48.16@mail.example.net>",
+      "conversationId": "conv-u43",
+      "sentAt": "{{datetime:-16}}",
+      "from": "events@conference.example.org",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Webinar reminder 44"
+    },
+    {
+      "id": "mock-49",
+      "internetMessageId": "<mock-49.17@mail.example.net>",
+      "conversationId": "conv-u44",
+      "sentAt": "{{datetime:-17}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "jordan.ellis@demo-search.example.com"
+      ],
+      "cc": [],
+      "subject": "Expense report 45"
+    },
+    {
+      "id": "mock-50",
+      "internetMessageId": "<mock-50.18@mail.example.net>",
+      "conversationId": "conv-u45",
+      "sentAt": "{{datetime:-18}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "sam.family@family.example.net"
+      ],
+      "cc": [],
+      "subject": "Holiday schedule 46"
+    },
+    {
+      "id": "mock-4",
+      "internetMessageId": "<mock-4.6@mail.example.net>",
+      "conversationId": "conv-p1",
+      "sentAt": "{{datetime:-6}}",
+      "from": "jordan.ellis@demo-search.example.com",
+      "to": [
+        "amara.sinclair@maddox-verne-apparel.example.com",
+        "assistant@example.org"
+      ],
+      "cc": [],
+      "subject": "Catching up"
+    }
+  ]
+}

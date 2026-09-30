@@ -1,0 +1,100 @@
+{
+  "messages": [
+    {
+      "id": "mock-101",
+      "internetMessageId": "<mock-101.1@mail.example.net>",
+      "conversationId": "conv-f1",
+      "sentAt": "{{datetime:-1}}",
+      "from": "priya.raman@markivis.example.com",
+      "to": [
+        "anders.kendrick@morvane-industrial.example.com"
+      ],
+      "cc": [],
+      "subject": "Scheduling a call with Jordan"
+    },
+    {
+      "id": "mock-102",
+      "internetMessageId": "<mock-102.2@mail.example.net>",
+      "conversationId": "conv-g1",
+      "sentAt": "{{datetime:-2}}",
+      "from": "delphine.oyelaran@caldrith-health.example.com",
+      "to": [
+        "priya.raman@markivis.example.com"
+      ],
+      "cc": [],
+      "subject": "Re: Request for time"
+    },
+    {
+      "id": "mock-103",
+      "internetMessageId": "<mock-103.1@mail.example.net>",
+      "conversationId": "conv-pu0",
+      "sentAt": "{{datetime:-1}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "priya.raman@markivis.example.com"
+      ],
+      "cc": [],
+      "subject": "Weekly market brief (Priya)"
+    },
+    {
+      "id": "mock-104",
+      "internetMessageId": "<mock-104.2@mail.example.net>",
+      "conversationId": "conv-pu1",
+      "sentAt": "{{datetime:-2}}",
+      "from": "priya.raman@markivis.example.com",
+      "to": [
+        "events@conference.example.org"
+      ],
+      "cc": [],
+      "subject": "Your invoice is ready (Priya)"
+    },
+    {
+      "id": "mock-105",
+      "internetMessageId": "<mock-105.3@mail.example.net>",
+      "conversationId": "conv-pu2",
+      "sentAt": "{{datetime:-3}}",
+      "from": "finance@demo-search.example.com",
+      "to": [
+        "priya.raman@markivis.example.com"
+      ],
+      "cc": [],
+      "subject": "Team offsite logistics (Priya)"
+    },
+    {
+      "id": "mock-106",
+      "internetMessageId": "<mock-106.4@mail.example.net>",
+      "conversationId": "conv-pu3",
+      "sentAt": "{{datetime:-4}}",
+      "from": "priya.raman@markivis.example.com",
+      "to": [
+        "sam.family@family.example.net"
+      ],
+      "cc": [],
+      "subject": "Travel itinerary (Priya)"
+    },
+    {
+      "id": "mock-107",
+      "internetMessageId": "<mock-107.5@mail.example.net>",
+      "conversationId": "conv-pu4",
+      "sentAt": "{{datetime:-5}}",
+      "from": "lee.whitford@demo-search.example.com",
+      "to": [
+        "priya.raman@markivis.example.com"
+      ],
+      "cc": [],
+      "subject": "Dinner on Saturday? (Priya)"
+    },
+    {
+      "id": "mock-108",
+      "internetMessageId": "<mock-108.6@mail.example.net>",
+      "conversationId": "conv-pu5",
+      "sentAt": "{{datetime:-6}}",
+      "from": "priya.raman@markivis.example.com",
+      "to": [
+        "noreply@bank.example.net"
+      ],
+      "cc": [],
+      "subject": "Quarterly numbers draft (Priya)"
+    }
+  ]
+}

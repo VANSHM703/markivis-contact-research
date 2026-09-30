@@ -7,6 +7,7 @@ import { getDataMode } from "@/config/env";
 import { closeDatabase } from "@/db/client";
 import { loadSeed } from "@/db/seed";
 import { stageDemoActions } from "@/db/seed/demo-actions";
+import { stageDemoCapture } from "@/db/seed/demo-capture";
 import { runSource } from "@/ingest/run";
 import { runPipeline } from "@/jobs/handlers";
 import { resetDatabase } from "./migrate";
@@ -22,6 +23,8 @@ async function main() {
     for (const source of ["sec_8k", "press_wire", "google_alert", "leadership_page", "leadership_page", "apollo", "newsletter"] as const) await runSource(demo, source, { mode: "mock" });
     const { processed, derived } = await runPipeline(demo);
     console.log(`Demo Search Partners: ${processed} items through the pipeline, ${derived} rule-based signals.`);
+    const captured = await stageDemoCapture(demo);
+    console.log(`Mailbox capture: ${captured.mail} emails and ${captured.meetings} meetings with tracked people logged for Jordan Ellis.`);
     const staged = await stageDemoActions(demo);
     console.log(`Actions staged: ${Object.values(staged).filter(Boolean).length} (awaiting approval, sent, escalated, lawful basis needed).`);
   }

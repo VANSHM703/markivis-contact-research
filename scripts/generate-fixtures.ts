@@ -634,11 +634,91 @@ async function aiFixtures() {
   return out.size;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Capture (BRD 11.1): mailbox deltas and calendars for the demo users' mock connections
+// ---------------------------------------------------------------------------------------------
+
+/**
+ * Jordan's first mailbox delta has exactly 50 messages, of which 4 involve tracked people
+ * (acceptance scenario 11): one inbound, one outbound, one with a tracked person only on copy,
+ * and one to a tracked person's past address. The other 46 are internal mail, newsletters,
+ * vendors and personal mail on reserved example domains. Priya's has 8, 2 of them tracked.
+ */
+async function capture(): Promise<Record<string, number>> {
+  const userEmail = (name: string) => bundle.users.find((u) => u.name === name)!.email;
+  const jordan = userEmail("Jordan Ellis");
+  const priya = userEmail("Priya Raman");
+  const used = new Set<string>();
+  const trackedEmail = (pred: (r: WorkspaceBundle["roles"][number]) => boolean) => {
+    const r = must(demo.roles.find((x) => x.businessEmail && !used.has(x.personId) && pred(x)), "tracked email");
+    used.add(r.personId);
+    return { email: r.businessEmail!, person: personById.get(r.personId)! };
+  };
+  const current = (r: WorkspaceBundle["roles"][number]) => r.status === "current" && r.seatType === "executive";
+  const a = trackedEmail(current);
+  const b = trackedEmail(current);
+  const c = trackedEmail(current);
+  const past = trackedEmail((r) => r.status === "ended");
+  const first = (p: Person) => p.fullName.split(" ")[0];
+  let n = 0;
+  const msg = (daysAgo: number, from: string, to: string[], cc: string[], subject: string, conversation: string) => ({
+    id: `mock-${++n}`,
+    internetMessageId: `<mock-${n}.${daysAgo}@mail.example.net>`,
+    conversationId: `conv-${conversation}`,
+    sentAt: `{{datetime:-${daysAgo}}}`,
+    from,
+    to,
+    cc,
+    subject,
+  });
+  const tracked = [
+    msg(2, a.email, [jordan], [], `Re: Board dinner next month`, "a1"),
+    msg(3, jordan, [b.email], [], `Following up on our conversation`, "b1"),
+    msg(4, "office@harcourt-legal.example.net", [jordan], [c.email], `Introductions ahead of the ${first(c.person)} meeting`, "c1"),
+    msg(6, jordan, [past.email, "assistant@example.org"], [], `Catching up`, "p1"),
+  ];
+  const colleagues = ["lee.whitford@demo-search.example.com", "priya.raman@markivis.example.com", "finance@demo-search.example.com", "it-help@demo-search.example.com"];
+  const others = ["digest@news.example.net", "events@conference.example.org", "billing@software.example.com", "sam.family@family.example.net", "concierge@travel.example.com", "noreply@bank.example.net", "hello@newsletter.example.org"];
+  const topics = ["Weekly market brief", "Your invoice is ready", "Team offsite logistics", "Travel itinerary", "Dinner on Saturday?", "Quarterly numbers draft", "Password reset", "Webinar reminder", "Expense report", "Holiday schedule", "Printer is fixed", "Reading list"];
+  const untracked = Array.from({ length: 46 }, (_, i) => {
+    const outsider = i % 2 === 0 ? colleagues[i % colleagues.length]! : others[i % others.length]!;
+    const outbound = i % 5 === 0;
+    return msg(1 + (i % 28), outbound ? jordan : outsider, outbound ? [outsider] : [jordan], i % 7 === 0 ? [colleagues[(i + 1) % colleagues.length]!] : [], `${topics[i % topics.length]} ${i + 1}`, `u${i}`);
+  });
+  // Interleave, so the tracked messages are not simply first.
+  const mail = [...untracked.slice(0, 11), tracked[0]!, ...untracked.slice(11, 23), tracked[1]!, ...untracked.slice(23, 34), tracked[2]!, ...untracked.slice(34), tracked[3]!];
+  await put(`capture/microsoft/${jordan}/mail.json`, json({ messages: mail }));
+
+  const d = trackedEmail(current);
+  const e = trackedEmail(current);
+  await put(`capture/microsoft/${jordan}/calendar.json`, json({
+    events: [
+      { id: "mock-event-1", title: `Coffee with ${first(d.person)}`, startsAt: "{{datetime:-5}}", endsAt: "{{datetime:-5}}", organizer: jordan, attendees: [jordan, d.email], cancelled: false },
+      { id: "mock-event-2", title: `Call: ${e.person.fullName}`, startsAt: "{{datetime:3}}", endsAt: "{{datetime:3}}", organizer: e.email, attendees: [jordan, e.email], cancelled: false },
+      { id: "mock-event-3", title: "Partners' weekly", startsAt: "{{datetime:-2}}", endsAt: "{{datetime:-2}}", organizer: jordan, attendees: [jordan, ...colleagues.slice(0, 2)], cancelled: false },
+      { id: "mock-event-4", title: `Lunch with ${first(a.person)}`, startsAt: "{{datetime:-8}}", endsAt: "{{datetime:-8}}", organizer: jordan, attendees: [jordan, a.email], cancelled: true },
+    ],
+  }));
+
+  const f = trackedEmail(current);
+  const g = trackedEmail(current);
+  n = 100;
+  await put(`capture/microsoft/${priya}/mail.json`, json({
+    messages: [
+      msg(1, priya, [f.email], [], "Scheduling a call with Jordan", "f1"),
+      msg(2, g.email, [priya], [], "Re: Request for time", "g1"),
+      ...Array.from({ length: 6 }, (_, i) => msg(1 + i, i % 2 ? priya : colleagues[i % colleagues.length]!, i % 2 ? [others[i]!] : [priya], [], `${topics[i]} (Priya)`, `pu${i}`)),
+    ],
+  }));
+  await put(`capture/microsoft/${priya}/calendar.json`, json({ events: [] }));
+  return { jordan_messages: mail.length, jordan_tracked: tracked.length };
+}
+
 async function main() {
-  for (const dir of ["sec", "wires", "alerts", "pages", "apollo", "newsletter", "licensed", "news_api", "warn", "job_postings", "ai"]) await rm(path.join(ROOT, dir), { recursive: true, force: true });
+  for (const dir of ["sec", "wires", "alerts", "pages", "apollo", "newsletter", "licensed", "news_api", "warn", "job_postings", "ai", "capture"]) await rm(path.join(ROOT, dir), { recursive: true, force: true });
   const counts = { sec_502_filings: await sec(), wire_items: await wires(), alert_items: await alerts(), pages_changed: await pages(), apollo_people: await apollo(), newsletter_events: await newsletter() };
   await release3();
-  console.log({ ...counts, ai_extractions: await aiFixtures() });
+  console.log({ ...counts, ai_extractions: await aiFixtures(), capture: await capture() });
 }
 
 main().catch((error: unknown) => {

@@ -1,0 +1,53 @@
+{
+  "events": [
+    {
+      "id": "mock-event-1",
+      "title": "Coffee with Bram",
+      "startsAt": "{{datetime:-5}}",
+      "endsAt": "{{datetime:-5}}",
+      "organizer": "jordan.ellis@demo-search.example.com",
+      "attendees": [
+        "jordan.ellis@demo-search.example.com",
+        "bram.greaves@brevik-harlow-foods.example.com"
+      ],
+      "cancelled": false
+    },
+    {
+      "id": "mock-event-2",
+      "title": "Call: Beatriz Quintero",
+      "startsAt": "{{datetime:3}}",
+      "endsAt": "{{datetime:3}}",
+      "organizer": "beatriz.quintero@tessaline-energy.example.com",
+      "attendees": [
+        "jordan.ellis@demo-search.example.com",
+        "beatriz.quintero@tessaline-energy.example.com"
+      ],
+      "cancelled": false
+    },
+    {
+      "id": "mock-event-3",
+      "title": "Partners' weekly",
+      "startsAt": "{{datetime:-2}}",
+      "endsAt": "{{datetime:-2}}",
+      "organizer": "jordan.ellis@demo-search.example.com",
+      "attendees": [
+        "jordan.ellis@demo-search.example.com",
+        "lee.whitford@demo-search.example.com",
+        "priya.raman@markivis.example.com"
+      ],
+      "cancelled": false
+    },
+    {
+      "id": "mock-event-4",
+      "title": "Lunch with Mairead",
+      "startsAt": "{{datetime:-8}}",
+      "endsAt": "{{datetime:-8}}",
+      "organizer": "jordan.ellis@demo-search.example.com",
+      "attendees": [
+        "jordan.ellis@demo-search.example.com",
+        "mairead.lacroix@wexcombe-group.example.com"
+      ],
+      "cancelled": true
+    }
+  ]
+}

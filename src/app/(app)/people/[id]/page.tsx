@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/forms/SubmitButton";
 import { Chip } from "@/components/ui/Chip";
 import { Notice } from "@/components/ui/Notice";
 import { Tabs } from "@/components/ui/Tabs";
+import { Interactions } from "@/components/capture/Interactions";
 import { MandateNotes } from "@/components/pack/MandateNotes";
 import { getRequestContext } from "@/lib/context";
 import { execSearchOn } from "@/lib/packs";
@@ -73,7 +74,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
   const placement = packOn ? record.placement : null;
   const canNotes = packOn && can(ctx.role, "mandate_notes.view");
   const canCreateAction = can(ctx.role, "messages.send") && !mergedInto && person.status !== "do_not_contact" && person.isTracked;
-  const tab = query.tab === "record" ? "record" : query.tab === "notes" && canNotes ? "notes" : "overview";
+  const tab = query.tab === "record" ? "record" : query.tab === "notes" && canNotes ? "notes" : query.tab === "interactions" ? "interactions" : "overview";
   const primary = roles.find((r) => r.isPrimary);
   const editor = can(ctx.role, "records.edit") && !mergedInto;
   const merger = can(ctx.role, "persons.merge");
@@ -111,6 +112,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
         {editor || canCreateAction ? (
           <div className={`${styles.headerActions} btn-row`}>
             {canCreateAction ? <Link href={`/people/${person.id}/actions/new`} className="btn btn--ghost">Create action</Link> : null}
+            {editor ? <Link href={`/people/${person.id}/interactions/new`} className="btn btn--ghost">Log interaction</Link> : null}
             {editor ? <Link href={`/people/${person.id}/edit`} className="btn btn--ghost">Edit details</Link> : null}
             {editor ? <Link href={`/people/${person.id}/roles/new`} className="btn btn--ghost">Add role</Link> : null}
             {editor && packOn ? <Link href={`/people/${person.id}/placements/new`} className="btn btn--ghost">Record placement</Link> : null}
@@ -131,6 +133,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
         current={tab}
         tabs={[
           { key: "overview", label: "Overview", href: `/people/${person.id}` },
+          { key: "interactions", label: "Interactions", href: `/people/${person.id}?tab=interactions` },
           { key: "record", label: "Record", href: `/people/${person.id}?tab=record` },
           ...(canNotes ? [{ key: "notes", label: "Notes", href: `/people/${person.id}?tab=notes` }] : []),
         ]}
@@ -212,6 +215,8 @@ export default async function PersonPage({ params, searchParams }: Props) {
             </dl>
           </section>
         </div>
+      ) : tab === "interactions" ? (
+        <Interactions ctx={ctx} personId={person.id} />
       ) : tab === "notes" ? (
         <MandateNotes actor={{ workspaceId: ctx.workspace.id, userId: ctx.user.id, role: ctx.role }} target={{ personId: person.id }} kind="person" id={person.id} tz={ctx.workspace.timezone} />
       ) : (

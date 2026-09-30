@@ -16,6 +16,8 @@ export default async function globalSetup(config: FullConfig) {
   const demo = bundle.workspaces[0]!.workspace.id;
   for (const source of ["sec_8k", "press_wire", "google_alert", "leadership_page", "leadership_page", "apollo", "newsletter"] as const) await runSource(demo, source, { mode: "mock" });
   await runPipeline(demo);
+  const { stageDemoCapture } = await import("../../src/db/seed/demo-capture");
+  await stageDemoCapture(demo);
   const { stageDemoActions } = await import("../../src/db/seed/demo-actions");
   await stageDemoActions(demo);
   await closeDatabase();

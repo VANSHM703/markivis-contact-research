@@ -43,6 +43,13 @@
       "when": 1790763497621,
       "tag": "0005_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790769847350,
+      "tag": "0006_capture",
+      "breakpoints": true
     }
   ]
 }

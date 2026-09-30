@@ -61,8 +61,8 @@ export const JOBS: JobDefinition[] = [
   { name: "actions.sla", builtIn: "M5", scope: "workspace", schedules: [{ slot: "hourly", cron: "0 * * * *" }], notes: "Escalates actions overdue by one working day (BRD 12.8)." },
   { name: "digest.daily", builtIn: "M5", scope: "workspace", schedules: [{ slot: "daily", cron: "0 8 * * *", cronFromSettings: digestCron }], notes: "At the workspace digest_time." },
   { name: "notifications.send", builtIn: "M5", scope: "workspace", schedules: [{ slot: "every1", cron: "* * * * *" }], notes: "Delivers queued alerts; also sent right after the event that queues them." },
-  { name: "capture.mail", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }] },
-  { name: "capture.calendar", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }] },
+  { name: "capture.mail", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }], notes: "Delta sync for every active mailbox connection in the workspace." },
+  { name: "capture.calendar", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }], notes: "The last 30 days and the next 14 days." },
   { name: "rel.score", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "0 1 * * *" }] },
   { name: "rel.connections", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "30 1 * * *" }] },
   { name: "rel.quiet", builtIn: "M8", scope: "workspace", schedules: [{ slot: "daily", cron: "0 6 * * *" }] },
@@ -71,7 +71,7 @@ export const JOBS: JobDefinition[] = [
   { name: "compliance.retention", builtIn: "M10", scope: "workspace", schedules: [{ slot: "monthly", cron: "0 9 1-7 * 1" }], notes: "First Monday of the month." },
 ];
 
-const BUILT = new Set(["M3", "M4", "M5"]);
+const BUILT = new Set(["M3", "M4", "M5", "M7"]);
 export const ACTIVE_JOBS = JOBS.filter((j) => BUILT.has(j.builtIn));
 
 /** pg-boss schedule keys allow letters, digits, _ - . / only. */
@@ -85,4 +85,6 @@ export interface IngestJobData {
   companyIds?: string[];
   /** pipeline.research: the signal to research. */
   signalId?: string;
+  /** capture.*: one connection only (Sync now). */
+  connectionId?: string;
 }

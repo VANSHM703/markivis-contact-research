@@ -27,3 +27,7 @@ a.section:hover { border-color: var(--accent); }
 @media (max-width: 760px) { .feed { grid-template-columns: minmax(0, 1fr); grid-template-areas: "name" "facts" "actions"; } .feed dd { white-space: normal; } }
 .emailRow { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--surface-raised); overflow-wrap: anywhere; }
 .emailBody { margin: var(--space-3) 0; padding: var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); font: 400 var(--caption)/1.6 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; }
+.readoutRows { display: grid; gap: 2px; margin: var(--space-3) 0; }
+.readoutRows div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-3); padding: 9px 12px; background: var(--surface-sunken); border-radius: var(--radius-md); align-items: center; }
+.readoutRows dt { font-size: var(--body-sm); color: var(--text-muted); }
+.readoutRows dd { margin: 0; overflow-wrap: anywhere; text-align: right; }

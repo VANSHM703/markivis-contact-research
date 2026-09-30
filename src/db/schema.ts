@@ -426,8 +426,12 @@ export const oauthConnections = dmi.table(
     tokenKeyId: text(),
     status: oauthStatus().notNull().default("active"),
     lastSyncAt: timestamp(tz),
+    /** Mail delta cursor (for Graph, one delta link per folder, as JSON). */
     deltaCursor: text(),
     errorMessage: text(),
+    /** The connected mailbox address: messages from it are outbound (BRD 11.1). */
+    accountEmail: text(),
+    calendarSyncedAt: timestamp(tz),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -960,4 +964,25 @@ export const notifications = dmi.table(
     updatedAt: updatedAt(),
   },
   (t) => [uniqueIndex().on(t.workspaceId, t.dedupeKey), index().on(t.workspaceId, t.status, t.createdAt), index().on(t.userId, t.kind, t.createdAt)],
+);
+
+/**
+ * Threads and contacts marked private by the partner (BRD 11.3). Interactions in a private thread
+ * or with a private contact count toward scores, but only the partner sees their subject and
+ * summary. Kept as marks so interactions captured later inherit them. Not in BRD 6.
+ */
+export const privacyMarkKind = dmi.enum("privacy_mark_kind", ["thread", "person"]);
+export const privacyMarks = dmi.table(
+  "privacy_marks",
+  {
+    id: id(),
+    workspaceId: workspaceRef(),
+    kind: privacyMarkKind().notNull(),
+    /** A thread key, or a person id. */
+    key: text().notNull(),
+    createdBy: uuid().references(() => users.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex().on(t.workspaceId, t.kind, t.key)],
 );
