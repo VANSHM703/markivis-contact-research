@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_board_change",
+  "subject_kind": "person",
+  "person_name": "Hana Underhill",
+  "company_name": "Ostrana Software",
+  "match_confidence": 0.95,
+  "new_title": null,
+  "previous_title": "Independent Director",
+  "event_date": "{{date:-5}}",
+  "announced_date": "{{date:-5}}",
+  "effective_date": "{{date:+20}}",
+  "headline": "Hana Underhill will retire from the Ostrana Software board",
+  "evidence_quote": "On {{date:-5}}, Hana Underhill informed the Board of Directors of Ostrana Software (the \"Company\") that he will not stand for re-election and will retire from the Board at the conclusion of the Company's annual meeting on {{date:+20}}."
+}

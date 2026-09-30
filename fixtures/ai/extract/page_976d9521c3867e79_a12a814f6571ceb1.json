@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "other",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Caldrith Health",
+  "match_confidence": 0.9,
+  "new_title": "Independent Director",
+  "previous_title": null,
+  "event_date": "{{date:+0}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Caldrith Health lists Lysander Coyle as an independent director",
+  "evidence_quote": "Lysander Coyle"
+}

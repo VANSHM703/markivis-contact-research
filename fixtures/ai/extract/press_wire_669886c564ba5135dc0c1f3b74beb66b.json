@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_pe_transaction",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Faircliff Education",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-5}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Blackwren Equity to acquire a majority stake in Faircliff Education",
+  "evidence_quote": "Blackwren Equity has signed a definitive agreement to acquire a majority stake in Faircliff Education from Cindervale Partners."
+}

@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_promotion",
+  "subject_kind": "person",
+  "person_name": "Hana Penrose",
+  "company_name": "Corrimont Labs",
+  "match_confidence": 0.93,
+  "new_title": "President and Chief Operating Officer",
+  "previous_title": "Chief Operating Officer",
+  "event_date": "{{date:+0}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Hana Penrose now listed as President and Chief Operating Officer of Corrimont Labs",
+  "evidence_quote": "President and Chief Operating Officer"
+}

@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_award",
+  "subject_kind": "person",
+  "person_name": "Rafferty Marchetti",
+  "company_name": "Tessaline Energy Corp.",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-10}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Rafferty Marchetti named to a list of 50 finance leaders",
+  "evidence_quote": "Rafferty Marchetti, Chief Financial Officer of Tessaline Energy Corp., was named to this year's list of 50 finance leaders to watch."
+}

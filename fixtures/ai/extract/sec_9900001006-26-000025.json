@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_cxo_change",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Penhallow Financial plc",
+  "match_confidence": 0.93,
+  "new_title": "Chief Operating Officer",
+  "previous_title": null,
+  "event_date": "{{date:-12}}",
+  "announced_date": "{{date:-12}}",
+  "effective_date": "{{date:+7}}",
+  "headline": "Penhallow Financial plc appoints Barnaby Ostrowe as Chief Operating Officer",
+  "evidence_quote": "On {{date:-12}}, Penhallow Financial plc (the \"Company\") announced the appointment of Barnaby Ostrowe as Chief Operating Officer, effective {{date:+7}}."
+}

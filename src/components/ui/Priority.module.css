@@ -1,0 +1,8 @@
+.pill { display: inline-flex; align-items: center; justify-content: center; height: 24px; min-width: 32px; padding: 0 8px; border-radius: var(--radius-pill); font: 700 var(--eyebrow)/1 var(--font-mono); flex: none; }
+.p1 { background: var(--accent-fill); color: var(--text-on-accent); }
+.p2 { border: 1.5px solid var(--accent); color: var(--accent); }
+.p3 { border: 1px solid var(--border-strong); color: var(--text-muted); }
+.confidence { font: 700 var(--meta)/1.2 var(--font-mono); }
+.high { color: var(--signal-ok); }
+.medium { color: var(--text-secondary); }
+.low { color: var(--signal-warn); }

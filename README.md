@@ -14,8 +14,9 @@ Relationship intelligence inside BEAM: one trusted record of every senior decisi
 | M1 Foundations: tenancy, auth, roles, audit log, schema, seed data | Done |
 | M2 Records: people, companies, roles, field sources, manual entry, CSV imports, matching | Done |
 | M3 Ingestion: source adapters and the job scheduler | Done |
-| M4 Pipeline and validation: extraction, matching, dedupe, confidence, lanes, the queue | Next |
-| M5 to M10 | Not started |
+| M4 Pipeline and validation: extraction, matching, dedupe, confidence, lanes, the queue | Done |
+| M5 Actions: action cards, pre-action checks, drafting, approval, Today, digest, service levels | Next |
+| M6 to M10 | Not started |
 
 ## Run it locally
 
@@ -62,6 +63,10 @@ CI runs all of these on every push and pull request (`.github/workflows/ci.yml`)
 
 People, then "Import target list". Download the template from that page for the columns (only `company_name` is required). The preview shows what will happen to every row before anything is saved; possible duplicates and conflicting values go to Queue, under "Conflicts and duplicates".
 
+## The pipeline and the queue
+
+Collected items go through the pipeline (BRD 9): a name match, AI extraction, matching to tracked people and companies, merging of duplicate reports, confidence, priority and a lane. Clear primary-source changes are confirmed automatically; the rest wait in Queue, where a validator confirms, rejects, sends for research or parks each one, with keyboard shortcuts (press `?` in the queue). In mock mode the AI reads fixtures under `fixtures/ai/`; set `ANTHROPIC_API_KEY` and `DATA_MODE=live` for the real models.
+
 ## Sources
 
 Settings, Sources shows every source's health and lets you check a connection or run it now (the worker must be running). In mock mode every source reads the fictional fixtures under `fixtures/`; regenerate them with `npm run fixtures:generate` after changing the seed. Each adapter's README, under `src/ingest/adapters/`, describes its behaviour and links the provider documentation it follows.
@@ -84,6 +89,8 @@ src/
   app/            (app) signed-in routes, (auth) sign-in, api/v1 JSON routes
   db/             schema, scoped query layer, seed generator
   domain/         matching, provenance, records, merge, suppression, titles, CSV imports, secrets
+  ai/             AI adapter (Anthropic Messages API, and a mock), prompt contracts, budget
+  pipeline/       pre-filter, extraction, resolve, dedupe, confidence, priority, lanes, validation
   ingest/         source adapters (SEC, wires, alerts, pages, Apollo, newsletter), transports, run loop
   jobs/           pg-boss queue, schedule (BRD 8.9), handlers
   worker/         the worker process

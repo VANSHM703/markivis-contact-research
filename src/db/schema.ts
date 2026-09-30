@@ -489,6 +489,9 @@ export const rawItems = dmi.table(
     payload: jsonb(),
     processedAt: timestamp(tz),
     outcome: rawItemOutcome(),
+    /** Pipeline attempts; an item that fails twice is marked error (BRD 9.1). */
+    attempts: smallint().notNull().default(0),
+    lastError: text(),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -531,6 +534,12 @@ export const signals = dmi.table(
     rejectReason: rejectReason(),
     isSpotCheck: boolean().notNull().default(false),
     spotCheckResult: spotCheckResult(),
+    /** Record changes applied on confirmation, shown to validators as before and after (BRD 9.1, 9.5). */
+    proposedChanges: jsonb().notNull().default([]),
+    /** Why the pipeline chose this lane, priority and confidence (BRD 19 explainability). */
+    explanation: jsonb().notNull().default({}),
+    /** Notes from each AI research cycle (BRD 10.2). */
+    researchNotes: jsonb().notNull().default([]),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -664,6 +673,8 @@ export const drafts = dmi.table(
     sentAt: timestamp(tz),
     providerMessageId: text(),
     sendError: text(),
+    /** Facts in the draft that are not in its context (BRD 17.2 post-check); non-empty means redraft. */
+    checkIssues: jsonb().notNull().default([]),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

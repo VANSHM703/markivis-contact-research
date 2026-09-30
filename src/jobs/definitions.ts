@@ -46,7 +46,8 @@ export const JOBS: JobDefinition[] = [
   { name: "ingest.newsletter", source: "newsletter", builtIn: "M3", scope: "workspace", schedules: [{ slot: "daily", cron: "0 4 * * *" }], notes: "Also immediately on CSV upload." },
   { name: "records.status", builtIn: "M3", scope: "workspace", schedules: [{ slot: "daily", cron: "30 0 * * *" }], notes: "People whose last role ended 90 days ago become no_current_role (BRD 7.3)." },
   { name: "scheduler.sync", builtIn: "M3", scope: "platform", schedules: [{ slot: "every10", cron: "*/10 * * * *", tz: "UTC" }], notes: "Reconciles per-workspace schedules with the workspace list." },
-  { name: "pipeline.process", builtIn: "M4", scope: "workspace", schedules: [], notes: "Continuous, triggered by new raw items, batches of 25." },
+  { name: "pipeline.process", builtIn: "M4", scope: "workspace", schedules: [{ slot: "every5", cron: "*/5 * * * *" }], notes: "Triggered by every ingest that adds items; the 5-minute schedule is a backstop. Batches of 25." },
+  { name: "pipeline.research", builtIn: "M4", scope: "workspace", schedules: [], notes: "On demand, when a validator sends an item for more research." },
   { name: "validation.spot_check", builtIn: "M4", scope: "workspace", schedules: [{ slot: "weekly", cron: "0 5 * * 1" }] },
   { name: "stats.sources", builtIn: "M4", scope: "workspace", schedules: [{ slot: "weekly", cron: "30 5 * * 1" }] },
   { name: "actions.sla", builtIn: "M5", scope: "workspace", schedules: [{ slot: "hourly", cron: "0 * * * *" }] },
@@ -61,7 +62,7 @@ export const JOBS: JobDefinition[] = [
   { name: "compliance.retention", builtIn: "M10", scope: "workspace", schedules: [{ slot: "monthly", cron: "0 9 1-7 * 1" }], notes: "First Monday of the month." },
 ];
 
-const BUILT = new Set(["M3"]);
+const BUILT = new Set(["M3", "M4"]);
 export const ACTIVE_JOBS = JOBS.filter((j) => BUILT.has(j.builtIn));
 
 /** pg-boss schedule keys allow letters, digits, _ - . / only. */
@@ -73,4 +74,6 @@ export interface IngestJobData {
   /** Apollo on-demand enrichment (essential under the credit guard). */
   personIds?: string[];
   companyIds?: string[];
+  /** pipeline.research: the signal to research. */
+  signalId?: string;
 }

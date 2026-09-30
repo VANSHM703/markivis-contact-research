@@ -1,0 +1,15 @@
+{
+  "is_relevant": false,
+  "signal_type": null,
+  "subject_kind": null,
+  "person_name": null,
+  "company_name": null,
+  "match_confidence": 0,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": null,
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "",
+  "evidence_quote": ""
+}

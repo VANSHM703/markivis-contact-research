@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_move_announced",
+  "subject_kind": "person",
+  "person_name": "Imogen Abernathy",
+  "company_name": "Brevik Harlow Foods",
+  "match_confidence": 0.95,
+  "new_title": "Chief Financial Officer",
+  "previous_title": "Chief Financial Officer",
+  "event_date": "{{date:-3}}",
+  "announced_date": "{{date:-3}}",
+  "effective_date": "{{date:+30}}",
+  "headline": "Imogen Abernathy appointed Chief Financial Officer of Brevik Harlow Foods",
+  "evidence_quote": "On {{date:-3}}, the Board of Directors of Brevik Harlow Foods (the \"Company\") appointed Imogen Abernathy as Chief Financial Officer of the Company, effective {{date:+30}}."
+}

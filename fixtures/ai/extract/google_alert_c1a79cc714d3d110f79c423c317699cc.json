@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_hiring_surge",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Ettrick Lane Insurance Services",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-6}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Ettrick Lane Insurance Services posts more than 60 technology roles",
+  "evidence_quote": "Ettrick Lane Insurance Services has posted more than 60 technology roles this month."
+}

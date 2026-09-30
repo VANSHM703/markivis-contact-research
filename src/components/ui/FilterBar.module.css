@@ -1,5 +1,6 @@
 .bar { display: grid; gap: var(--space-3); margin-bottom: var(--space-5); }
 .fields { display: grid; grid-template-columns: minmax(200px, 2fr) repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-3); }
+.noSearch { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .field { display: grid; gap: var(--space-1); min-width: 0; }
 .label { font: 400 var(--eyebrow)/1.2 var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
 .input {

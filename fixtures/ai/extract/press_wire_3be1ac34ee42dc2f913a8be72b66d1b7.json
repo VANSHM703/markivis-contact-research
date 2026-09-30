@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_cxo_change",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Tamsworth Aerospace",
+  "match_confidence": 0.94,
+  "new_title": "Chief Financial Officer",
+  "previous_title": null,
+  "event_date": "{{date:-2}}",
+  "announced_date": null,
+  "effective_date": "{{date:+15}}",
+  "headline": "Tamsworth Aerospace appoints Evander Holloway-Price Chief Financial Officer",
+  "evidence_quote": "Tamsworth Aerospace today announced the appointment of Evander Holloway-Price as Chief Financial Officer, effective {{date:+15}}."
+}

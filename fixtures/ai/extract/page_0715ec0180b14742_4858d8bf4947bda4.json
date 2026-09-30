@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_left",
+  "subject_kind": "person",
+  "person_name": "Adaeze Merriweather",
+  "company_name": "Quarnell Systems, Inc.",
+  "match_confidence": 0.92,
+  "new_title": null,
+  "previous_title": "Chief Financial Officer",
+  "event_date": "{{date:+0}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Adaeze Merriweather no longer listed on the Quarnell Systems, Inc. leadership page",
+  "evidence_quote": "Adaeze Merriweather"
+}

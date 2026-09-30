@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "other",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Caldrith Health",
+  "match_confidence": 0.9,
+  "new_title": "Independent Director",
+  "previous_title": null,
+  "event_date": "{{date:-8}}",
+  "announced_date": "{{date:-8}}",
+  "effective_date": null,
+  "headline": "Caldrith Health elects Harriet Quillfeather as an independent director",
+  "evidence_quote": "On {{date:-8}}, the Board of Directors of Caldrith Health (the \"Company\") increased the size of the Board from nine to ten members and elected Harriet Quillfeather as an independent director, effective immediately."
+}

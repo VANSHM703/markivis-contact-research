@@ -11,7 +11,7 @@ import { setWorkspaceSecret } from "@/domain/secrets";
 import { NewsletterCsvError, parseNewsletterCsv } from "@/ingest/adapters/newsletter/adapter";
 import { checkSourceHealth, runSource } from "@/ingest/run";
 import type { HealthResult } from "@/ingest/types";
-import { enqueue } from "@/jobs/enqueue";
+import { enqueue, enqueueQuietly } from "@/jobs/enqueue";
 import { ACTIVE_JOBS } from "@/jobs/definitions";
 import { audit } from "@/lib/audit";
 import { EncryptionConfigError } from "@/lib/crypto";
@@ -128,5 +128,6 @@ export async function uploadNewsletterAction(_prev: UploadResult, formData: Form
   if (run.skipped === "no_feeds") return { message: "Add a newsletter source before uploading." };
   const feed = run.feeds[0]!;
   if (!feed.ok) return { message: `Couldn't import the file: ${feed.error}` };
+  if (feed.created > 0) await enqueueQuietly("pipeline.process", { workspaceId: ctx.workspace.id });
   return { report: { events: parsed.rows.length, rejected: parsed.rejected.length, created: feed.created, duplicates: feed.duplicates, suppressed: feed.suppressed } };
 }

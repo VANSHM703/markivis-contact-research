@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_cxo_change",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Brisk Harbor Pet Care",
+  "match_confidence": 0.92,
+  "new_title": "Chief Human Resources Officer",
+  "previous_title": null,
+  "event_date": "{{date:+0}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Brisk Harbor Pet Care lists Perpetua Grimsby as Chief Human Resources Officer",
+  "evidence_quote": "Perpetua Grimsby"
+}

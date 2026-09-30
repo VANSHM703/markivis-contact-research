@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "other",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Ostrana Software",
+  "match_confidence": 0.9,
+  "new_title": "Chair of the Board",
+  "previous_title": null,
+  "event_date": "{{date:-16}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Ostrana Software elects Clementine Vashti as Chair of the Board",
+  "evidence_quote": "On {{date:-16}}, the Board of Directors of Ostrana Software (the \"Company\") elected Clementine Vashti as Chair of the Board, effective {{date:-16}}."
+}

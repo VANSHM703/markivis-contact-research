@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_speaking",
+  "subject_kind": "person",
+  "person_name": "Teodor Northcott",
+  "company_name": "Brisk Harbor Pet Care",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:+21}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Teodor Northcott to keynote the Portfolio Leadership Summit",
+  "evidence_quote": "Teodor Northcott, Chief Executive Officer of Brisk Harbor Pet Care, will deliver the opening keynote at the Portfolio Leadership Summit in Chicago on {{date:+21}}."
+}

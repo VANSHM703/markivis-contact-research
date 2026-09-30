@@ -9,7 +9,13 @@ export default async function globalSetup(config: FullConfig) {
   const { loadSeed } = await import("../../src/db/seed");
   const { closeDatabase } = await import("../../src/db/client");
   await resetDatabase(E2E_ENV.DATABASE_MIGRATE_URL);
-  await loadSeed();
+  const bundle = await loadSeed();
+  // Run every mock source and the pipeline, so the queue has items to work (as demo:reset does).
+  const { runSource } = await import("../../src/ingest/run");
+  const { runPipeline } = await import("../../src/jobs/handlers");
+  const demo = bundle.workspaces[0]!.workspace.id;
+  for (const source of ["sec_8k", "press_wire", "google_alert", "leadership_page", "leadership_page", "apollo", "newsletter"] as const) await runSource(demo, source, { mode: "mock" });
+  await runPipeline(demo);
   await closeDatabase();
 
   const baseURL = config.projects[0]!.use.baseURL!;

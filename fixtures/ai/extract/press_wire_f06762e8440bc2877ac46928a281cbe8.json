@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_product_partnership",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Ostrana Software",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-12}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Ostrana Software and Kelvaro Networks announce a partnership",
+  "evidence_quote": "Ostrana Software and Kelvaro Networks announced a strategic partnership to integrate their platforms."
+}

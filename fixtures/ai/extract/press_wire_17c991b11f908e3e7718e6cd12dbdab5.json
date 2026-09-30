@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_mna",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Penhallow Financial plc",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-7}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Penhallow Financial plc to acquire Orlanda Hotels",
+  "evidence_quote": "Penhallow Financial plc announced it will acquire Orlanda Hotels in an all-cash transaction expected to close next quarter."
+}

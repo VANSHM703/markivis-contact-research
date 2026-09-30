@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_left",
+  "subject_kind": "person",
+  "person_name": "Wren Okonkwo",
+  "company_name": "Ulvera Materials",
+  "match_confidence": 0.95,
+  "new_title": null,
+  "previous_title": "Chief Human Resources Officer",
+  "event_date": "{{date:-9}}",
+  "announced_date": "{{date:-9}}",
+  "effective_date": "{{date:-1}}",
+  "headline": "Wren Okonkwo steps down as Chief Human Resources Officer of Ulvera Materials",
+  "evidence_quote": "On {{date:-9}}, Wren Okonkwo and Ulvera Materials (the \"Company\") agreed that he will step down as Chief Human Resources Officer, effective {{date:-1}}, to pursue other opportunities."
+}

@@ -10,7 +10,11 @@
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { generateSeed, type WorkspaceBundle } from "@/db/seed/generate";
+import { createHash } from "node:crypto";
+import { fixtureFileForExternalId } from "@/ai/mock";
+import { hashText } from "@/ingest/adapters/pages/diff";
 import { fixtureNameForUrl } from "@/ingest/adapters/rss/parse";
+import { htmlToLines } from "@/ingest/html";
 
 const ROOT = path.resolve("fixtures");
 const bundle = generateSeed(new Date("2026-09-30T12:00:00Z"));
@@ -76,6 +80,12 @@ const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 // ---------------------------------------------------------------------------------------------
 // SEC EDGAR
 // ---------------------------------------------------------------------------------------------
+
+/** Accession numbers given to each 5.02 filing, in the order of the filings list. */
+const SEC_ACCESSIONS: string[] = [];
+let SEC_FILINGS: SecFiling[] = [];
+/** After-page HTML for each changed leadership page, by company ID. */
+const CHANGED_PAGES = new Map<string, { url: string; html: string }>();
 
 interface SecFiling {
   company: Company;
@@ -154,7 +164,11 @@ async function sec() {
       { daysAgo: 400, form: "8-K", items: "5.02", doc: "d8k-old.htm" },
     ];
     const entries = [
-      ...own.map((f) => ({ ...f, doc: "d8k.htm", accession: `99${cik.slice(2, 10)}-26-${String(seq++).padStart(6, "0")}` })),
+      ...own.map((f) => {
+        const accession = `99${cik.slice(2, 10)}-26-${String(seq++).padStart(6, "0")}`;
+        SEC_ACCESSIONS[filings.indexOf(f)] = accession;
+        return { ...f, doc: "d8k.htm", accession };
+      }),
       ...routine.map((r) => ({ ...r, company, body: "", accession: `99${cik.slice(2, 10)}-26-${String(seq++).padStart(6, "0")}` })),
     ].sort((a, b) => a.daysAgo - b.daysAgo);
 
@@ -209,6 +223,7 @@ ${e.items.includes("9.01") ? "<p>Item 9.01 Financial Statements and Exhibits.</p
   tickers[String(i++)] = { cik_str: 9900009002, ticker: "HXC", title: "HARLAN EXAMPLE CORP" };
   tickers[String(i++)] = { cik_str: 9900009003, ticker: "HXCP", title: "HARLAN EXAMPLE CORP" };
   await put("sec/company_tickers.json", json(tickers));
+  SEC_FILINGS = filings;
   return filings.length;
 }
 
@@ -388,7 +403,9 @@ ${section("Board of directors", [...board, ...added.filter(([, t]) => /director|
         await put(`${base}.before.html`, page(w, company));
         const change = changes.get(company.id);
         if (change) {
-          await put(`${base}.after.html`, page(w, company, change));
+          const html = page(w, company, change);
+          await put(`${base}.after.html`, html);
+          CHANGED_PAGES.set(company.id, { url, html });
           changed++;
         }
       }
@@ -488,11 +505,140 @@ async function release3() {
   for (const key of ["licensed", "news_api", "warn", "job_postings"]) await put(`${key}/items.json`, "[]");
 }
 
+
+// ---------------------------------------------------------------------------------------------
+// AI extraction outputs for mock mode (BRD 21: "AI extraction outputs for every raw item")
+// ---------------------------------------------------------------------------------------------
+
+interface Extraction {
+  is_relevant: boolean;
+  signal_type: string | null;
+  subject_kind: "person" | "company" | null;
+  person_name: string | null;
+  company_name: string | null;
+  match_confidence: number;
+  new_title: string | null;
+  previous_title: string | null;
+  event_date: string | null;
+  announced_date: string | null;
+  effective_date: string | null;
+  headline: string;
+  evidence_quote: string;
+}
+
+const NOT_RELEVANT: Extraction = { is_relevant: false, signal_type: null, subject_kind: null, person_name: null, company_name: null, match_confidence: 0, new_title: null, previous_title: null, event_date: null, announced_date: null, effective_date: null, headline: "", evidence_quote: "" };
+
+function ex(o: Partial<Extraction> & Pick<Extraction, "signal_type" | "headline" | "evidence_quote">): Extraction {
+  return { ...NOT_RELEVANT, is_relevant: true, match_confidence: 0.93, subject_kind: o.person_name ? "person" : "company", ...o };
+}
+
+/** The first sentence of a body: a verbatim evidence quote. */
+const firstSentence = (body: string) => {
+  const end = body.indexOf(". ");
+  return (end === -1 ? body : body.slice(0, end + 1)).slice(0, 300);
+};
+
+const d = (days: number) => `{{date:${days >= 0 ? "+" : ""}${days}}}`;
+const rssId = (feedUrl: string, entryId: string, key: string) => `${key}:${createHash("sha256").update(`${feedUrl}|${entryId}`).digest("hex").slice(0, 32)}`;
+
+async function aiFixtures() {
+  const out = new Map<string, Extraction>();
+  const [p0, p1, , p3, p4, p5, p6, p7, p8] = publics;
+
+  // SEC 8-K Item 5.02, in the order of the filings list.
+  const cfo0 = must(holder(demo, p0!.id, "CFO"), "CFO");
+  const mover = must(holder(demo, publics[9]!.id, "CFO") ?? holder(demo, publics[10]!.id, "CFO"), "mover");
+  const ceo3 = must(holder(demo, p3!.id, "CEO"), "CEO");
+  const chro5 = must(holder(demo, p5!.id, "CHRO"), "CHRO");
+  const cto7 = holder(demo, p7!.id, "CTO") ?? must(holder(demo, p7!.id, "CHRO"), "officer");
+  const chair8 = demo.roles.find((r) => r.companyId === p8!.id && r.titleNormalised === "Chair" && r.status === "current");
+  const boardSeatCompany = companyById.get(multiBoardPublicSeat.companyId)!;
+  const secSpecs: Extraction[] = [
+    ex({ signal_type: "person_left", person_name: cfo0.person.fullName, company_name: p0!.name, match_confidence: 0.96, previous_title: "Chief Financial Officer", event_date: d(-2), announced_date: d(-1), effective_date: d(14), headline: `${cfo0.person.fullName} to resign as Chief Financial Officer of ${p0!.name}`, evidence_quote: "" }),
+    ex({ signal_type: "person_move_announced", person_name: mover.person.fullName, company_name: p1!.name, match_confidence: 0.95, new_title: "Chief Financial Officer", previous_title: mover.role.title, event_date: d(-3), announced_date: d(-3), effective_date: d(30), headline: `${mover.person.fullName} appointed Chief Financial Officer of ${p1!.name}`, evidence_quote: "" }),
+    ex({ signal_type: "person_board_change", person_name: multiBoard.fullName, company_name: boardSeatCompany.name, match_confidence: 0.95, previous_title: multiBoardPublicSeat.title, event_date: d(-5), announced_date: d(-5), effective_date: d(20), headline: `${multiBoard.fullName} will retire from the ${boardSeatCompany.name} board`, evidence_quote: "" }),
+    ex({ signal_type: "person_left", person_name: ceo3.person.fullName, company_name: p3!.name, match_confidence: 0.95, previous_title: "Chief Executive Officer", event_date: d(-6), announced_date: d(-6), effective_date: d(60), headline: `${ceo3.person.fullName} to retire as Chief Executive Officer of ${p3!.name}`, evidence_quote: "" }),
+    ex({ signal_type: "other", company_name: p4!.name, match_confidence: 0.9, new_title: "Independent Director", event_date: d(-8), announced_date: d(-8), headline: `${p4!.name} elects ${OUTSIDERS[0]} as an independent director`, evidence_quote: "" }),
+    ex({ signal_type: "person_left", person_name: chro5.person.fullName, company_name: p5!.name, match_confidence: 0.95, previous_title: "Chief Human Resources Officer", event_date: d(-9), announced_date: d(-9), effective_date: d(-1), headline: `${chro5.person.fullName} steps down as Chief Human Resources Officer of ${p5!.name}`, evidence_quote: "" }),
+    ex({ signal_type: "person_left", person_name: cfo0.person.fullName, company_name: p0!.name, match_confidence: 0.95, previous_title: "Chief Financial Officer", event_date: d(-2), announced_date: d(-1), effective_date: d(10), headline: `${cfo0.person.fullName}'s resignation as ${p0!.name} CFO now effective earlier`, evidence_quote: "" }),
+    ex({ signal_type: "company_cxo_change", company_name: p6!.name, match_confidence: 0.93, new_title: "Chief Operating Officer", event_date: d(-12), announced_date: d(-12), effective_date: d(7), headline: `${p6!.name} appoints ${OUTSIDERS[1]} as Chief Operating Officer`, evidence_quote: "" }),
+    ex({ signal_type: "person_left", person_name: cto7.person.fullName, company_name: p7!.name, match_confidence: 0.95, previous_title: cto7.role.title, event_date: d(-14), announced_date: d(-14), effective_date: d(-4), headline: `${cto7.person.fullName} resigns as ${cto7.role.title} of ${p7!.name}`, evidence_quote: "" }),
+    chair8
+      ? ex({ signal_type: "person_board_change", person_name: personById.get(chair8.personId)!.fullName, company_name: p8!.name, match_confidence: 0.88, previous_title: "Chair of the Board", event_date: d(-16), announced_date: d(-16), headline: `${personById.get(chair8.personId)!.fullName} steps down as Chair of ${p8!.name} and stays a director`, evidence_quote: "" })
+      : ex({ signal_type: "other", company_name: p8!.name, match_confidence: 0.9, new_title: "Chair of the Board", event_date: d(-16), headline: `${p8!.name} elects ${OUTSIDERS[2]} as Chair of the Board`, evidence_quote: "" }),
+  ];
+  secSpecs.forEach((spec, i) => out.set(`sec:${SEC_ACCESSIONS[i]}`, { ...spec, evidence_quote: firstSentence(SEC_FILINGS[i]!.body.replace(/^\([a-z]\)\s*/, "")) }));
+
+  // Wires.
+  const feed = "https://wire.example.net/rss/appointments";
+  const pe0 = peBacked[0]!;
+  const joiner = must(holder(demo, publics[11]!.id, "COO") ?? holder(demo, publics[11]!.id, "CFO"), "joiner");
+  const glenmara = demo.companies.find((c) => c.hqCountry === "DE")!;
+  const german = demo.persons.find((p) => p.country === "DE" && demo.consents.some((c) => c.personId === p.id && c.channel === "email" && c.status === "unknown"))!;
+  const client = clients[0]!;
+  const clientExec = must(holder(demo, client.id, "CFO"), "client CFO");
+  const award = must(holder(demo, publics[2]!.id, "CFO"), "award");
+  const speaker = must(holder(demo, peBacked[1]!.id, "CEO"), "speaker");
+  const joined = (conf: number, days: number) => ex({ signal_type: "person_joined", person_name: joiner.person.fullName, company_name: pe0.name, match_confidence: conf, new_title: "Chief Executive Officer", previous_title: joiner.role.title, event_date: d(-days), headline: `${joiner.person.fullName} joins ${pe0.name} as Chief Executive Officer`, evidence_quote: "" });
+  const wireSpecs: Record<string, [Extraction, string]> = {
+    "wire-1001": [joined(0.9, 2), `${pe0.name}, a portfolio company of ${sponsors[0]!.name}, today announced that ${joiner.person.fullName} has joined the company as Chief Executive Officer.`],
+    "wire-1002": [joined(0.9, 2), `${sponsors[0]!.name} portfolio company ${pe0.name} has appointed ${joiner.person.fullName} as its new chief executive, effective immediately.`],
+    "wire-1003": [joined(0.88, 1), `${pe0.name} said ${joiner.person.fullName} has been appointed Chief Executive Officer.`],
+    "wire-1004": [ex({ signal_type: "person_promotion", person_name: german.fullName, company_name: glenmara.name, match_confidence: 0.92, new_title: "Chief Operating Officer", event_date: d(-3), headline: `${german.fullName} promoted to Chief Operating Officer of ${glenmara.name}`, evidence_quote: "" }), `${glenmara.name} announced that ${german.fullName} has been promoted to Chief Operating Officer, with responsibility for plants in Bavaria and Saxony.`],
+    "wire-1005": [ex({ signal_type: "person_left", person_name: clientExec.person.fullName, company_name: client.name, match_confidence: 0.92, previous_title: "Chief Financial Officer", event_date: d(-4), headline: `${clientExec.person.fullName} to leave ${client.name}`, evidence_quote: "" }), `${client.name} announced that Chief Financial Officer ${clientExec.person.fullName} will leave the company at the end of the quarter.`],
+    "wire-1006": [ex({ signal_type: "company_pe_transaction", company_name: peBacked[5]!.name, event_date: d(-5), headline: `${sponsors[1]!.name} to acquire a majority stake in ${peBacked[5]!.name}`, evidence_quote: "" }), `${sponsors[1]!.name} has signed a definitive agreement to acquire a majority stake in ${peBacked[5]!.name} from ${sponsors[2]!.name}.`],
+    "wire-1007": [ex({ signal_type: "company_funding_ipo", company_name: privates[4]!.name, event_date: d(-6), headline: `${privates[4]!.name} raises $85 million Series C`, evidence_quote: "" }), `${privates[4]!.name} today announced an $85 million Series C financing to expand its manufacturing capacity and grow its leadership team.`],
+    "wire-1008": [ex({ signal_type: "company_mna", company_name: publics[6]!.name, event_date: d(-7), headline: `${publics[6]!.name} to acquire ${privates[2]!.name}`, evidence_quote: "" }), `${publics[6]!.name} announced it will acquire ${privates[2]!.name} in an all-cash transaction expected to close next quarter.`],
+    "wire-1009": [ex({ signal_type: "company_layoffs", company_name: publics[13]!.name, event_date: d(-8), headline: `${publics[13]!.name} to cut about 8 percent of its workforce`, evidence_quote: "" }), `${publics[13]!.name} will reduce its workforce by about 8 percent as part of a restructuring plan.`],
+    "wire-1010": [ex({ signal_type: "company_expansion", company_name: peBacked[3]!.name, event_date: d(-9), headline: `${peBacked[3]!.name} opens European headquarters`, evidence_quote: "" }), `${peBacked[3]!.name} opened its first European headquarters in Amsterdam and plans to hire a regional leadership team.`],
+    "wire-1011": [ex({ signal_type: "person_award", person_name: award.person.fullName, company_name: publics[2]!.name, event_date: d(-10), headline: `${award.person.fullName} named to a list of 50 finance leaders`, evidence_quote: "" }), `${award.person.fullName}, Chief Financial Officer of ${publics[2]!.name}, was named to this year's list of 50 finance leaders to watch.`],
+    "wire-1012": [ex({ signal_type: "person_speaking", person_name: speaker.person.fullName, company_name: peBacked[1]!.name, event_date: d(21), headline: `${speaker.person.fullName} to keynote the Portfolio Leadership Summit`, evidence_quote: "" }), `${speaker.person.fullName}, Chief Executive Officer of ${peBacked[1]!.name}, will deliver the opening keynote at the Portfolio Leadership Summit in Chicago on ${d(21)}.`],
+    "wire-1013": [ex({ signal_type: "company_product_partnership", company_name: publics[8]!.name, event_date: d(-12), headline: `${publics[8]!.name} and ${publics[9]!.name} announce a partnership`, evidence_quote: "" }), `${publics[8]!.name} and ${publics[9]!.name} announced a strategic partnership to integrate their platforms.`],
+    "wire-1014": [ex({ signal_type: "company_cxo_change", company_name: publics[12]!.name, match_confidence: 0.94, new_title: "Chief Financial Officer", event_date: d(-2), effective_date: d(15), headline: `${publics[12]!.name} appoints ${OUTSIDERS[3]} Chief Financial Officer`, evidence_quote: "" }), `${publics[12]!.name} today announced the appointment of ${OUTSIDERS[3]} as Chief Financial Officer, effective ${d(15)}.`],
+  };
+  for (const [guid, [spec, quote]] of Object.entries(wireSpecs)) out.set(rssId(feed, guid, "press_wire"), { ...spec, evidence_quote: quote });
+
+  // Google Alerts.
+  const alertFeed = "https://alerts.example.net/feeds/demo-executives";
+  const rumour = must(holder(demo, peBacked[6]!.id, "CEO"), "rumour");
+  const alertSpecs: Record<string, Extraction> = {
+    a03: NOT_RELEVANT,
+    a04: ex({ signal_type: "person_left", person_name: rumour.person.fullName, company_name: peBacked[6]!.name, match_confidence: 0.7, previous_title: "Chief Executive Officer", event_date: d(-3), headline: `${rumour.person.fullName} reported to be weighing an exit from ${peBacked[6]!.name}`, evidence_quote: `People familiar with the matter said ${rumour.person.fullName} is considering leaving ${peBacked[6]!.name}.` }),
+    a05: NOT_RELEVANT,
+    a06: ex({ signal_type: "company_cxo_change", company_name: pe0.name, match_confidence: 0.7, event_date: d(-2), headline: `${pe0.name} names a new chief executive`, evidence_quote: `${pe0.name} named a new chief executive this week, according to a company statement.` }),
+    a07: ex({ signal_type: "company_layoffs", company_name: publics[13]!.name, event_date: d(-5), headline: `${publics[13]!.name} restructuring to cut jobs`, evidence_quote: `${publics[13]!.name} will cut about 8 percent of its workforce.` }),
+    a08: ex({ signal_type: "company_hiring_surge", company_name: peBacked[4]!.name, event_date: d(-6), headline: `${peBacked[4]!.name} posts more than 60 technology roles`, evidence_quote: `${peBacked[4]!.name} has posted more than 60 technology roles this month.` }),
+    a09: NOT_RELEVANT,
+  };
+  for (const [id, spec] of Object.entries(alertSpecs)) out.set(rssId(alertFeed, `tag:google.com,2013:googlealerts/feed:demo-${id}`, "google_alert"), spec);
+
+  // Leadership page diffs.
+  const t1 = publics[0]!;
+  const t2 = peBacked[1]!;
+  const t3 = publics[4]!;
+  const t4 = peBacked[2]!;
+  const promoted = must(holder(demo, t4.id, "COO") ?? holder(demo, t4.id, "CHRO"), "promoted");
+  const pageSpecs: [Company, Extraction][] = [
+    [t1, ex({ signal_type: "person_left", person_name: cfo0.person.fullName, company_name: t1.name, match_confidence: 0.92, previous_title: "Chief Financial Officer", event_date: d(0), headline: `${cfo0.person.fullName} no longer listed on the ${t1.name} leadership page`, evidence_quote: cfo0.person.fullName })],
+    [t2, ex({ signal_type: "company_cxo_change", company_name: t2.name, match_confidence: 0.92, new_title: "Chief Human Resources Officer", event_date: d(0), headline: `${t2.name} lists ${OUTSIDERS[4]} as Chief Human Resources Officer`, evidence_quote: OUTSIDERS[4]! })],
+    [t3, ex({ signal_type: "other", company_name: t3.name, match_confidence: 0.9, new_title: "Independent Director", event_date: d(0), headline: `${t3.name} lists ${OUTSIDERS[5]} as an independent director`, evidence_quote: OUTSIDERS[5]! })],
+    [t4, ex({ signal_type: "person_promotion", person_name: promoted.person.fullName, company_name: t4.name, match_confidence: 0.93, new_title: "President and Chief Operating Officer", previous_title: promoted.role.title, event_date: d(0), headline: `${promoted.person.fullName} now listed as President and Chief Operating Officer of ${t4.name}`, evidence_quote: "President and Chief Operating Officer" })],
+  ];
+  for (const [company, spec] of pageSpecs) {
+    const changed = CHANGED_PAGES.get(company.id);
+    if (!changed) throw new Error(`No changed page for ${company.name}`);
+    out.set(`page:${hashText(changed.url)}:${hashText(htmlToLines(changed.html).join("\n"))}`, spec);
+  }
+
+  for (const [externalId, spec] of out) await put(fixtureFileForExternalId(externalId), json(spec));
+  return out.size;
+}
+
 async function main() {
-  for (const dir of ["sec", "wires", "alerts", "pages", "apollo", "newsletter", "licensed", "news_api", "warn", "job_postings"]) await rm(path.join(ROOT, dir), { recursive: true, force: true });
+  for (const dir of ["sec", "wires", "alerts", "pages", "apollo", "newsletter", "licensed", "news_api", "warn", "job_postings", "ai"]) await rm(path.join(ROOT, dir), { recursive: true, force: true });
   const counts = { sec_502_filings: await sec(), wire_items: await wires(), alert_items: await alerts(), pages_changed: await pages(), apollo_people: await apollo(), newsletter_events: await newsletter() };
   await release3();
-  console.log(counts);
+  console.log({ ...counts, ai_extractions: await aiFixtures() });
 }
 
 main().catch((error: unknown) => {

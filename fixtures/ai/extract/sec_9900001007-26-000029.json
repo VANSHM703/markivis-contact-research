@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_left",
+  "subject_kind": "person",
+  "person_name": "Arjun Galloway",
+  "company_name": "Draymoor Logistics",
+  "match_confidence": 0.95,
+  "new_title": null,
+  "previous_title": "Chief Human Resources Officer",
+  "event_date": "{{date:-14}}",
+  "announced_date": "{{date:-14}}",
+  "effective_date": "{{date:-4}}",
+  "headline": "Arjun Galloway resigns as Chief Human Resources Officer of Draymoor Logistics",
+  "evidence_quote": "On {{date:-14}}, Arjun Galloway notified Draymoor Logistics (the \"Company\") that she will resign as Chief Human Resources Officer of the Company, effective {{date:-4}}."
+}

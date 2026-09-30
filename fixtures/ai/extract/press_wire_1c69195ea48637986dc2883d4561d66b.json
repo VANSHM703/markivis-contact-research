@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_left",
+  "subject_kind": "person",
+  "person_name": "Zoltan Sandoval",
+  "company_name": "Wexcombe Group",
+  "match_confidence": 0.92,
+  "new_title": null,
+  "previous_title": "Chief Financial Officer",
+  "event_date": "{{date:-4}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Zoltan Sandoval to leave Wexcombe Group",
+  "evidence_quote": "Wexcombe Group announced that Chief Financial Officer Zoltan Sandoval will leave the company at the end of the quarter."
+}

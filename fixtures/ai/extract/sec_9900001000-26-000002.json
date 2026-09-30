@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_left",
+  "subject_kind": "person",
+  "person_name": "Adaeze Merriweather",
+  "company_name": "Quarnell Systems, Inc.",
+  "match_confidence": 0.95,
+  "new_title": null,
+  "previous_title": "Chief Financial Officer",
+  "event_date": "{{date:-2}}",
+  "announced_date": "{{date:-1}}",
+  "effective_date": "{{date:+10}}",
+  "headline": "Adaeze Merriweather's resignation as Quarnell Systems, Inc. CFO now effective earlier",
+  "evidence_quote": "This Amendment No."
+}

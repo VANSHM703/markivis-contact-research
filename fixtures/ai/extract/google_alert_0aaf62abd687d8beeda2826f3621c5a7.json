@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_left",
+  "subject_kind": "person",
+  "person_name": "Esme Trevelyan",
+  "company_name": "Glenmara Packaging GmbH",
+  "match_confidence": 0.7,
+  "new_title": null,
+  "previous_title": "Chief Executive Officer",
+  "event_date": "{{date:-3}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Esme Trevelyan reported to be weighing an exit from Glenmara Packaging GmbH",
+  "evidence_quote": "People familiar with the matter said Esme Trevelyan is considering leaving Glenmara Packaging GmbH."
+}

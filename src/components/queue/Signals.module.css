@@ -1,0 +1,5 @@
+.feed { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.feed > li { display: grid; gap: var(--space-2); }
+.head { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
+.headline { font-weight: 600; }
+.sources { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; overflow-wrap: anywhere; }

@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_left",
+  "subject_kind": "person",
+  "person_name": "Anders Kendrick",
+  "company_name": "Morvane Industrial",
+  "match_confidence": 0.95,
+  "new_title": null,
+  "previous_title": "Chief Executive Officer",
+  "event_date": "{{date:-6}}",
+  "announced_date": "{{date:-6}}",
+  "effective_date": "{{date:+60}}",
+  "headline": "Anders Kendrick to retire as Chief Executive Officer of Morvane Industrial",
+  "evidence_quote": "On {{date:-6}}, Anders Kendrick informed the Board of Directors of Morvane Industrial (the \"Company\") of her intention to retire as Chief Executive Officer, effective {{date:+60}}."
+}

@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_cxo_change",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Ashvale Dental Partners",
+  "match_confidence": 0.7,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-2}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Ashvale Dental Partners names a new chief executive",
+  "evidence_quote": "Ashvale Dental Partners named a new chief executive this week, according to a company statement."
+}

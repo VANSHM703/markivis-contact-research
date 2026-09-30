@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_expansion",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Dellavar Building Products",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-9}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Dellavar Building Products opens European headquarters",
+  "evidence_quote": "Dellavar Building Products opened its first European headquarters in Amsterdam and plans to hire a regional leadership team."
+}

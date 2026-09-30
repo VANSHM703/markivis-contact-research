@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_joined",
+  "subject_kind": "person",
+  "person_name": "Hollis Jessop",
+  "company_name": "Ashvale Dental Partners",
+  "match_confidence": 0.9,
+  "new_title": "Chief Executive Officer",
+  "previous_title": "Chief Financial Officer",
+  "event_date": "{{date:-2}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Hollis Jessop joins Ashvale Dental Partners as Chief Executive Officer",
+  "evidence_quote": "Ashvale Dental Partners, a portfolio company of Aldermoor Capital Partners, today announced that Hollis Jessop has joined the company as Chief Executive Officer."
+}

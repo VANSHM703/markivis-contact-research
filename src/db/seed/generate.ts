@@ -721,7 +721,8 @@ function generateWorkspace(
   for (const person of ordered) {
     if (!["strong", "warm"].includes(personProfile.get(person.id) ?? "")) continue;
     for (const topic of rng.shuffle(topics).slice(0, rng.int(1, 2))) {
-      personInterests.push({ id: rng.uuid(), workspaceId, personId: person.id, topic, source: rng.chance(0.5) ? "first_party" : "manual", capturedAt: addDays(now, -rng.int(5, 90)) });
+      // Seeded interests are old, so they do not raise new content-engagement signals.
+      personInterests.push({ id: rng.uuid(), workspaceId, personId: person.id, topic, source: rng.chance(0.5) ? "first_party" : "manual", capturedAt: addDays(now, -rng.int(40, 200)) });
     }
   }
 

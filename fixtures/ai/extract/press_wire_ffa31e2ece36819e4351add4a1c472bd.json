@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_funding_ipo",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Quenby Robotics",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-6}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Quenby Robotics raises $85 million Series C",
+  "evidence_quote": "Quenby Robotics today announced an $85 million Series C financing to expand its manufacturing capacity and grow its leadership team."
+}

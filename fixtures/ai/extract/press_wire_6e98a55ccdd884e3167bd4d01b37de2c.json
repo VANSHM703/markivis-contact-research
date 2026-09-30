@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "person_promotion",
+  "subject_kind": "person",
+  "person_name": "Niall Esposito",
+  "company_name": "Glenmara Packaging GmbH",
+  "match_confidence": 0.92,
+  "new_title": "Chief Operating Officer",
+  "previous_title": null,
+  "event_date": "{{date:-3}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Niall Esposito promoted to Chief Operating Officer of Glenmara Packaging GmbH",
+  "evidence_quote": "Glenmara Packaging GmbH announced that Niall Esposito has been promoted to Chief Operating Officer, with responsibility for plants in Bavaria and Saxony."
+}

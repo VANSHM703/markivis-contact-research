@@ -1,0 +1,15 @@
+{
+  "is_relevant": true,
+  "signal_type": "company_layoffs",
+  "subject_kind": "company",
+  "person_name": null,
+  "company_name": "Heddrick Water",
+  "match_confidence": 0.93,
+  "new_title": null,
+  "previous_title": null,
+  "event_date": "{{date:-8}}",
+  "announced_date": null,
+  "effective_date": null,
+  "headline": "Heddrick Water to cut about 8 percent of its workforce",
+  "evidence_quote": "Heddrick Water will reduce its workforce by about 8 percent as part of a restructuring plan."
+}
