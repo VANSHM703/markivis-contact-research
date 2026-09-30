@@ -50,8 +50,12 @@ test.describe("app shell", () => {
   test("focuses search with the / key", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("./");
-    await page.keyboard.press("/");
-    await expect(page.getByRole("searchbox", { name: "Search people and companies" })).toBeFocused();
+    const search = page.getByRole("searchbox", { name: "Search people and companies" });
+    // The shortcut is wired up once the page has hydrated, which takes longer on slow machines.
+    await expect(async () => {
+      await page.keyboard.press("/");
+      await expect(search).toBeFocused({ timeout: 500 });
+    }).toPass({ timeout: 15_000 });
   });
 
   for (const route of ROUTES) {
