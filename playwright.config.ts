@@ -19,6 +19,8 @@ export const E2E_ENV = {
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: true,
+  // CI runners are small and run several workers at once; give assertions more time there.
+  expect: { timeout: process.env.CI ? 10_000 : 5_000 },
   reporter: process.env.CI ? "github" : "list",
   globalSetup: "./tests/e2e/global-setup.ts",
   use: {
