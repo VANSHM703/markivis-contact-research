@@ -13,7 +13,7 @@ export interface SyncResult {
 }
 
 export async function syncSchedules(boss: PgBoss): Promise<SyncResult> {
-  const all = await withSystem("scheduler", (tx) => tx.select({ id: workspaces.id, timezone: workspaces.timezone }).from(workspaces));
+  const all = await withSystem("scheduler", (tx) => tx.select({ id: workspaces.id, timezone: workspaces.timezone, settings: workspaces.settings }).from(workspaces));
   let scheduled = 0;
   let removed = 0;
   for (const job of ACTIVE_JOBS) {
@@ -21,7 +21,7 @@ export async function syncSchedules(boss: PgBoss): Promise<SyncResult> {
     if (job.scope === "platform") {
       for (const s of job.schedules) wanted.set(`platform.${s.slot}`, { cron: s.cron, tz: s.tz ?? "UTC", data: {} });
     } else {
-      for (const ws of all) for (const s of job.schedules) wanted.set(scheduleKey(ws.id, s.slot), { cron: s.cron, tz: s.tz ?? ws.timezone, data: { workspaceId: ws.id } });
+      for (const ws of all) for (const s of job.schedules) wanted.set(scheduleKey(ws.id, s.slot), { cron: s.cronFromSettings ? s.cronFromSettings(ws.settings as Record<string, unknown>) : s.cron, tz: s.tz ?? ws.timezone, data: { workspaceId: ws.id } });
     }
     const existing = await boss.getSchedules(job.name);
     for (const [key, s] of wanted) {

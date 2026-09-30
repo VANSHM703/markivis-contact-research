@@ -6,7 +6,7 @@ import { Chip } from "@/components/ui/Chip";
 import { Notice } from "@/components/ui/Notice";
 import { Tabs } from "@/components/ui/Tabs";
 import { getRequestContext } from "@/lib/context";
-import { CONTACT_TYPE_LABELS, formatDate, SEAT_TYPE_LABELS } from "@/lib/format/labels";
+import { ACTION_STATUS_LABELS, ACTION_TYPE_LABELS, CONTACT_TYPE_LABELS, formatDate, SEAT_TYPE_LABELS } from "@/lib/format/labels";
 import { can } from "@/lib/permissions";
 import { endRoleAction, unmergeAction } from "@/server/record-actions";
 import { getPerson, getPersonProvenance } from "@/server/records";
@@ -64,7 +64,8 @@ export default async function PersonPage({ params, searchParams }: Props) {
   if (!UUID_RE.test(id)) notFound();
   const record = await getPerson(ctx.workspace.id, id);
   if (!record) notFound();
-  const { person, roles, placement, mergedInto, canUnmergeUntil, ownerName, pendingDuplicates } = record;
+  const { person, roles, placement, mergedInto, canUnmergeUntil, ownerName, pendingDuplicates, openActions } = record;
+  const canCreateAction = can(ctx.role, "messages.send") && !mergedInto && person.status !== "do_not_contact" && person.isTracked;
   const tab = query.tab === "record" ? "record" : "overview";
   const primary = roles.find((r) => r.isPrimary);
   const editor = can(ctx.role, "records.edit") && !mergedInto;
@@ -101,11 +102,12 @@ export default async function PersonPage({ params, searchParams }: Props) {
             {person.status === "no_current_role" ? <Chip>No current role</Chip> : null}
           </div>
         </div>
-        {editor ? (
+        {editor || canCreateAction ? (
           <div className={`${styles.headerActions} btn-row`}>
-            <Link href={`/people/${person.id}/edit`} className="btn btn--ghost">Edit details</Link>
-            <Link href={`/people/${person.id}/roles/new`} className="btn btn--ghost">Add role</Link>
-            {merger ? <Link href={`/people/${person.id}/merge`} className="btn btn--ghost">Merge</Link> : null}
+            {canCreateAction ? <Link href={`/people/${person.id}/actions/new`} className="btn btn--ghost">Create action</Link> : null}
+            {editor ? <Link href={`/people/${person.id}/edit`} className="btn btn--ghost">Edit details</Link> : null}
+            {editor ? <Link href={`/people/${person.id}/roles/new`} className="btn btn--ghost">Add role</Link> : null}
+            {editor && merger ? <Link href={`/people/${person.id}/merge`} className="btn btn--ghost">Merge</Link> : null}
           </div>
         ) : null}
       </div>
@@ -166,6 +168,18 @@ export default async function PersonPage({ params, searchParams }: Props) {
                 </li>
               ))}
             </ol>
+          </section>
+          <section className="card" aria-labelledby="actions-heading">
+            <h2 id="actions-heading" className="t-heading-card">Open actions</h2>
+            {openActions.length === 0 ? <p className="t-caption t-muted">No open actions.</p> : null}
+            <ul className={styles.plainList}>
+              {openActions.map((a) => (
+                <li key={a.id}>
+                  <Link href={`/actions?owner=all&status=all&id=${a.id}`}>{a.headline ?? ACTION_TYPE_LABELS[a.type]}</Link>
+                  <p className="t-meta t-muted">{ACTION_TYPE_LABELS[a.type]} · {ACTION_STATUS_LABELS[a.status]} · due {formatDate(a.dueAt)}{a.blockedReason ? " · blocked" : ""}</p>
+                </li>
+              ))}
+            </ul>
           </section>
           <section className="card" aria-labelledby="facts-heading">
             <h2 id="facts-heading" className="t-heading-card">Details</h2>

@@ -4,6 +4,9 @@ import type { PgBoss } from "pg-boss";
 import { withWorkspace } from "@/db/client";
 import { persons, roles } from "@/db/schema";
 import { recomputePrimaryRole, refreshPersonStatus } from "@/domain/records";
+import { runSla } from "@/domain/sla";
+import { runDigest } from "@/digest/digest";
+import { deliverQueued } from "@/mail/notify";
 import { runSource, type SourceRunResult } from "@/ingest/run";
 import { raiseDerivedSignals } from "@/pipeline/derived";
 import { processPending } from "@/pipeline/process";
@@ -76,6 +79,9 @@ export async function registerWorkers(boss: PgBoss): Promise<void> {
         else if (job.name === "stats.sources") result = await withWorkspace(ws, (tx) => recomputeAllStats(tx, ws));
         else if (job.name === "records.status") result = { updated: await runRecordsStatus(ws) };
         else if (job.name === "scheduler.sync") result = await syncSchedules(boss);
+        else if (job.name === "actions.sla") result = await runSla(ws);
+        else if (job.name === "digest.daily") result = await runDigest(ws);
+        else if (job.name === "notifications.send") result = await deliverQueued(ws);
         log.info("job.completed", { job: job.name, jobId: item.id, ms: Date.now() - started, result });
         return result;
       } catch (error) {

@@ -48,11 +48,53 @@ const NOTICES: Record<string, { text: string; tone: "ok" | "warn" }> = {
   auto_confirm_reenabled: { text: "Auto-confirm re-enabled.", tone: "ok" },
   action_created: { text: "Action created.", tone: "ok" },
   apollo_key_saved: { text: "Apollo key saved. It is stored encrypted and cannot be shown again.", tone: "ok" },
+  // Actions (BRD 12.4 to 12.7). {name} is filled from the open action, never from the URL.
+  sent: { text: "Sent to {name}.", tone: "ok" },
+  linkedin_sent: { text: "Marked as sent to {name} on LinkedIn.", tone: "ok" },
+  draft_saved: { text: "Draft saved.", tone: "ok" },
+  draft_unchanged: { text: "Nothing changed, so no new version was saved.", tone: "ok" },
+  submitted: { text: "Sent for approval. The partner sees it in Drafts awaiting approval.", tone: "ok" },
+  approved: { text: "Draft approved.", tone: "ok" },
+  redrafted: { text: "New draft written.", tone: "ok" },
+  action_done: { text: "Marked done.", tone: "ok" },
+  action_dismissed: { text: "Action dismissed.", tone: "ok" },
+  outcome_recorded: { text: "Outcome recorded.", tone: "ok" },
+  action_updated: { text: "Action updated.", tone: "ok" },
+  lawful_basis_recorded: { text: "Lawful basis recorded. Drafting and sending are no longer blocked.", tone: "ok" },
+  draft_blocked: { text: "Couldn't draft: a pre-action check blocks this message. The card says why and what to do.", tone: "warn" },
+  draft_skipped: { text: "Couldn't write a draft just now. Try Redraft, or write the message yourself.", tone: "warn" },
+  draft_paused: { text: "Couldn't draft: the monthly AI budget is used up. Write the message yourself, or raise the budget in Settings.", tone: "warn" },
+  flow_blocked: { text: "Couldn't continue: a pre-action check blocks this action. The card says why and what to do.", tone: "warn" },
+  flow_closed: { text: "This action is already closed.", tone: "warn" },
+  flow_no_draft: { text: "There is no draft yet. Use Redraft to write one.", tone: "warn" },
+  flow_not_approved: { text: "This draft needs a partner's approval before it is sent.", tone: "warn" },
+  flow_flagged_draft: { text: "This draft mentions facts that are not on record. Edit it or redraft before approving.", tone: "warn" },
+  flow_rate_limit: { text: "Couldn't send: this mailbox has reached its daily email limit. It can send again tomorrow.", tone: "warn" },
+  flow_no_email: { text: "Couldn't send: there is no working email address for this person. Add one on their record.", tone: "warn" },
+  flow_no_mailbox: { text: "Couldn't send: no mailbox is connected for this partner. Connect it in Settings.", tone: "warn" },
+  flow_send_failed: { text: "Couldn't send: the mail provider returned an error. The draft is saved; try again in a few minutes.", tone: "warn" },
+  flow_wrong_channel: { text: "That does not apply to this channel. Email is sent with Approve and send; LinkedIn messages are copied and marked sent.", tone: "warn" },
+  flow_not_found: { text: "That item is not in this workspace.", tone: "warn" },
+  flow_no_person: { text: "This action has no person yet. Choose who to contact first.", tone: "warn" },
+  flow_empty_body: { text: "Couldn't save: the message is empty. Write the message, or use Redraft.", tone: "warn" },
+  flow_no_subject: { text: "Couldn't save: an email needs a subject.", tone: "warn" },
+  flow_no_reason: { text: "Choose a reason for dismissing.", tone: "warn" },
+  flow_no_outcome: { text: "Choose an outcome.", tone: "warn" },
+  flow_not_sent: { text: "Outcomes are recorded once the message is sent.", tone: "warn" },
+  flow_bad_owner: { text: "Choose an owner who is a member of this workspace.", tone: "warn" },
+  flow_short_note: { text: "Couldn't record it: say what the lawful basis is, for example the existing business relationship.", tone: "warn" },
+  flow_opted_out: { text: "This person has opted out of email. An opt-out cannot be overridden by a lawful basis.", tone: "warn" },
+  workflow_saved: { text: "Service levels saved. New actions use them; a changed digest time applies within 10 minutes.", tone: "ok" },
+  workflow_invalid: { text: "Couldn't save: use whole working days (priority 1 up to 20, priority 2 up to 30), a time like 08:00, a daily limit from 1 to 200, and at least one working day.", tone: "warn" },
+  style_guide_saved: { text: "Style guide saved. New drafts follow it.", tone: "ok" },
+  style_guide_invalid: { text: "Couldn't save: the style guide must be 40 to 4,000 characters.", tone: "warn" },
+  action_refused: { text: "Couldn't create the action: this person must not be contacted, or the company is off-limits for this approach.", tone: "warn" },
 };
 
-export function Notice({ notice }: { notice?: string | string[] }) {
+export function Notice({ notice, name }: { notice?: string | string[]; name?: string | null }) {
   const key = Array.isArray(notice) ? notice[0] : notice;
-  const entry = key ? NOTICES[key] : undefined;
+  const found = key ? NOTICES[key] : undefined;
+  const entry = found && found.text.includes("{name}") ? (name ? { ...found, text: found.text.replace("{name}", name) } : undefined) : found;
   return (
     <div role="status" aria-live="polite" className={styles.region}>
       {entry ? <p className={entry.tone === "ok" ? `${styles.notice} ${styles.ok}` : `${styles.notice} ${styles.warn}`}>{entry.text}</p> : null}

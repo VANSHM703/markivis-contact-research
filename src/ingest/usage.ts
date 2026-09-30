@@ -1,10 +1,11 @@
 /**
  * Monthly metered usage per workspace (BRD 8.1 credit guard). Non-essential work stops at the
- * cap; the data steward is alerted at 80% (the alert is recorded now and emailed from M5).
+ * cap; the data steward and platform admins are emailed at 80%.
  */
 import { and, eq, sql } from "drizzle-orm";
 import { usageCounters } from "@/db/schema";
 import { audit } from "@/lib/audit";
+import { alertBudget80 } from "@/mail/alerts";
 import type { WorkspaceCtx } from "./types";
 
 export const periodOf = (d: Date) => d.toISOString().slice(0, 7);
@@ -33,5 +34,6 @@ export async function recordUsage(ctx: WorkspaceCtx, provider: string, units: nu
   if (cap !== null && row && !row.alertedAt && row.units >= cap * 0.8) {
     await ctx.tx.update(usageCounters).set({ alertedAt: ctx.now }).where(eq(usageCounters.id, row.id));
     await audit(ctx.tx, { workspaceId: ctx.workspaceId, actorUserId: null, actorKind: "system", action: "usage.alert_80", entityType: "usage_counter", entityId: row.id, after: { provider, used: row.units, cap } });
+    await alertBudget80(ctx.tx, ctx.workspaceId, provider === "apollo" ? "Apollo" : "AI", `${row.units} credits`, `${cap} credit`, row.period);
   }
 }

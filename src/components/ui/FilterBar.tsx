@@ -5,6 +5,8 @@ export interface FilterSelect {
   name: string;
   label: string;
   options: { value: string; label: string }[];
+  /** Label of the empty option, which means the screen's default. */
+  anyLabel?: string;
 }
 
 interface FilterBarProps {
@@ -31,7 +33,7 @@ export function FilterBar({ path, searchLabel, values, selects }: FilterBarProps
           <label key={s.name} className={styles.field}>
             <span className={styles.label}>{s.label}</span>
             <select name={s.name} defaultValue={values[s.name] ?? ""} className={styles.input}>
-              <option value="">Any</option>
+              <option value="">{s.anyLabel ?? "Any"}</option>
               {s.options.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}

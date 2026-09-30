@@ -15,8 +15,9 @@ Relationship intelligence inside BEAM: one trusted record of every senior decisi
 | M2 Records: people, companies, roles, field sources, manual entry, CSV imports, matching | Done |
 | M3 Ingestion: source adapters and the job scheduler | Done |
 | M4 Pipeline and validation: extraction, matching, dedupe, confidence, lanes, the queue | Done |
-| M5 Actions: action cards, pre-action checks, drafting, approval, Today, digest, service levels | Next |
-| M6 to M10 | Not started |
+| M5 Actions: action cards, pre-action checks, drafting, approval, Today, digest, service levels | Done |
+| M6 Executive search pack: contact types, off-limits, placements, confidential notes, succession watch | Next |
+| M7 to M10 | Not started |
 
 ## Run it locally
 
@@ -67,6 +68,10 @@ People, then "Import target list". Download the template from that page for the 
 
 Collected items go through the pipeline (BRD 9): a name match, AI extraction, matching to tracked people and companies, merging of duplicate reports, confidence, priority and a lane. Clear primary-source changes are confirmed automatically; the rest wait in Queue, where a validator confirms, rejects, sends for research or parks each one, with keyboard shortcuts (press `?` in the queue). In mock mode the AI reads fixtures under `fixtures/ai/`; set `ANTHROPIC_API_KEY` and `DATA_MODE=live` for the real models.
 
+## Actions, Today and the digest
+
+Confirmed priority 1 and 2 changes create actions with an AI draft, after the pre-action checks (BRD 12.2): do not contact, opt-outs, a lawful basis for EU, EEA and UK contacts, and off-limits for candidate approaches. Actions opens each one in a drawer: edit the draft, submit it for approval (outreach owners), approve and send (partners), mark it done or dismiss it with a reason, and record the outcome. In mock mode sending uses a mock mailbox and logs the outbound email on the person. The daily digest and alerts are listed in Settings, Email log; in mock mode nothing leaves the machine, and in live mode they need `SMTP_URL` and `MAIL_FROM`. Service levels, the digest time, the daily send limit and the style guide are in Settings, Service levels and style guide.
+
 ## Sources
 
 Settings, Sources shows every source's health and lets you check a connection or run it now (the worker must be running). In mock mode every source reads the fictional fixtures under `fixtures/`; regenerate them with `npm run fixtures:generate` after changing the seed. Each adapter's README, under `src/ingest/adapters/`, describes its behaviour and links the provider documentation it follows.
@@ -88,10 +93,14 @@ scripts/          migrate, setup (compose), demo:reset, generate-fixtures
 src/
   app/            (app) signed-in routes, (auth) sign-in, api/v1 JSON routes
   db/             schema, scoped query layer, seed generator
-  domain/         matching, provenance, records, merge, suppression, titles, CSV imports, secrets
+  domain/         matching, provenance, records, merge, suppression, titles, CSV imports, secrets,
+                  actions, pre-action checks, the action flow, service levels
   ai/             AI adapter (Anthropic Messages API, and a mock), prompt contracts, budget
   pipeline/       pre-filter, extraction, resolve, dedupe, confidence, priority, lanes, validation
   ingest/         source adapters (SEC, wires, alerts, pages, Apollo, newsletter), transports, run loop
+  digest/         the daily digest
+  mail/           platform email: the notifications outbox, SMTP or mock, alerts
+  outreach/       sending approved drafts from the partner's mailbox (mock now; Graph and Gmail in M9)
   jobs/           pg-boss queue, schedule (BRD 8.9), handlers
   worker/         the worker process
   components/

@@ -16,12 +16,14 @@ export default async function globalSetup(config: FullConfig) {
   const demo = bundle.workspaces[0]!.workspace.id;
   for (const source of ["sec_8k", "press_wire", "google_alert", "leadership_page", "leadership_page", "apollo", "newsletter"] as const) await runSource(demo, source, { mode: "mock" });
   await runPipeline(demo);
+  const { stageDemoActions } = await import("../../src/db/seed/demo-actions");
+  await stageDemoActions(demo);
   await closeDatabase();
 
   const baseURL = config.projects[0]!.use.baseURL!;
   mkdirSync("tests/e2e/.auth", { recursive: true });
   const browser = await chromium.launch();
-  for (const [file, name] of [["partner", "Jordan Ellis"], ["validator", "Sam Okafor"], ["harbor", "Casey Morgan"]] as const) {
+  for (const [file, name] of [["partner", "Jordan Ellis"], ["validator", "Sam Okafor"], ["harbor", "Casey Morgan"], ["outreach", "Priya Raman"], ["steward", "Lee Whitford"]] as const) {
     const page = await browser.newPage({ baseURL });
     await page.goto("sign-in");
     await page.getByRole("button", { name: new RegExp(name) }).click();

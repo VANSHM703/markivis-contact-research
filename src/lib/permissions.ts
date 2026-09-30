@@ -18,7 +18,8 @@ export type Capability =
   | "compliance.manage"
   | "data.export_all"
   | "audit_log.view"
-  | "settings.change";
+  | "settings.change"
+  | "consent.record_basis";
 
 const P = "partner";
 const O = "outreach_owner";
@@ -45,6 +46,8 @@ export const PERMISSIONS: Readonly<Record<Capability, readonly WorkspaceRole[]>>
   "data.export_all": [D],
   "audit_log.view": [P, D],
   "settings.change": [P, D],
+  // Not a BRD 5.4 row: BRD 12.2 step 3 lets the data steward or partner record a lawful basis.
+  "consent.record_basis": [P, D],
 };
 
 export function can(role: WorkspaceRole, capability: Capability): boolean {

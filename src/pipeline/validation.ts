@@ -10,7 +10,9 @@ import { withWorkspace, type Tx } from "@/db/client";
 import { companies, feeds, persons, rawItems, signals, signalSources, sourceStatsWeekly, workspaces } from "@/db/schema";
 import { createActionForSignal, type CreatedAction } from "@/domain/actions";
 import { addRole, endRole, type Actor, type SourceNote } from "@/domain/records";
+import { SOURCE_TYPE_LABELS as SOURCE_LABELS } from "@/lib/format/labels";
 import { audit } from "@/lib/audit";
+import { alertAutoConfirmSuspended } from "@/mail/alerts";
 import { weekStart } from "@/lib/working-days";
 import type { ProposedChange } from "./process";
 import { combineConfidence, SIGNAL_RULES, type Confidence, type SourceFacts } from "./rules";
@@ -269,7 +271,10 @@ export async function markSpotCheck(tx: Tx, actor: Actor, signalId: string, resu
     const validation = (settings.validation ?? {}) as Record<string, unknown>;
     const next = { ...current, ...Object.fromEntries(suspended.map((t) => [t, { since: now.toISOString(), reason: "Spot-check error rate above the threshold" }])) };
     await tx.update(workspaces).set({ settings: { ...settings, validation: { ...validation, suspended_sources: next } } }).where(eq(workspaces.id, actor.workspaceId));
-    for (const t of suspended) await audit(tx, { workspaceId: actor.workspaceId, actorUserId: actor.userId, actorKind: "system", action: "auto_confirm.suspended", after: { source_type: t } });
+    for (const t of suspended) {
+      await audit(tx, { workspaceId: actor.workspaceId, actorUserId: actor.userId, actorKind: "system", action: "auto_confirm.suspended", after: { source_type: t } });
+      await alertAutoConfirmSuspended(tx, actor.workspaceId, SOURCE_LABELS[t] ?? t, t, now.toISOString());
+    }
   }
   return suspended;
 }

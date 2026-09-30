@@ -6,3 +6,13 @@
 .high { color: var(--signal-ok); }
 .medium { color: var(--text-secondary); }
 .low { color: var(--signal-warn); }
+.band, .state { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: var(--radius-pill); font: 600 var(--caption)/1 var(--font-sans); white-space: nowrap; flex: none; }
+.bandStrong { background: var(--accent-fill); color: var(--text-on-accent); }
+.bandWarm { background: var(--surface-accent-wash); color: var(--accent); }
+.bandCooling { background: var(--surface-sunken); color: var(--text-secondary); }
+.bandCold { background: var(--surface-sunken); border: 1px solid var(--border-strong); color: var(--text-muted); }
+.bandNone { border: 1px dashed var(--border-strong); color: var(--text-muted); }
+.stateOk { color: var(--signal-ok); padding: 0; }
+.stateWarn { background: var(--signal-warn-wash); color: var(--signal-warn); }
+.stateBlocked { background: var(--signal-critical-wash); color: var(--signal-critical); }
+.stateNeutral { background: var(--surface-sunken); color: var(--text-secondary); }

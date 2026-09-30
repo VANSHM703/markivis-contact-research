@@ -12,39 +12,19 @@ export function ConfidenceText({ confidence }: { confidence: string }) {
   return <span className={`${styles.confidence} ${cls}`}>{confidence.charAt(0).toUpperCase() + confidence.slice(1)}</span>;
 }
 
-export const SOURCE_TYPE_LABELS: Record<string, string> = {
-  sec_8k: "SEC filing",
-  press_wire: "Press release",
-  google_alert: "Google Alert",
-  leadership_page: "Leadership page",
-  apollo: "Apollo",
-  newsletter: "Newsletter",
-  manual: "Manual",
-  ai_research: "AI research",
-  event_site: "Event website",
-};
+export { SIGNAL_TYPE_LABELS, SOURCE_TYPE_LABELS } from "@/lib/format/labels";
 
-/** Signal types in sentence case for the interface (BRD 9.3). */
-export const SIGNAL_TYPE_LABELS: Record<string, string> = {
-  person_move_announced: "Move announced",
-  person_left: "Left a role",
-  person_joined: "Joined",
-  person_board_change: "Board change",
-  company_cxo_change: "Leadership change",
-  company_pe_transaction: "PE transaction",
-  company_mna: "Merger or acquisition",
-  company_funding_ipo: "Funding or IPO",
-  person_promotion: "Promotion",
-  person_speaking: "Speaking",
-  person_email_bounced: "Email bounced",
-  company_layoffs: "Layoffs",
-  company_expansion: "Expansion",
-  company_hiring_surge: "Hiring surge",
-  internal_relationship_quiet: "Going quiet",
-  person_award: "Award",
-  person_content_engagement: "Content engagement",
-  company_ceo_tenure_threshold: "Long CEO tenure",
-  company_product_partnership: "Partnership",
-  company_intent_spike: "Intent spike",
-  other: "Other",
-};
+const BAND_WORDS: Record<string, string> = { strong: "Strong", warm: "Warm", cooling: "Cooling", cold: "Cold", none: "None" };
+
+/** Relationship band, always in words (design file 4.2). A missing score reads "Not scored". */
+export function BandPill({ band }: { band: string | null }) {
+  if (!band) return <span className={`${styles.band} ${styles.bandNone}`}>Not scored</span>;
+  const cls = { strong: styles.bandStrong, warm: styles.bandWarm, cooling: styles.bandCooling, cold: styles.bandCold, none: styles.bandNone }[band] ?? styles.bandNone;
+  return <span className={`${styles.band} ${cls}`}>{BAND_WORDS[band] ?? band}</span>;
+}
+
+/** State pill: ok (sent, done), warn (overdue, needs attention), blocked (consent, off-limits). */
+export function StatePill({ tone, children }: { tone: "ok" | "warn" | "blocked" | "neutral"; children: string }) {
+  const cls = { ok: styles.stateOk, warn: styles.stateWarn, blocked: styles.stateBlocked, neutral: styles.stateNeutral }[tone];
+  return <span className={`${styles.state} ${cls}`}>{tone === "ok" ? `✓ ${children}` : children}</span>;
+}

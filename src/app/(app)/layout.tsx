@@ -7,7 +7,7 @@ import { getTodayFigures } from "@/server/today";
 export default async function SignedInLayout({ children }: { children: ReactNode }) {
   const ctx = await getRequestContext();
   if (!ctx) redirect("/sign-in");
-  const figures = await getTodayFigures(ctx.workspace.id, ctx.user.id);
+  const figures = await getTodayFigures(ctx.workspace.id, ctx.user.id, new Date(), ctx.workspace.timezone);
   const actionsCount = figures.actionsDueToday + figures.actionsOverdue;
   return (
     <AppShell

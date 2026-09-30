@@ -82,6 +82,10 @@ export const dismissReason = dmi.enum("dismiss_reason", ["not_relevant", "alread
 export const actionOutcome = dmi.enum("action_outcome", ["none", "no_reply", "replied", "meeting", "mandate"]);
 export const draftChannel = dmi.enum("draft_channel", ["email", "linkedin_message"]);
 export const draftAuthor = dmi.enum("draft_author", ["ai", "user"]);
+/** Whether an action approaches the person as a client contact or as a candidate (BRD 12.2 step 4). */
+export const actionPurpose = dmi.enum("action_purpose", ["client", "candidate"]);
+export const notificationKind = dmi.enum("notification_kind", ["digest", "p1_change", "auto_confirm_suspended", "budget_80"]);
+export const notificationStatus = dmi.enum("notification_status", ["queued", "sent", "failed"]);
 export const band = dmi.enum("band", ["strong", "warm", "cooling", "cold", "none"]);
 export const offLimitsScope = dmi.enum("off_limits_scope", ["company", "function", "level_and_above"]);
 export const offLimitsReason = dmi.enum("off_limits_reason", ["current_client", "recent_placement", "contractual"]);
@@ -640,6 +644,11 @@ export const actions = dmi.table(
     whyItMatters: text(),
     dismissReason: dismissReason(),
     blockedReason: text(),
+    purpose: actionPurpose().notNull().default("client"),
+    /** Later signals merged into this open action instead of a second one (BRD 12.2 step 5). */
+    mergedSignalIds: uuid().array().notNull().default(sql`'{}'::uuid[]`),
+    /** When the action first became overdue by one working day (BRD 12.8 escalation). */
+    escalatedAt: timestamp(tz),
     outcome: actionOutcome().notNull().default("none"),
     outcomeAt: timestamp(tz),
     createdAt: createdAt(),
@@ -671,8 +680,12 @@ export const drafts = dmi.table(
     approvedBy: uuid().references(() => users.id),
     approvedAt: timestamp(tz),
     sentAt: timestamp(tz),
+    /** Whose mailbox sent it (BRD 12.5): the approving partner. Used for the daily send limit. */
+    sentFromUserId: uuid().references(() => users.id),
     providerMessageId: text(),
     sendError: text(),
+    /** The AI's one sentence for the approver: why this angle (BRD 17.3). */
+    rationale: text(),
     /** Facts in the draft that are not in its context (BRD 17.2 post-check); non-empty means redraft. */
     checkIssues: jsonb().notNull().default([]),
     createdAt: createdAt(),
@@ -682,6 +695,7 @@ export const drafts = dmi.table(
     uniqueIndex().on(t.actionId, t.version),
     index().on(t.contentItemId),
     index().on(t.approvedBy),
+    index().on(t.sentFromUserId, t.sentAt),
   ],
 );
 
@@ -919,4 +933,31 @@ export const importBatches = dmi.table(
     updatedAt: updatedAt(),
   },
   (t) => [index().on(t.workspaceId, t.createdAt), index().on(t.createdBy)],
+);
+
+/**
+ * Outbox for platform email (BRD 12.8): the digest and alerts. Rows are written in the same
+ * transaction as the event and delivered by the notifications.send job, so an alert is never lost
+ * or sent twice. `dedupe_key` makes each alert idempotent. Not in BRD 6.
+ */
+export const notifications = dmi.table(
+  "notifications",
+  {
+    id: id(),
+    workspaceId: workspaceRef(),
+    userId: uuid().references(() => users.id, { onDelete: "cascade" }),
+    kind: notificationKind().notNull(),
+    dedupeKey: text().notNull(),
+    toEmail: text().notNull(),
+    subject: text().notNull(),
+    bodyText: text().notNull(),
+    status: notificationStatus().notNull().default("queued"),
+    attempts: integer().notNull().default(0),
+    error: text(),
+    providerMessageId: text(),
+    sentAt: timestamp(tz),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [uniqueIndex().on(t.workspaceId, t.dedupeKey), index().on(t.workspaceId, t.status, t.createdAt), index().on(t.userId, t.kind, t.createdAt)],
 );

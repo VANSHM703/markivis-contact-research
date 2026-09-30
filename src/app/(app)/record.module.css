@@ -64,3 +64,5 @@
 .queueList > li { display: grid; gap: var(--space-3); }
 .queueHeader { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; }
 .choice { display: grid; gap: var(--space-2); padding: var(--space-3); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); flex: 1 1 240px; }
+.plainList { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.plainList li { display: grid; gap: 2px; }

@@ -21,6 +21,8 @@ const MATRIX: [Capability, string][] = [
   ["data.export_all", "NNNNY"],
   ["audit_log.view", "YNNNY"],
   ["settings.change", "YNNNY"],
+  // BRD 12.2 step 3, not a 5.4 row.
+  ["consent.record_basis", "YNNNY"],
 ];
 const ROLES: WorkspaceRole[] = ["partner", "outreach_owner", "validator", "account_lead", "data_steward"];
 

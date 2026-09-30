@@ -1,7 +1,7 @@
 /** Read queries for people and companies. Every function takes a workspace ID and runs scoped. */
 import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
 import { withWorkspace } from "@/db/client";
-import { auditLog, companies, fieldSources, offLimits, persons, placements, queueItems, roles, users } from "@/db/schema";
+import { actions, auditLog, companies, fieldSources, offLimits, persons, placements, queueItems, roles, users } from "@/db/schema";
 import { reversibleMerge } from "@/domain/merge";
 import { normaliseCompanyName, normaliseName } from "@/lib/normalise";
 
@@ -162,8 +162,14 @@ export async function getPerson(workspaceId: string, personId: string) {
       .select({ id: queueItems.id })
       .from(queueItems)
       .where(and(eq(queueItems.kind, "possible_duplicate"), eq(queueItems.status, "pending"), sql`${queueItems.payload}->'person_ids' ? ${personId}`));
+    const openActions = await tx
+      .select({ id: actions.id, type: actions.type, status: actions.status, dueAt: actions.dueAt, headline: sql<string | null>`coalesce(${actions.headline}, (select s.headline from dmi.signals s where s.id = ${actions.signalId}))`, blockedReason: actions.blockedReason })
+      .from(actions)
+      .where(and(eq(actions.personId, personId), inArray(actions.status, ["open", "drafted", "awaiting_approval", "approved", "sent"])))
+      .orderBy(actions.dueAt);
     return {
       person,
+      openActions,
       roles: personRoles.map((r) => ({ ...r.role, companyName: r.companyName })),
       placement: placement ?? null,
       mergedInto,

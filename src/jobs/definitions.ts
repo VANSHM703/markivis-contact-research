@@ -10,6 +10,14 @@ export interface ScheduleEntry {
   cron: string;
   /** Fixed time zone; omit to use the workspace's own. */
   tz?: string;
+  /** Derives the cron from workspace settings instead, for example the digest time. */
+  cronFromSettings?: (settings: Record<string, unknown>) => string;
+}
+
+/** "08:00" in settings.digest_time to "0 8 * * *"; anything malformed falls back to 08:00. */
+export function digestCron(settings: Record<string, unknown>): string {
+  const match = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(settings.digest_time ?? ""));
+  return match ? `${Number(match[2])} ${Number(match[1])} * * *` : "0 8 * * *";
 }
 
 export interface JobDefinition {
@@ -50,8 +58,9 @@ export const JOBS: JobDefinition[] = [
   { name: "pipeline.research", builtIn: "M4", scope: "workspace", schedules: [], notes: "On demand, when a validator sends an item for more research." },
   { name: "validation.spot_check", builtIn: "M4", scope: "workspace", schedules: [{ slot: "weekly", cron: "0 5 * * 1" }] },
   { name: "stats.sources", builtIn: "M4", scope: "workspace", schedules: [{ slot: "weekly", cron: "30 5 * * 1" }] },
-  { name: "actions.sla", builtIn: "M5", scope: "workspace", schedules: [{ slot: "hourly", cron: "0 * * * *" }] },
-  { name: "digest.daily", builtIn: "M5", scope: "workspace", schedules: [{ slot: "daily", cron: "0 8 * * *" }], notes: "At the workspace digest_time." },
+  { name: "actions.sla", builtIn: "M5", scope: "workspace", schedules: [{ slot: "hourly", cron: "0 * * * *" }], notes: "Escalates actions overdue by one working day (BRD 12.8)." },
+  { name: "digest.daily", builtIn: "M5", scope: "workspace", schedules: [{ slot: "daily", cron: "0 8 * * *", cronFromSettings: digestCron }], notes: "At the workspace digest_time." },
+  { name: "notifications.send", builtIn: "M5", scope: "workspace", schedules: [{ slot: "every1", cron: "* * * * *" }], notes: "Delivers queued alerts; also sent right after the event that queues them." },
   { name: "capture.mail", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }] },
   { name: "capture.calendar", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }] },
   { name: "rel.score", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "0 1 * * *" }] },
@@ -62,7 +71,7 @@ export const JOBS: JobDefinition[] = [
   { name: "compliance.retention", builtIn: "M10", scope: "workspace", schedules: [{ slot: "monthly", cron: "0 9 1-7 * 1" }], notes: "First Monday of the month." },
 ];
 
-const BUILT = new Set(["M3", "M4"]);
+const BUILT = new Set(["M3", "M4", "M5"]);
 export const ACTIVE_JOBS = JOBS.filter((j) => BUILT.has(j.builtIn));
 
 /** pg-boss schedule keys allow letters, digits, _ - . / only. */
