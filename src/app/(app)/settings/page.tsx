@@ -2,13 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PermissionDenied } from "@/components/ui/PermissionDenied";
+import { execSearchOn } from "@/lib/packs";
 import { allowed, pageContext } from "@/server/guards";
 import styles from "@/components/settings/Settings.module.css";
 
 export const metadata: Metadata = { title: "Settings" };
 
 // BRD 16.2: the Settings screen's sections, and the milestone that brings each one.
-const SECTIONS = [
+type Section = { title: string; body: string; href?: string; later?: string };
+
+const PACK_SECTIONS: Section[] = [
+  { title: "Off-limits rules", body: "Companies whose executives are not approached as candidates. Partners only.", href: "/settings/off-limits" },
+  { title: "Placements", body: "Import the executives your firm has placed.", href: "/people/placements/import" },
+];
+
+const SECTIONS: Section[] = [
   { title: "Sources", body: "Feeds, connection checks, Apollo key and newsletter uploads.", href: "/settings/sources" },
   { title: "Members and roles", body: "Invite people and set their roles.", later: "M10" },
   { title: "Mailbox and calendar", body: "Connect Microsoft 365 for activity capture.", later: "M7" },
@@ -31,11 +39,16 @@ export default async function SettingsPage() {
       </>
     );
   }
+  const sections = [
+    ...SECTIONS,
+    ...(execSearchOn(ctx.workspace) ? PACK_SECTIONS.filter((p) => p.href !== "/settings/off-limits" || allowed(ctx, "off_limits.set")) : []),
+    ...(ctx.user.isPlatformAdmin ? [{ title: "Packs", body: "Switch workspace modules on or off. Platform admins only.", href: "/settings/packs" }] : []),
+  ];
   return (
     <>
       <PageHeader title="Settings" lede={`Configuration for ${ctx.workspace.name}.`} />
       <div className={styles.sections}>
-        {SECTIONS.map((s) =>
+        {sections.map((s) =>
           s.href ? (
             <Link key={s.title} href={s.href} className={`card ${styles.section}`}>
               <h2 className="t-heading-card">{s.title} <span className="arrow t-meta" aria-hidden="true">→</span></h2>

@@ -1,11 +1,13 @@
 /**
  * Signals raised by rules rather than extraction (BRD 9.3): first-party content engagement, from
  * the interests the newsletter adapter records (BRD 8.6), and CEO tenure past the threshold. Both
- * are priority 3 and go to the weekly batch. Idempotent: each fires once per subject.
+ * are priority 3 and go to the weekly batch. Idempotent: each fires once per subject. CEO tenure
+ * (succession watch) runs only with the executive search pack on.
  */
 import { and, eq, sql } from "drizzle-orm";
 import type { Tx } from "@/db/client";
 import { companies, personInterests, persons, roles, signals, workspaces } from "@/db/schema";
+import { execSearchOn } from "@/lib/packs";
 
 export async function raiseDerivedSignals(tx: Tx, workspaceId: string, now = new Date()): Promise<number> {
   const [ws] = await tx.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
@@ -36,7 +38,9 @@ export async function raiseDerivedSignals(tx: Tx, workspaceId: string, now = new
     raised++;
   }
 
-  // CEO tenure: once per CEO role when it passes the threshold (default 7 years).
+  // CEO tenure: once per CEO role when it passes the threshold (default 7 years). Succession
+  // watch is part of the executive search pack (BRD 13).
+  if (!execSearchOn(ws)) return raised;
   const years = settings.ceo_tenure_years ?? 7;
   const ceos = await tx
     .select({ roleId: roles.id, companyId: roles.companyId, personId: roles.personId, since: roles.effectiveOn, company: companies.name, name: persons.fullName })

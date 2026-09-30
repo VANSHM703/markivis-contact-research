@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { aiMode } from "@/ai/adapter";
 import { SIGNAL_TYPES } from "@/ai/contracts";
 import { withWorkspace } from "@/db/client";
-import { draftForAction } from "@/domain/actions";
+import { actionsToDraft, draftForAction } from "@/domain/actions";
 import { QueueItemError, resolveConflict, resolveDuplicate } from "@/domain/queue-items";
 import { enqueueQuietly } from "@/jobs/enqueue";
 import {
@@ -85,15 +85,15 @@ function editsFrom(formData: FormData): SignalEdits {
 export async function confirmSignalAction(signalId: string, tab: Tab, formData: FormData): Promise<void> {
   const ctx = await requireValidator();
   const actor = { workspaceId: ctx.workspace.id, userId: ctx.user.id };
-  let actionId: string | null = null;
+  let toDraft: string[] = [];
   try {
     const result = await withWorkspace(ctx.workspace.id, (tx) => confirmSignal(tx, actor, signalId, { edits: editsFrom(formData) }));
-    actionId = result.action?.needsDraft ? result.action.actionId : null;
+    toDraft = actionsToDraft(result.action);
   } catch (error) {
     if (error instanceof ValidationError) redirect(`/queue?tab=${tab}&notice=item_gone`);
     throw error;
   }
-  if (actionId) await draftForAction(ctx.workspace.id, actionId).catch(() => undefined);
+  for (const id of toDraft) await draftForAction(ctx.workspace.id, id).catch(() => undefined);
   await afterDecision(ctx.workspace.id, tab, signalId, "signal_confirmed");
 }
 
@@ -138,7 +138,7 @@ export async function approveBatchAction(formData: FormData): Promise<void> {
   const ctx = await requireValidator();
   const ids = formData.getAll("signal_id").map(String).filter((id) => /^[0-9a-f-]{36}$/i.test(id));
   const result = await withWorkspace(ctx.workspace.id, (tx) => approveBatch(tx, { workspaceId: ctx.workspace.id, userId: ctx.user.id }, ids));
-  for (const a of result.actions) if (a.needsDraft) await draftForAction(ctx.workspace.id, a.actionId).catch(() => undefined);
+  for (const id of result.actions.flatMap(actionsToDraft)) await draftForAction(ctx.workspace.id, id).catch(() => undefined);
   redirect(`/queue?tab=batch&notice=batch_approved&count=${result.confirmed}`);
 }
 

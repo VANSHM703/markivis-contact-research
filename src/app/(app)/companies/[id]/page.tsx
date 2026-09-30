@@ -3,7 +3,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Chip } from "@/components/ui/Chip";
 import { Notice } from "@/components/ui/Notice";
+import { MandateNotes } from "@/components/pack/MandateNotes";
+import { describeRule, ruleState } from "@/domain/off-limits";
 import { getRequestContext } from "@/lib/context";
+import { execSearchOn } from "@/lib/packs";
+import { localDate } from "@/lib/working-days";
 import { CLIENT_STATUS_LABELS, formatDate, OWNERSHIP_LABELS, SEAT_TYPE_LABELS } from "@/lib/format/labels";
 import { can } from "@/lib/permissions";
 import { getCompany } from "@/server/records";
@@ -29,13 +33,15 @@ export default async function CompanyPage({ params, searchParams }: Props) {
   if (!UUID_RE.test(id)) notFound();
   const record = await getCompany(ctx.workspace.id, id);
   if (!record) notFound();
-  const { company, seats, offLimits } = record;
+  const { company, seats, offLimits, placements } = record;
   const editor = can(ctx.role, "records.edit");
-  const packOn = ctx.workspace.packs.exec_search;
+  const packOn = execSearchOn(ctx.workspace);
+  const canNotes = packOn && can(ctx.role, "mandate_notes.view");
+  const canSetRules = packOn && can(ctx.role, "off_limits.set");
   const leadership = seats.filter((s) => s.seatType !== "board");
   const board = seats.filter((s) => s.seatType === "board");
-  const today = new Date().toISOString().slice(0, 10);
-  const activeRules = offLimits.filter((r) => r.startsOn <= today && (!r.endsOn || r.endsOn >= today));
+  const today = localDate(new Date(), ctx.workspace.timezone);
+  const activeRules = offLimits.filter((r) => ruleState(r, today) === "active");
 
   return (
     <>
@@ -55,6 +61,7 @@ export default async function CompanyPage({ params, searchParams }: Props) {
           <div className={`${styles.headerActions} btn-row`}>
             <Link href={`/companies/${company.id}/edit`} className="btn btn--ghost">Edit details</Link>
             <Link href={`/people/new?company=${company.id}`} className="btn btn--ghost">Add person</Link>
+            {canSetRules ? <Link href={`/settings/off-limits?company=${company.id}`} className="btn btn--ghost">Add off-limits rule</Link> : null}
           </div>
         ) : null}
       </div>
@@ -99,7 +106,7 @@ export default async function CompanyPage({ params, searchParams }: Props) {
               <ul className={styles.seats}>
                 {offLimits.map((r) => (
                   <li key={r.id}>
-                    <span>{r.scope === "company" ? "Whole company" : r.scope === "function" ? `${r.function} function` : "By seniority"}, {OFF_LIMITS_REASON[r.reason]}</span>
+                    <span>{describeRule(r)}, {OFF_LIMITS_REASON[r.reason]}{ruleState(r, today) !== "active" ? (ruleState(r, today) === "ended" ? " (ended)" : " (starts later)") : ""}</span>
                     <span className="t-meta t-muted">
                       {formatDate(r.startsOn)} to {r.endsOn ? formatDate(r.endsOn) : "no end date"}
                     </span>
@@ -108,8 +115,26 @@ export default async function CompanyPage({ params, searchParams }: Props) {
               </ul>
             </>
           ) : null}
+          {packOn && placements.length > 0 ? (
+            <>
+              <h3 className={styles.subheading}>Placements</h3>
+              <ul className={styles.seats}>
+                {placements.map((p) => (
+                  <li key={p.id}>
+                    <span><Link href={`/people/${p.personId}`}>{p.personName}</Link>, {p.roleTitle}</span>
+                    <span className="t-meta t-muted">Placed {formatDate(p.placedOn)}{p.searchReference ? ` · ${p.searchReference}` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
         </section>
       </div>
+      {canNotes ? (
+        <div className={styles.spaced}>
+          <MandateNotes actor={{ workspaceId: ctx.workspace.id, userId: ctx.user.id, role: ctx.role }} target={{ companyId: company.id }} kind="company" id={company.id} tz={ctx.workspace.timezone} />
+        </div>
+      ) : null}
     </>
   );
 }

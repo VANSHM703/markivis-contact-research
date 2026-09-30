@@ -5,7 +5,8 @@
  */
 import { and, eq, sql } from "drizzle-orm";
 import type { Tx } from "@/db/client";
-import { consents, offLimits, persons, roles, workspaces } from "@/db/schema";
+import { consents, offLimits, persons, roles } from "@/db/schema";
+import { execSearchOnFor } from "@/lib/packs";
 import { isSuppressed } from "./suppression";
 import { SENIORITY_RANK, type Seniority } from "./titles";
 
@@ -104,8 +105,7 @@ export function evaluateChecks(facts: CheckFacts, purpose: Purpose, today: strin
 export async function loadCheckFacts(tx: Tx, workspaceId: string, personId: string): Promise<CheckFacts | null> {
   const [person] = await tx.select().from(persons).where(eq(persons.id, personId)).limit(1);
   if (!person) return null;
-  const [ws] = await tx.select({ packs: workspaces.packs, flags: workspaces.flags }).from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
-  const packOn = (ws?.packs as Record<string, boolean> | undefined)?.exec_search !== false && (ws?.flags as Record<string, boolean> | undefined)?.["pack.exec_search"] !== false;
+  const packOn = await execSearchOnFor(tx, workspaceId);
 
   const personRoles = await tx
     .select({ companyId: roles.companyId, function: roles.function, seniority: roles.seniority, seatType: roles.seatType, status: roles.status, email: roles.businessEmail, emailStatus: roles.emailStatus })
@@ -133,7 +133,7 @@ export async function loadCheckFacts(tx: Tx, workspaceId: string, personId: stri
     status: person.status,
     suppressed: await isSuppressed(tx, workspaceId, { emails: personRoles.map((r) => r.email), linkedinUrls: [person.linkedinUrl] }),
     country: person.country,
-    contactTypes: person.contactTypes,
+    contactTypes: packOn ? person.contactTypes : [],
     emailConsent: consentOf("email"),
     linkedinConsent: consentOf("linkedin"),
     hasVerifiedEmail: personRoles.some((r) => r.status === "current" && r.email && r.emailStatus === "verified"),

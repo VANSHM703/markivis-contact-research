@@ -7,9 +7,10 @@ import type { DraftInput, SignalType } from "@/ai/contracts";
 import { getAi, type AiAdapter } from "@/ai/adapter";
 import { AiBudgetPausedError, assertAiAllowed, recordAiCall } from "@/ai/budget";
 import { withWorkspace, type Tx } from "@/db/client";
-import { actions, companies, contentItems, drafts, interactions, personInterests, persons, roles, signals, signalSources, users, workspaceMembers, workspaces } from "@/db/schema";
+import { actions, companies, contentItems, drafts, interactions, personInterests, persons, placements, roles, signals, signalSources, users, workspaceMembers, workspaces } from "@/db/schema";
 import { audit } from "@/lib/audit";
 import { addWorkingDays, localDate } from "@/lib/working-days";
+import { execSearchOn, execSearchOnFor } from "@/lib/packs";
 import { appLink, EMAIL_FOOTER, queueNotification } from "@/mail/notify";
 import { SIGNAL_RULES } from "@/pipeline/rules";
 import { evaluateChecks, loadCheckFacts, type Channel, type Purpose } from "./checks";
@@ -43,12 +44,12 @@ async function partnerOf(tx: Tx): Promise<string | null> {
 }
 
 /** Whom a company signal is for (BRD 12.1): the person named, else the most senior tracked person there. */
-async function targetForCompany(tx: Tx, companyId: string): Promise<string | null> {
+async function targetForCompany(tx: Tx, companyId: string, excludePersonId?: string): Promise<string | null> {
   const people = await tx
     .select({ personId: roles.personId, seniority: roles.seniority, title: roles.titleNormalised, status: persons.status })
     .from(roles)
     .innerJoin(persons, eq(persons.id, roles.personId))
-    .where(and(eq(roles.companyId, companyId), eq(roles.status, "current"), eq(persons.isTracked, true), sql`${persons.mergedIntoId} is null`, sql`${persons.status} <> 'do_not_contact'`));
+    .where(and(eq(roles.companyId, companyId), eq(roles.status, "current"), eq(persons.isTracked, true), sql`${persons.mergedIntoId} is null`, sql`${persons.status} <> 'do_not_contact'`, excludePersonId ? sql`${persons.id} <> ${excludePersonId}` : undefined));
   const order = (t: string | null) => (t === "CEO" ? 0 : t === "Chair" ? 1 : 2);
   people.sort((a, b) => order(a.title) - order(b.title) || SENIORITY_RANK[b.seniority] - SENIORITY_RANK[a.seniority]);
   return people[0]?.personId ?? null;
@@ -59,6 +60,39 @@ export interface CreatedAction {
   needsDraft: boolean;
   /** The signal was added to an open action from the last 7 days (BRD 12.2 step 5). */
   merged?: boolean;
+  /** Further actions from the same signal: the backfill check-in when a placed executive leaves (BRD 13). */
+  also?: CreatedAction[];
+}
+
+/** Every action a creation produced that still needs its first draft. */
+export function actionsToDraft(created: CreatedAction | null | undefined): string[] {
+  if (!created) return [];
+  return [...(created.needsDraft ? [created.actionId] : []), ...(created.also ?? []).flatMap(actionsToDraft)];
+}
+
+const LEAVING_TYPES = ["person_left", "person_joined", "person_move_announced"];
+
+/** The company a movement signal says the person is leaving: an ended role, or the left company. */
+function companyLeft(signal: SignalRow): string | null {
+  const ended = ((signal.proposedChanges ?? []) as { kind: string; company_id?: string }[]).find((c) => c.kind === "end_role");
+  if (ended?.company_id) return ended.company_id;
+  return signal.type === "person_left" ? signal.companyId : null;
+}
+
+/**
+ * A placed executive leaving (BRD 13): besides the check-in with the person, a check-in with the
+ * most senior tracked person at the company they left, for a possible backfill search.
+ */
+async function backfillAction(tx: Tx, signal: SignalRow, personId: string, confirmedAt: Date): Promise<CreatedAction | null> {
+  if (!LEAVING_TYPES.includes(signal.type)) return null;
+  const [placed] = await tx.select({ id: placements.id }).from(placements).where(eq(placements.personId, personId)).limit(1);
+  const companyId = companyLeft(signal);
+  if (!placed || !companyId) return null;
+  const targetId = await targetForCompany(tx, companyId, personId);
+  const [company] = await tx.select({ name: companies.name }).from(companies).where(eq(companies.id, companyId)).limit(1);
+  const [person] = await tx.select({ name: persons.fullName }).from(persons).where(eq(persons.id, personId)).limit(1);
+  const headline = `Possible backfill search at ${company?.name ?? "their former company"}: ${person?.name ?? "a placed executive"} is leaving`.slice(0, 140);
+  return createFor(tx, signal, confirmedAt, { personId: targetId, companyId, type: targetId ? "check_in" : "custom", headline: targetId ? headline : `Find the right contact at ${company?.name ?? "this company"}: ${person?.name ?? "a placed executive"} is leaving`.slice(0, 140) });
 }
 
 export const OPEN_STATUSES = ["open", "drafted", "awaiting_approval", "approved"] as const;
@@ -104,8 +138,6 @@ async function alertP1Change(tx: Tx, signal: SignalRow, personId: string, ownerU
 export async function createActionForSignal(tx: Tx, signal: SignalRow, confirmedAt: Date, options: { force?: boolean } = {}): Promise<CreatedAction | null> {
   const rule = SIGNAL_RULES[signal.type as SignalType];
   if (!options.force && (signal.priority > 2 || !rule.action)) return null;
-  const [ws] = await tx.select().from(workspaces).where(eq(workspaces.id, signal.workspaceId)).limit(1);
-  const settings = (ws!.settings ?? {}) as Settings;
 
   let personId = signal.personId;
   let type: ActionType = rule.action ?? "custom";
@@ -116,8 +148,22 @@ export async function createActionForSignal(tx: Tx, signal: SignalRow, confirmed
     type = "custom";
     headline = `Find the right contact at ${company?.name ?? "this company"}`;
   }
+  const main = await createFor(tx, signal, confirmedAt, { personId, companyId: signal.companyId, type, headline });
+  const packOn = await execSearchOnFor(tx, signal.workspaceId);
+  const backfill = packOn && signal.personId ? await backfillAction(tx, signal, signal.personId, confirmedAt) : null;
+  if (!backfill) return main;
+  if (!main) return backfill;
+  return { ...main, also: [backfill] };
+}
 
-  const purpose = purposeForType(type);
+/** One action for one subject, with the checks, the 7-day merge and the priority 1 alert. */
+async function createFor(tx: Tx, signal: SignalRow, confirmedAt: Date, target: { personId: string | null; companyId: string | null; type: ActionType; headline: string | null }): Promise<CreatedAction | null> {
+  const rule = SIGNAL_RULES[signal.type as SignalType];
+  const [ws] = await tx.select().from(workspaces).where(eq(workspaces.id, signal.workspaceId)).limit(1);
+  const settings = (ws!.settings ?? {}) as Settings;
+  const { personId, type, headline } = target;
+
+  const purpose = execSearchOn(ws) ? purposeForType(type) : "client";
   let blocked: { reason: string; note: string } | null = null;
   if (personId) {
     const [person] = await tx.select({ isTracked: persons.isTracked }).from(persons).where(eq(persons.id, personId)).limit(1);
@@ -151,7 +197,7 @@ export async function createActionForSignal(tx: Tx, signal: SignalRow, confirmed
       workspaceId: signal.workspaceId,
       signalId: signal.id,
       personId,
-      companyId: signal.companyId,
+      companyId: target.companyId,
       type,
       purpose,
       status: offLimits ? "dismissed" : "open",
@@ -250,7 +296,9 @@ export async function draftForAction(workspaceId: string, actionId: string, opti
     if (!DRAFTABLE.includes(action.status)) return { kind: "skipped", note: "This action is closed, so it cannot be redrafted." };
     const [ws] = await tx.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
     const settings = ws!.settings as Record<string, unknown> & Settings;
-    const purpose = options.purpose ?? action.purpose;
+    // Without the executive search pack every approach is a client approach (BRD 13).
+    const packOn = execSearchOn(ws);
+    const purpose: Purpose = packOn ? (options.purpose ?? action.purpose) : "client";
 
     const facts = await loadCheckFacts(tx, workspaceId, action.personId);
     const previous = await tx.select({ version: drafts.version, channel: drafts.channel }).from(drafts).where(eq(drafts.actionId, actionId)).orderBy(desc(drafts.version)).limit(1);
@@ -298,6 +346,7 @@ export async function draftForAction(workspaceId: string, actionId: string, opti
       band: band?.band ?? null,
       contentItem: content ? { title: content.title, description: content.description, url: content.url } : null,
       channel: check.channel,
+      approach: packOn ? purpose : null,
       instruction: options.instruction?.trim().slice(0, 300) || null,
     };
     return { input, settings, contentId: content?.id ?? null, version: (previous[0]?.version ?? 0) + 1, names, purpose };

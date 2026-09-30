@@ -39,7 +39,12 @@ export function createMockAi(now: () => Date): AiAdapter {
     async draftMessage(input) {
       const first = input.partnerName.split(" ")[0] ?? input.partnerName;
       const reason = input.signal ? `I saw the news: ${input.signal.headline.replace(/\.$/, "")}.` : "It has been a while since we last spoke.";
-      const ask = input.suggestedAction === "congratulate" ? "Congratulations. If it would be useful, I would be glad to compare notes on the first months in the role." : "Would you have time in the next few weeks for a short call?";
+      const ask =
+        input.approach === "candidate"
+          ? "I am working on a search you may find worth hearing about for your own next step. Would you be open to a confidential conversation?"
+          : input.suggestedAction === "congratulate"
+            ? "Congratulations. If it would be useful, I would be glad to compare notes on the leadership team as you settle in."
+            : "Would you have time in the next few weeks for a short call about your leadership team?";
       const content = input.contentItem ? ` You may find our recent piece, "${input.contentItem.title}", relevant.` : "";
       const body = `[Mock draft] Dear ${input.person.preferredName},\n\n${reason}${content} ${ask}\n\nBest regards,\n${first}`;
       return {

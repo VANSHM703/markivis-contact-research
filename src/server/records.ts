@@ -3,6 +3,8 @@ import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } 
 import { withWorkspace } from "@/db/client";
 import { actions, auditLog, companies, fieldSources, offLimits, persons, placements, queueItems, roles, users } from "@/db/schema";
 import { reversibleMerge } from "@/domain/merge";
+import { offLimitsCoversSql } from "@/domain/off-limits";
+import { placementsFor } from "@/domain/placements";
 import { normaliseCompanyName, normaliseName } from "@/lib/normalise";
 
 export const PAGE_SIZE = 50;
@@ -17,7 +19,7 @@ export interface PeopleFilters {
   tier?: 1 | 2 | 3;
   ownership?: string;
   seatType?: string;
-  flag?: "placed" | "do_not_contact" | "off_list" | "no_current_role" | "priority";
+  flag?: "placed" | "off_limits" | "do_not_contact" | "off_list" | "no_current_role" | "priority";
   companyId?: string;
 }
 
@@ -43,7 +45,7 @@ export function parsePeopleFilters(params: Params): PeopleFilters {
     tier: tierOf(one(params.tier)),
     ownership: ["public", "pe_backed", "vc_backed", "private", "non_profit", "unknown"].find((o) => o === one(params.ownership)),
     seatType: ["executive", "board", "advisory", "pe_operating_partner", "pe_deal_partner", "other"].find((t) => t === one(params.seat_type)),
-    flag: (["placed", "do_not_contact", "off_list", "no_current_role", "priority"] as const).find((f) => f === flag),
+    flag: (["placed", "off_limits", "do_not_contact", "off_list", "no_current_role", "priority"] as const).find((f) => f === flag),
     companyId: company && UUID_RE.test(company) ? company : undefined,
   };
 }
@@ -81,11 +83,12 @@ export interface PersonRow {
   status: "active" | "no_current_role" | "do_not_contact";
   isOffList: boolean;
   isPlaced: boolean;
+  isOffLimits: boolean;
   isPriority: boolean;
   country: string | null;
 }
 
-function peopleWhere(f: PeopleFilters): SQL | undefined {
+function peopleWhere(f: PeopleFilters, today: string): SQL | undefined {
   const clauses: (SQL | undefined)[] = [isNull(persons.mergedIntoId)];
   if (f.q) {
     const q = normaliseName(f.q);
@@ -97,6 +100,7 @@ function peopleWhere(f: PeopleFilters): SQL | undefined {
   if (f.seatType) clauses.push(sql`exists (select 1 from ${roles} r where r.person_id = ${persons}.id and r.status = 'current' and r.seat_type = ${f.seatType})`);
   if (f.companyId) clauses.push(sql`exists (select 1 from ${roles} r where r.person_id = ${persons}.id and r.company_id = ${f.companyId})`);
   if (f.flag === "placed") clauses.push(sql`exists (select 1 from ${placements} pl where pl.person_id = ${persons}.id)`);
+  if (f.flag === "off_limits") clauses.push(offLimitsCoversSql(sql`${persons}.id`, today));
   if (f.flag === "do_not_contact") clauses.push(eq(persons.status, "do_not_contact"));
   if (f.flag === "no_current_role") clauses.push(eq(persons.status, "no_current_role"));
   if (f.flag === "off_list") clauses.push(eq(persons.isOffList, true));
@@ -104,9 +108,9 @@ function peopleWhere(f: PeopleFilters): SQL | undefined {
   return and(...clauses);
 }
 
-export async function listPeople(workspaceId: string, page = 1, filters: PeopleFilters = {}): Promise<{ rows: PersonRow[]; total: number }> {
+export async function listPeople(workspaceId: string, page = 1, filters: PeopleFilters = {}, today = new Date().toISOString().slice(0, 10)): Promise<{ rows: PersonRow[]; total: number }> {
   const offset = (Math.max(1, page) - 1) * PAGE_SIZE;
-  const where = peopleWhere(filters);
+  const where = peopleWhere(filters, today);
   return withWorkspace(workspaceId, async (tx) => {
     const base = tx
       .select({ total: count() })
@@ -128,6 +132,7 @@ export async function listPeople(workspaceId: string, page = 1, filters: PeopleF
         country: persons.country,
         // Correlated subqueries use explicit aliases: Drizzle renders bare column names inside raw SQL.
         isPlaced: sql<boolean>`exists (select 1 from ${placements} pl where pl.person_id = ${persons}.id)`,
+        isOffLimits: sql<boolean>`${offLimitsCoversSql(sql`${persons}.id`, today)}`,
       })
       .from(persons)
       .leftJoin(roles, and(eq(roles.personId, persons.id), eq(roles.isPrimary, true)))
@@ -140,10 +145,12 @@ export async function listPeople(workspaceId: string, page = 1, filters: PeopleF
   });
 }
 
-export async function getPerson(workspaceId: string, personId: string) {
+export async function getPerson(workspaceId: string, personId: string, today = new Date().toISOString().slice(0, 10)) {
   return withWorkspace(workspaceId, async (tx) => {
     const [person] = await tx.select().from(persons).where(eq(persons.id, personId)).limit(1);
     if (!person) return null;
+    const [{ covered } = { covered: false }] = await tx.select({ covered: offLimitsCoversSql(sql`${personId}::uuid`, today) }).from(sql`(select 1) as one`);
+    const placementRows = await placementsFor(tx, { personId });
     const personRoles = await tx
       .select({ role: roles, companyName: companies.name })
       .from(roles)
@@ -170,6 +177,8 @@ export async function getPerson(workspaceId: string, personId: string) {
     return {
       person,
       openActions,
+      isOffLimits: covered as boolean,
+      placements: placementRows,
       roles: personRoles.map((r) => ({ ...r.role, companyName: r.companyName })),
       placement: placement ?? null,
       mergedInto,
@@ -265,7 +274,7 @@ export async function getCompany(workspaceId: string, companyId: string) {
       .where(and(eq(roles.companyId, companyId), inArray(roles.status, ["current", "announced"]), isNull(persons.mergedIntoId)))
       .orderBy(sql`${roles.seatType} = 'board'`, asc(roles.title));
     const rules = await tx.select().from(offLimits).where(eq(offLimits.companyId, companyId));
-    return { company, seats, offLimits: rules };
+    return { company, seats, offLimits: rules, placements: await placementsFor(tx, { companyId }) };
   });
 }
 

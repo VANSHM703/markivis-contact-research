@@ -13,8 +13,9 @@ import { withWorkspace, type Tx } from "@/db/client";
 import { companies, placements, rawItems, roles, signals, signalSources, workspaces } from "@/db/schema";
 import { resolveCompany } from "@/domain/matching";
 import { normaliseTitle } from "@/domain/titles";
-import { draftForAction } from "@/domain/actions";
+import { actionsToDraft, draftForAction } from "@/domain/actions";
 import { log } from "@/lib/log";
+import { execSearchOn } from "@/lib/packs";
 import { buildIndex, prefilter, type PrefilterResult, type WorkspaceIndex } from "./prefilter";
 import { combineConfidence, dedupeKey, eventDateOf, laneOf, priorityOf, SIGNAL_RULES, withinDays, type SourceFacts } from "./rules";
 import { confirmSignal } from "./validation";
@@ -28,7 +29,7 @@ export type ProposedChange =
   | { kind: "set_off_list"; person_id: string };
 
 type RawItem = typeof rawItems.$inferSelect;
-type Ws = { flags: Record<string, boolean>; settings: Record<string, unknown>; timezone: string };
+type Ws = { flags: Record<string, boolean>; packs: Record<string, unknown>; settings: Record<string, unknown>; timezone: string };
 
 export interface ProcessResult {
   rawItemId: string;
@@ -38,7 +39,8 @@ export interface ProcessResult {
   status?: string;
   reason?: string;
   /** An action created by auto-confirmation, drafted after the transaction commits. */
-  actionId?: string;
+  /** Actions created by an auto-confirmation that need their first draft. */
+  actionIds?: string[];
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -188,7 +190,7 @@ export async function processRawItem(workspaceId: string, itemId: string, ai: Ai
     if (!item || item.processedAt) return null;
     const [ws] = await tx.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
     const pre = prefilter({ sourceType: item.sourceType, title: item.title, bodyText: item.bodyText, url: item.url, payload: item.payload as Record<string, unknown> | null }, index);
-    return { item, pre, ws: { flags: ws!.flags as Record<string, boolean>, settings: ws!.settings as Record<string, unknown>, timezone: ws!.timezone } as Ws };
+    return { item, pre, ws: { flags: ws!.flags as Record<string, boolean>, packs: ws!.packs as Record<string, unknown>, settings: ws!.settings as Record<string, unknown>, timezone: ws!.timezone } as Ws };
   });
   if (!prep) return { rawItemId: itemId, outcome: "skipped" };
   const { item, pre, ws } = prep;
@@ -279,7 +281,8 @@ export async function processRawItem(workspaceId: string, itemId: string, ai: Ai
 
     // Stages 6 to 8.
     const confidence = combineConfidence([source], { companyDomain: resolved.companyDomain, reputableOutlets });
-    const [placed] = resolved.personId ? await tx.select({ id: placements.id }).from(placements).where(eq(placements.personId, resolved.personId)).limit(1) : [];
+    // The placement override belongs to the executive search pack (BRD 7.3, 13).
+    const [placed] = resolved.personId && execSearchOn(ws) ? await tx.select({ id: placements.id }).from(placements).where(eq(placements.personId, resolved.personId)).limit(1) : [];
     const priority = priorityOf({ type: resolved.type, personIsPlaced: !!placed, offList: resolved.offList });
     const suspended = Object.keys(suspendedSources(ws.settings)).includes(item.sourceType);
     const matchScore = extraction && !aiNote ? extraction.match_confidence : 0;
@@ -317,12 +320,12 @@ export async function processRawItem(workspaceId: string, itemId: string, ai: Ai
     await tx.update(rawItems).set({ processedAt: now, outcome: "signal_created" }).where(eq(rawItems.id, itemId));
 
     // Stage 9: the auto-confirm lane confirms now, unless the workspace is in its shadow run.
-    let actionId: string | undefined;
+    let actionIds: string[] | undefined;
     if (lane.lane === "auto_confirm" && !shadow) {
       const { action } = await confirmSignal(tx, { workspaceId, userId: null, kind: "system" }, signal!.id, { auto: true, now });
-      if (action?.needsDraft) actionId = action.actionId;
+      actionIds = actionsToDraft(action);
     }
-    return { rawItemId: itemId, outcome: "signal_created", signalId: signal!.id, lane: lane.lane, status: lane.lane === "auto_confirm" && !shadow ? "confirmed" : shadow ? "shadow" : "pending", actionId };
+    return { rawItemId: itemId, outcome: "signal_created", signalId: signal!.id, lane: lane.lane, status: lane.lane === "auto_confirm" && !shadow ? "confirmed" : shadow ? "shadow" : "pending", actionIds };
   });
   return result;
 }
@@ -345,10 +348,10 @@ export async function processPending(workspaceId: string, options: { ai?: AiAdap
     try {
       const result = await processRawItem(workspaceId, id, ai, index, now());
       processed.push(result);
-      if (result.actionId) {
-        // Drafting is separate from the signal: a failed draft leaves the action to be redrafted.
-        await draftForAction(workspaceId, result.actionId, { ai, now }).catch((error: unknown) =>
-          log.error("pipeline.draft_failed", { workspaceId, actionId: result.actionId, error: (error as Error).message }),
+      // Drafting is separate from the signal: a failed draft leaves the action to be redrafted.
+      for (const actionId of result.actionIds ?? []) {
+        await draftForAction(workspaceId, actionId, { ai, now }).catch((error: unknown) =>
+          log.error("pipeline.draft_failed", { workspaceId, actionId, error: (error as Error).message }),
         );
       }
     } catch (error) {

@@ -31,6 +31,7 @@ export async function loadSeed(now: Date = new Date()): Promise<SeedBundle> {
       await insertChunked(tx, s.consents, w.consents);
       await insertChunked(tx, s.fieldSources, w.fieldSources);
       await insertChunked(tx, s.personInterests, w.personInterests);
+      await insertChunked(tx, s.mandateNotes, w.mandateNotes);
       await audit(tx, {
         workspaceId: w.workspace.id,
         actorUserId: null,

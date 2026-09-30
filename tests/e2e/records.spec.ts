@@ -33,7 +33,8 @@ test("adds a person by hand, with a source note", async ({ page }) => {
 
   await page.getByLabel("Full name").fill(PERSON);
   await page.getByLabel("City").fill("Portland");
-  await page.getByLabel("Prospective client").check();
+  // Harbor has the executive search pack off, so the form has no contact types (BRD 13).
+  await expect(page.getByRole("group", { name: "Contact type" })).toHaveCount(0);
   await chooseCompany(page, "Tarnwick");
   await expect(page.getByText("Existing company")).toBeVisible();
   await page.getByLabel("Title").fill("Chief Operating Officer");

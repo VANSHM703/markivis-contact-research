@@ -14,6 +14,7 @@ import { OPEN_STATUSES } from "@/domain/actions";
 import { DISMISS_REASONS, OUTCOMES } from "@/domain/action-flow";
 import { ACTION_STATUS_LABELS, ACTION_TYPE_LABELS, CONTACT_TYPE_LABELS, DISMISS_REASON_LABELS, formatDateIn, OUTCOME_LABELS, pageParam } from "@/lib/format/labels";
 import { can } from "@/lib/permissions";
+import { execSearchOn } from "@/lib/packs";
 import { localDate } from "@/lib/working-days";
 import {
   dismissActionAction, markDoneAction, recordLawfulBasisAction, recordOutcomeAction, redraftAction, saveDraftAction, updateActionAction,
@@ -162,6 +163,7 @@ function Drawer({ detail: d, ctx, notice, closeHref, back, owners, now }: { deta
   const canApprove = can(ctx.role, "drafts.approve");
   const canDismiss = can(ctx.role, "actions.dismiss");
   const canBasis = can(ctx.role, "consent.record_basis");
+  const packOn = execSearchOn(ctx.workspace);
   const blocked = open && d.check?.kind === "blocked" ? d.check : null;
   const cannotContact = d.check?.kind === "no_action";
   const draft = d.draft;
@@ -184,8 +186,8 @@ function Drawer({ detail: d, ctx, notice, closeHref, back, owners, now }: { deta
           {d.currentRole ? <p className="t-caption">{d.currentRole.title}, {d.currentRole.company}</p> : null}
           <div className={styles.meta}>
             {d.person ? <BandPill band={d.position.band?.band ?? null} /> : null}
-            {d.person?.contactTypes.map((t) => <Chip key={t}>{CONTACT_TYPE_LABELS[t] ?? t}</Chip>)}
-            {d.position.offLimits.length ? <Chip tone="blocked">Off-limits</Chip> : null}
+            {packOn ? d.person?.contactTypes.map((t) => <Chip key={t}>{CONTACT_TYPE_LABELS[t] ?? t}</Chip>) : null}
+            {packOn && d.position.offLimits.length ? <Chip tone="blocked">Off-limits</Chip> : null}
             {d.person?.status === "do_not_contact" ? <Chip tone="blocked">Do not contact</Chip> : null}
             {d.person?.isOffList ? <Chip>Off list</Chip> : null}
           </div>
@@ -256,14 +258,18 @@ function Drawer({ detail: d, ctx, notice, closeHref, back, owners, now }: { deta
                 <dt>Last two-way touch</dt>
                 <dd>{d.position.lastTwoWay ? `${d.position.lastTwoWay.channel.replace("_", " ")}, ${date(d.position.lastTwoWay.at)}` : "None on record"}</dd>
               </div>
-              <div>
-                <dt>Contact types</dt>
-                <dd>{d.person.contactTypes.map((t) => CONTACT_TYPE_LABELS[t] ?? t).join(", ") || "None"}</dd>
-              </div>
-              <div>
-                <dt>Off-limits</dt>
-                <dd>{d.position.offLimits.join("; ") || "None"}</dd>
-              </div>
+              {packOn ? (
+                <>
+                  <div>
+                    <dt>Contact types</dt>
+                    <dd>{d.person.contactTypes.map((t) => CONTACT_TYPE_LABELS[t] ?? t).join(", ") || "None"}</dd>
+                  </div>
+                  <div>
+                    <dt>Off-limits</dt>
+                    <dd>{d.position.offLimits.join("; ") || "None"}</dd>
+                  </div>
+                </>
+              ) : null}
             </dl>
           </section>
         ) : null}
@@ -363,13 +369,15 @@ function Drawer({ detail: d, ctx, notice, closeHref, back, owners, now }: { deta
                       <span className={styles.label}>Instruction (optional)</span>
                       <input name="instruction" className={styles.input} maxLength={300} placeholder="For example: shorter, or mention the board appointment" />
                     </label>
-                    <label className={styles.field}>
-                      <span className={styles.label}>Approach</span>
-                      <select name="purpose" defaultValue={a.purpose} className={styles.select}>
-                        <option value="client">Client</option>
-                        <option value="candidate">Candidate</option>
-                      </select>
-                    </label>
+                    {packOn ? (
+                      <label className={styles.field}>
+                        <span className={styles.label}>Approach</span>
+                        <select name="purpose" defaultValue={a.purpose} className={styles.select}>
+                          <option value="client">Client</option>
+                          <option value="candidate">Candidate</option>
+                        </select>
+                      </label>
+                    ) : null}
                     <label className={styles.field}>
                       <span className={styles.label}>Channel</span>
                       <select name="channel" defaultValue={draft?.channel ?? ""} className={styles.select}>

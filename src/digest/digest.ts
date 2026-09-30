@@ -11,12 +11,14 @@ import { OPEN_STATUSES } from "@/domain/actions";
 import { bandFor, isWarmOrStrong } from "@/domain/relationships";
 import { formatDateIn, formatTimeIn } from "@/lib/format/labels";
 import { can } from "@/lib/permissions";
+import { execSearchOn } from "@/lib/packs";
+import { describeRule, EXPIRY_REMINDER_DAYS, rulesEndingSoon } from "@/domain/off-limits";
 import { addWorkingDays, endOfLocalDay, escalatesAt, localDate, workingDaysBetween } from "@/lib/working-days";
 import { appLink, deliverQueued, EMAIL_FOOTER, queueNotification } from "@/mail/notify";
 import type { Mailer } from "@/mail/mailer";
 
 export interface DigestSection {
-  key: "actions" | "approvals" | "p1_changes" | "meetings" | "quiet" | "queue" | "outcomes";
+  key: "actions" | "approvals" | "p1_changes" | "meetings" | "quiet" | "queue" | "outcomes" | "off_limits";
   title: string;
   lines: string[];
 }
@@ -47,7 +49,7 @@ export interface DigestMember {
 const OUTCOME_PROMPT_DAYS = 14;
 
 /** Gathers the sections for one member. `since` is the member's previous digest. */
-export async function gatherSections(tx: Tx, member: DigestMember, timeZone: string, workingDays: string[] | undefined, since: Date, now: Date): Promise<DigestSection[]> {
+export async function gatherSections(tx: Tx, member: DigestMember, timeZone: string, workingDays: string[] | undefined, since: Date, now: Date, packOn = false): Promise<DigestSection[]> {
   const endOfToday = endOfLocalDay(now, timeZone);
   const date = (d: Date) => formatDateIn(d, timeZone);
 
@@ -130,6 +132,17 @@ export async function gatherSections(tx: Tx, member: DigestMember, timeZone: str
   const cutoff = new Date(now.getTime() - OUTCOME_PROMPT_DAYS * 86_400_000);
   const outcomeLines = sent.filter((a) => a.sentAt && a.sentAt <= cutoff).map((a) => `Message to ${a.person ?? "a contact"}, sent ${date(a.sentAt!)}: how did it go? ${appLink(`/actions?id=${a.id}`)}`);
 
+  // 8. Executive search pack: each off-limits rule once, 30 days before it ends (BRD 13).
+  const offLimitsLines: string[] = [];
+  if (packOn && can(member.role, "off_limits.set")) {
+    const today = localDate(now, timeZone);
+    const sinceDay = localDate(since, timeZone);
+    for (const r of await rulesEndingSoon(tx, today)) {
+      const remindOn = new Date(new Date(`${r.endsOn}T00:00:00Z`).getTime() - EXPIRY_REMINDER_DAYS * 86_400_000).toISOString().slice(0, 10);
+      if (remindOn > sinceDay && remindOn <= today) offLimitsLines.push(`${r.companyName}, ${describeRule(r).toLowerCase()}: ends ${formatDateIn(new Date(`${r.endsOn}T12:00:00Z`), "UTC")}. Extend or let it lapse ${appLink("/settings/off-limits")}`);
+    }
+  }
+
   return [
     { key: "actions", title: "Actions due today and overdue", lines: actionLines },
     { key: "approvals", title: "Drafts awaiting approval", lines: approvalLines },
@@ -138,6 +151,7 @@ export async function gatherSections(tx: Tx, member: DigestMember, timeZone: str
     { key: "quiet", title: "Going quiet", lines: quietLines },
     { key: "queue", title: "Validation queue", lines: queueLines },
     { key: "outcomes", title: "Outcomes to record", lines: outcomeLines },
+    { key: "off_limits", title: "Off-limits rules ending within 30 days", lines: offLimitsLines },
   ];
 }
 
@@ -172,7 +186,7 @@ export async function runDigest(workspaceId: string, options: { now?: Date; mail
         .orderBy(desc(notifications.createdAt))
         .limit(1);
       const since = last?.at ?? new Date(now.getTime() - 24 * 3_600_000);
-      const sections = await gatherSections(tx, member, ws!.timezone, settings.working_days, since, now);
+      const sections = await gatherSections(tx, member, ws!.timezone, settings.working_days, since, now, execSearchOn(ws));
       const digest = composeDigest(ws!.name, formatDateIn(now, ws!.timezone), sections);
       if (!digest) {
         skipped++;

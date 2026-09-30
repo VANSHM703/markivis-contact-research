@@ -18,10 +18,12 @@ interface CompanyPickerProps {
   required?: boolean;
   error?: string;
   defaultCompany?: { id: string; name: string } | null;
+  /** Off for forms that must name a company already on the list, such as an off-limits rule. */
+  allowNew?: boolean;
 }
 
 /** Searchable company combobox with "Add as a new company" (design file 8.3, ARIA combobox pattern). */
-export function CompanyPicker({ name, label, required, error, defaultCompany }: CompanyPickerProps) {
+export function CompanyPicker({ name, label, required, error, defaultCompany, allowNew = true }: CompanyPickerProps) {
   const inputId = useId();
   const listId = useId();
   const [query, setQuery] = useState(defaultCompany?.name ?? "");
@@ -67,7 +69,7 @@ export function CompanyPicker({ name, label, required, error, defaultCompany }: 
   const exact = options.some((o) => o.name.toLowerCase() === trimmed.toLowerCase());
   const items: (Option | { id: null; name: string; detail: string })[] = [
     ...options,
-    ...(trimmed && !exact && answered === query ? [{ id: null, name: trimmed, detail: "Add as a new company" }] : []),
+    ...(allowNew && trimmed && !exact && answered === query ? [{ id: null, name: trimmed, detail: "Add as a new company" }] : []),
   ];
 
   function choose(index: number) {

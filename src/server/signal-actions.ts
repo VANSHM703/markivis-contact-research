@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { withWorkspace } from "@/db/client";
 import { signals } from "@/db/schema";
-import { createActionForSignal, draftForAction } from "@/domain/actions";
+import { actionsToDraft, createActionForSignal, draftForAction } from "@/domain/actions";
 import { getRequestContext } from "@/lib/context";
 import { can } from "@/lib/permissions";
 
@@ -18,6 +18,6 @@ export async function createActionFromSignalAction(signalId: string): Promise<vo
     if (!signal || signal.status !== "confirmed") return null;
     return createActionForSignal(tx, signal, new Date(), { force: true });
   });
-  if (created?.needsDraft) await draftForAction(ctx.workspace.id, created.actionId).catch(() => undefined);
+  for (const id of actionsToDraft(created)) await draftForAction(ctx.workspace.id, id).catch(() => undefined);
   redirect(`/signals?notice=${created ? "action_created" : "not_allowed"}`);
 }

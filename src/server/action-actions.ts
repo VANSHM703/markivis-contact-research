@@ -9,6 +9,7 @@ import {
 } from "@/domain/action-flow";
 import type { Purpose } from "@/domain/checks";
 import { getRequestContext, type RequestContext } from "@/lib/context";
+import { execSearchOn } from "@/lib/packs";
 import { ForbiddenError } from "@/lib/permissions";
 import { deliverQueued } from "@/mail/notify";
 import { ACTION_TYPE_LABELS } from "@/lib/format/labels";
@@ -166,7 +167,7 @@ export async function createActionForPersonAction(personId: string, formData: Fo
   if (!UUID_RE.test(personId)) redirect("/people");
   if (a.role !== "partner" && a.role !== "outreach_owner") redirect(`/people/${personId}?notice=not_allowed`);
   const type = String(formData.get("type") ?? "check_in");
-  const purpose: Purpose = formData.get("purpose") === "candidate" ? "candidate" : "client";
+  const purpose: Purpose = execSearchOn(ctx.workspace) && formData.get("purpose") === "candidate" ? "candidate" : "client";
   const owner = String(formData.get("owner") ?? "");
   const due = String(formData.get("due") ?? "");
   const now = new Date();

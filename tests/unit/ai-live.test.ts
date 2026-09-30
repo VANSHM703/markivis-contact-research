@@ -49,7 +49,7 @@ describe("live AI adapter", () => {
     const { client, parse } = fakeClient([{ parsed_output: { subject: "Hello", body: "Dear Jane", used_content_item: false, rationale: "Timely." }, content: [], usage, stop_reason: "end_turn" }]);
     const result = await createLiveAi(client).draftMessage({
       partnerName: "Jordan Ellis", styleGuide: "Short.", person: { preferredName: "Jane", fullName: "Jane Example", role: "CFO", company: "Example", contactTypes: [], country: "US" },
-      signal: null, suggestedAction: "check_in", bestPath: null, recentInteractions: [], band: null, contentItem: null, channel: "email",
+      signal: null, suggestedAction: "check_in", bestPath: null, recentInteractions: [], band: null, contentItem: null, channel: "email", approach: "client",
     });
     expect(result.output.body).toBe("Dear Jane");
     const args = (parse.mock.calls[0] as unknown[])[0] as Record<string, unknown>;

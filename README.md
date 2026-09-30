@@ -16,8 +16,9 @@ Relationship intelligence inside BEAM: one trusted record of every senior decisi
 | M3 Ingestion: source adapters and the job scheduler | Done |
 | M4 Pipeline and validation: extraction, matching, dedupe, confidence, lanes, the queue | Done |
 | M5 Actions: action cards, pre-action checks, drafting, approval, Today, digest, service levels | Done |
-| M6 Executive search pack: contact types, off-limits, placements, confidential notes, succession watch | Next |
-| M7 to M10 | Not started |
+| M6 Executive search pack: contact types, off-limits, placements, confidential notes, succession watch | Done |
+| M7 Capture: Microsoft 365 mail and calendar, Google (P1), privacy controls | Next |
+| M8 to M10 | Not started |
 
 ## Run it locally
 
@@ -39,7 +40,7 @@ Open http://localhost:3000/intelligence. In mock mode (`DATA_MODE=mock`, the def
 |---|---|
 | Jordan Ellis | Partner, Demo Search Partners |
 | Priya Raman | Outreach owner, Demo Search Partners |
-| Sam Okafor | Validator, in both workspaces (shows the workspace switcher) |
+| Sam Okafor | Validator, in both workspaces (shows the workspace switcher); also the platform admin, who sets packs |
 | Lee Whitford | Data steward, Demo Search Partners |
 | Casey Morgan | Partner, Harbor Search Group |
 
@@ -71,6 +72,10 @@ Collected items go through the pipeline (BRD 9): a name match, AI extraction, ma
 ## Actions, Today and the digest
 
 Confirmed priority 1 and 2 changes create actions with an AI draft, after the pre-action checks (BRD 12.2): do not contact, opt-outs, a lawful basis for EU, EEA and UK contacts, and off-limits for candidate approaches. Actions opens each one in a drawer: edit the draft, submit it for approval (outreach owners), approve and send (partners), mark it done or dismiss it with a reason, and record the outcome. In mock mode sending uses a mock mailbox and logs the outbound email on the person. The daily digest and alerts are listed in Settings, Email log; in mock mode nothing leaves the machine, and in live mode they need `SMTP_URL` and `MAIL_FROM`. Service levels, the digest time, the daily send limit and the style guide are in Settings, Service levels and style guide.
+
+## Executive search pack
+
+On for Demo Search Partners and off for Harbor Search Group; a platform admin switches it under Settings, Packs (or the user menu). With it on: contact types on people, off-limits rules (Settings, Off-limits rules, partners only) with badges and the candidate block, placements (Record placement on a person, or People, Import placements), a backfill check-in when a placed executive leaves, partner-only confidential notes (the Notes tab), and the CEO tenure succession signal. With it off, all of this is hidden and its checks are skipped.
 
 ## Sources
 

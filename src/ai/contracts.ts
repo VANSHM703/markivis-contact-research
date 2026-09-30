@@ -2,7 +2,7 @@
 import { z } from "zod";
 
 export const PROMPT_VERSION_EXTRACT = "extract.v1";
-export const PROMPT_VERSION_DRAFT = "draft.v1";
+export const PROMPT_VERSION_DRAFT = "draft.v2";
 export const PROMPT_VERSION_RESEARCH = "research.v1";
 
 export const SIGNAL_TYPES = [
@@ -88,6 +88,11 @@ export interface DraftInput {
   band: string | null;
   contentItem: { title: string; description: string | null; url: string | null } | null;
   channel: "email" | "linkedin_message";
+  /**
+   * Executive search pack (BRD 13): a client message discusses the company's leadership needs, a
+   * candidate message (only on explicit request) the person's career. Null when the pack is off.
+   */
+  approach: "client" | "candidate" | null;
   instruction?: string | null;
 }
 
@@ -99,6 +104,8 @@ Rules:
 - State only facts present in the context. Never claim a shared history that is not in the interactions listed.
 - Never mention how the change was detected.
 - For an introduction request, write to the connector, not the target.
+- approach "client": write about the company's leadership needs and how the partner can help; never raise the person's own next career move.
+- approach "candidate": write about the person's own career and a possible opportunity; never pitch the firm's services to them. Never mix the two approaches in one message.
 - rationale: one sentence for the approver saying why this angle.`;
 
 export const researchOutputSchema = z.object({

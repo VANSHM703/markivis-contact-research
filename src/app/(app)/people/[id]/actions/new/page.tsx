@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { PermissionDenied } from "@/components/ui/PermissionDenied";
 import { dueDate } from "@/domain/actions";
 import { ACTION_TYPE_LABELS } from "@/lib/format/labels";
+import { execSearchOn } from "@/lib/packs";
 import { localDate } from "@/lib/working-days";
 import { createActionForPersonAction } from "@/server/action-actions";
 import { listOwners } from "@/server/actions";
@@ -38,6 +39,7 @@ export default async function NewActionPage({ params }: { params: Promise<{ id: 
               {Object.entries(ACTION_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
           </label>
+          {execSearchOn(ctx.workspace) ? (
           <label className={styles.field}>
             <span className={styles.label}>Approach</span>
             <select name="purpose" defaultValue="client" className={styles.input}>
@@ -46,6 +48,7 @@ export default async function NewActionPage({ params }: { params: Promise<{ id: 
             </select>
             <span className={styles.help}>Candidate approaches are blocked where the employer is off-limits.</span>
           </label>
+          ) : null}
           <label className={styles.field}>
             <span className={styles.label}>Owner</span>
             <select name="owner" defaultValue={defaultOwner} className={styles.input}>

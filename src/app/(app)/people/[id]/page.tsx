@@ -5,7 +5,10 @@ import { SubmitButton } from "@/components/forms/SubmitButton";
 import { Chip } from "@/components/ui/Chip";
 import { Notice } from "@/components/ui/Notice";
 import { Tabs } from "@/components/ui/Tabs";
+import { MandateNotes } from "@/components/pack/MandateNotes";
 import { getRequestContext } from "@/lib/context";
+import { execSearchOn } from "@/lib/packs";
+import { localDate } from "@/lib/working-days";
 import { ACTION_STATUS_LABELS, ACTION_TYPE_LABELS, CONTACT_TYPE_LABELS, formatDate, SEAT_TYPE_LABELS } from "@/lib/format/labels";
 import { can } from "@/lib/permissions";
 import { endRoleAction, unmergeAction } from "@/server/record-actions";
@@ -62,11 +65,15 @@ export default async function PersonPage({ params, searchParams }: Props) {
   const { id } = await params;
   const query = await searchParams;
   if (!UUID_RE.test(id)) notFound();
-  const record = await getPerson(ctx.workspace.id, id);
+  const record = await getPerson(ctx.workspace.id, id, localDate(new Date(), ctx.workspace.timezone));
   if (!record) notFound();
-  const { person, roles, placement, mergedInto, canUnmergeUntil, ownerName, pendingDuplicates, openActions } = record;
+  const { person, roles, mergedInto, canUnmergeUntil, ownerName, pendingDuplicates, openActions, isOffLimits } = record;
+  // Executive search pack elements (BRD 13) are hidden when the pack is off.
+  const packOn = execSearchOn(ctx.workspace);
+  const placement = packOn ? record.placement : null;
+  const canNotes = packOn && can(ctx.role, "mandate_notes.view");
   const canCreateAction = can(ctx.role, "messages.send") && !mergedInto && person.status !== "do_not_contact" && person.isTracked;
-  const tab = query.tab === "record" ? "record" : "overview";
+  const tab = query.tab === "record" ? "record" : query.tab === "notes" && canNotes ? "notes" : "overview";
   const primary = roles.find((r) => r.isPrimary);
   const editor = can(ctx.role, "records.edit") && !mergedInto;
   const merger = can(ctx.role, "persons.merge");
@@ -93,9 +100,8 @@ export default async function PersonPage({ params, searchParams }: Props) {
           <h1 className="t-display-3">{person.fullName}</h1>
           <p className="t-lede">{primary ? `${primary.title}, ${primary.companyName}` : "No current role"}</p>
           <div>
-            {person.contactTypes.map((t) => (
-              <Chip key={t}>{CONTACT_TYPE_LABELS[t] ?? t}</Chip>
-            ))}
+            {packOn ? person.contactTypes.map((t) => <Chip key={t}>{CONTACT_TYPE_LABELS[t] ?? t}</Chip>) : null}
+            {packOn && isOffLimits ? <Chip tone="blocked">Off-limits</Chip> : null}
             {person.isPriority ? <Chip>Tier 1</Chip> : null}
             {placement ? <Chip>Placed</Chip> : null}
             {person.status === "do_not_contact" ? <Chip tone="blocked">Do not contact</Chip> : null}
@@ -107,6 +113,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
             {canCreateAction ? <Link href={`/people/${person.id}/actions/new`} className="btn btn--ghost">Create action</Link> : null}
             {editor ? <Link href={`/people/${person.id}/edit`} className="btn btn--ghost">Edit details</Link> : null}
             {editor ? <Link href={`/people/${person.id}/roles/new`} className="btn btn--ghost">Add role</Link> : null}
+            {editor && packOn ? <Link href={`/people/${person.id}/placements/new`} className="btn btn--ghost">Record placement</Link> : null}
             {editor && merger ? <Link href={`/people/${person.id}/merge`} className="btn btn--ghost">Merge</Link> : null}
           </div>
         ) : null}
@@ -125,6 +132,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
         tabs={[
           { key: "overview", label: "Overview", href: `/people/${person.id}` },
           { key: "record", label: "Record", href: `/people/${person.id}?tab=record` },
+          ...(canNotes ? [{ key: "notes", label: "Notes", href: `/people/${person.id}?tab=notes` }] : []),
         ]}
       />
 
@@ -181,6 +189,19 @@ export default async function PersonPage({ params, searchParams }: Props) {
               ))}
             </ul>
           </section>
+          {packOn && record.placements.length ? (
+            <section className="card" aria-labelledby="placements-heading">
+              <h2 id="placements-heading" className="t-heading-card">Placements</h2>
+              <ul className={styles.plainList}>
+                {record.placements.map((p) => (
+                  <li key={p.id}>
+                    <span>{p.roleTitle}, <Link href={`/companies/${p.companyId}`}>{p.companyName}</Link></span>
+                    <p className="t-meta t-muted">Placed {formatDate(p.placedOn)}{p.searchReference ? ` · ${p.searchReference}` : ""}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
           <section className="card" aria-labelledby="facts-heading">
             <h2 id="facts-heading" className="t-heading-card">Details</h2>
             <dl className={styles.readout}>
@@ -191,6 +212,8 @@ export default async function PersonPage({ params, searchParams }: Props) {
             </dl>
           </section>
         </div>
+      ) : tab === "notes" ? (
+        <MandateNotes actor={{ workspaceId: ctx.workspace.id, userId: ctx.user.id, role: ctx.role }} target={{ personId: person.id }} kind="person" id={person.id} tz={ctx.workspace.timezone} />
       ) : (
         <RecordTab workspaceId={ctx.workspace.id} personId={person.id} />
       )}

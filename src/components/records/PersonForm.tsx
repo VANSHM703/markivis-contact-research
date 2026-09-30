@@ -28,9 +28,11 @@ interface PersonFormProps {
   withRole?: boolean;
   defaultCompany?: { id: string; name: string } | null;
   submitLabel: string;
+  /** Contact types are part of the executive search pack (BRD 13). */
+  showContactTypes?: boolean;
 }
 
-export function PersonForm({ action, defaults = {}, withRole = false, defaultCompany, submitLabel }: PersonFormProps) {
+export function PersonForm({ action, defaults = {}, withRole = false, defaultCompany, submitLabel, showContactTypes = true }: PersonFormProps) {
   const [state, formAction] = useActionState(action, EMPTY_FORM_STATE);
   const v = (k: keyof PersonDefaults) => (state.values?.[k] as string | undefined) ?? (defaults[k] as string | undefined) ?? "";
   const e = state.fieldErrors ?? {};
@@ -58,7 +60,7 @@ export function PersonForm({ action, defaults = {}, withRole = false, defaultCom
           />
           <TextField name="city" label="City" autoComplete="address-level2" defaultValue={v("city")} error={e.city} />
           <TextField name="country" label="Country" autoComplete="country" placeholder="US" maxLength={2} help="Two-letter code. Decides which consent rules apply." defaultValue={v("country")} error={e.country} />
-          <CheckboxGroup name="contact_types" legend="Contact type" options={CONTACT_TYPE_OPTIONS} defaultValues={types} error={e.contact_types} />
+          {showContactTypes ? <CheckboxGroup name="contact_types" legend="Contact type" options={CONTACT_TYPE_OPTIONS} defaultValues={types} error={e.contact_types} /> : null}
           <CheckboxGroup name="is_priority" legend="Priority" options={[{ value: "on", label: "Tier 1 target: watch for going quiet" }]} defaultValues={priority ? ["on"] : []} />
         </FormGrid>
       </FormSection>

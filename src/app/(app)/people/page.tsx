@@ -8,6 +8,8 @@ import { FilterBar } from "@/components/ui/FilterBar";
 import { Notice } from "@/components/ui/Notice";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getRequestContext } from "@/lib/context";
+import { execSearchOn } from "@/lib/packs";
+import { localDate } from "@/lib/working-days";
 import { CONTACT_TYPE_LABELS, pageParam } from "@/lib/format/labels";
 import { can } from "@/lib/permissions";
 import { CONTACT_TYPE_OPTIONS, OWNERSHIP_OPTIONS, SEAT_TYPE_OPTIONS } from "@/server/forms";
@@ -23,7 +25,13 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const params = await searchParams;
   const page = pageParam(params.page);
   const filters = parsePeopleFilters(params);
-  const { rows, total } = await listPeople(ctx.workspace.id, page, filters);
+  // Contact types, placements and off-limits belong to the executive search pack (BRD 13).
+  const packOn = execSearchOn(ctx.workspace);
+  if (!packOn) {
+    filters.contactType = undefined;
+    if (filters.flag === "placed" || filters.flag === "off_limits") filters.flag = undefined;
+  }
+  const { rows, total } = await listPeople(ctx.workspace.id, page, filters, localDate(new Date(), ctx.workspace.timezone));
   const filtered = FILTER_KEYS.some((k) => params[k]);
   const editor = can(ctx.role, "records.edit");
 
@@ -37,6 +45,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
           editor ? (
             <>
               <Link href="/people/import" className="btn btn--ghost">Import target list</Link>
+              {packOn ? <Link href="/people/placements/import" className="btn btn--ghost">Import placements</Link> : null}
               <Link href="/people/new" className="btn btn--primary">Add person</Link>
             </>
           ) : undefined
@@ -47,7 +56,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
         searchLabel="Name or company"
         values={{ q: filters.q, contact_type: filters.contactType, tier: filters.tier ? String(filters.tier) : undefined, ownership: filters.ownership, seat_type: filters.seatType, flag: filters.flag }}
         selects={[
-          { name: "contact_type", label: "Contact type", options: CONTACT_TYPE_OPTIONS },
+          ...(packOn ? [{ name: "contact_type", label: "Contact type", options: CONTACT_TYPE_OPTIONS }] : []),
           { name: "tier", label: "Target tier", options: [{ value: "1", label: "Tier 1" }, { value: "2", label: "Tier 2" }, { value: "3", label: "Tier 3" }] },
           { name: "ownership", label: "Ownership", options: OWNERSHIP_OPTIONS.filter((o) => o.value !== "unknown") },
           { name: "seat_type", label: "Seat", options: SEAT_TYPE_OPTIONS.filter((o) => o.value) },
@@ -56,7 +65,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
             label: "Flag",
             options: [
               { value: "priority", label: "Tier 1 priority" },
-              { value: "placed", label: "Placed" },
+              ...(packOn ? [{ value: "placed", label: "Placed" }, { value: "off_limits", label: "Off-limits" }] : []),
               { value: "do_not_contact", label: "Do not contact" },
               { value: "off_list", label: "Off list" },
               { value: "no_current_role", label: "No current role" },
@@ -79,7 +88,7 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
           columns={[
             { key: "name", label: "Name" },
             { key: "company", label: "Company" },
-            { key: "types", label: "Contact type" },
+            ...(packOn ? [{ key: "types", label: "Contact type" }] : []),
             { key: "flags", label: "Flags" },
           ]}
           rows={rows.map((p) => ({
@@ -93,11 +102,12 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
                 </>
               ),
               company: p.companyName ?? "",
-              types: p.contactTypes.map((t) => CONTACT_TYPE_LABELS[t] ?? t).join(", "),
+              ...(packOn ? { types: p.contactTypes.map((t) => CONTACT_TYPE_LABELS[t] ?? t).join(", ") } : {}),
               flags: (
                 <>
                   {p.isPriority ? <Chip>Tier 1</Chip> : null}
-                  {p.isPlaced ? <Chip>Placed</Chip> : null}
+                  {packOn && p.isPlaced ? <Chip>Placed</Chip> : null}
+                  {packOn && p.isOffLimits ? <Chip tone="blocked">Off-limits</Chip> : null}
                   {p.status === "do_not_contact" ? <Chip tone="blocked">Do not contact</Chip> : null}
                   {p.status === "no_current_role" ? <Chip>No current role</Chip> : null}
                   {p.isOffList ? <Chip>Off list</Chip> : null}

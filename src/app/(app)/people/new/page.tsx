@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { eq } from "drizzle-orm";
 import { PersonForm } from "@/components/records/PersonForm";
+import { execSearchOn } from "@/lib/packs";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { PermissionDenied } from "@/components/ui/PermissionDenied";
 import { withWorkspace } from "@/db/client";
@@ -21,7 +22,7 @@ export default async function NewPersonPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader title="Add person" lede="Checked against everyone in the workspace first, so the same person is never added twice." />
-      <PersonForm action={createPersonAction} withRole defaultCompany={defaultCompany} submitLabel="Add person" />
+      <PersonForm showContactTypes={execSearchOn(ctx.workspace)} action={createPersonAction} withRole defaultCompany={defaultCompany} submitLabel="Add person" />
     </>
   );
 }

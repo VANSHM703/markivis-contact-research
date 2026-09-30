@@ -68,9 +68,9 @@ describe("seed workspace: Demo Search Partners", () => {
     expect(await n((tx) => tx.select({ n: count() }).from(s.interactions).where(lt(s.interactions.occurredAt, yearAgo)))).toBe(0);
   });
 
-  it("has 2 off-limits rules (one company-wide, one function-level), 8 content items and 3 meetings tomorrow", async () => {
+  it("has 3 off-limits rules (one company-wide, two function-level, one ending in 30 days), 8 content items and 3 meetings tomorrow", async () => {
     const rules = await withWorkspace(demo.id, (tx) => tx.select().from(s.offLimits));
-    expect(rules.map((r) => r.scope).sort()).toEqual(["company", "function"]);
+    expect(rules.map((r) => r.scope).sort()).toEqual(["company", "function", "function"]);
     expect(await n((tx) => tx.select({ n: count() }).from(s.contentItems))).toBe(8);
     const tomorrowStart = new Date(Date.UTC(SEED_NOW.getUTCFullYear(), SEED_NOW.getUTCMonth(), SEED_NOW.getUTCDate() + 1));
     const tomorrowEnd = new Date(tomorrowStart.getTime() + 86_400_000);

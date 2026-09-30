@@ -9,6 +9,7 @@ import { enqueueQuietly } from "@/jobs/enqueue";
 import { MergeError, mergePersons, unmergePerson } from "@/domain/merge";
 import { addRole, createCompany, DuplicateLinkedinError, endRole, findOrCreateCompany, updateCompany, updatePerson, upsertPerson, type Actor, type SourceNote } from "@/domain/records";
 import { SuppressedError } from "@/domain/suppression";
+import { execSearchOn } from "@/lib/packs";
 import { getRequestContext, type RequestContext } from "@/lib/context";
 import { can, type Capability } from "@/lib/permissions";
 import { companySchema, formObject, invalidAll, parseForm, personSchema, roleSchema, sourceSchema } from "./forms";
@@ -58,7 +59,8 @@ export async function createPersonAction(_prev: FormState, formData: FormData): 
           city: person.data.city,
           region: person.data.region,
           country: person.data.country,
-          contactTypes: person.data.contact_types,
+          // Contact types belong to the executive search pack (BRD 13).
+          contactTypes: execSearchOn(ctx.workspace) ? person.data.contact_types : [],
           relationshipOwnerId: ctx.user.id,
           isPriority: person.data.is_priority,
         },
@@ -102,7 +104,8 @@ export async function updatePersonAction(personId: string, _prev: FormState, for
           city: person.data.city,
           region: person.data.region,
           country: person.data.country,
-          contactTypes: person.data.contact_types,
+          // Without the pack the field is not shown, so the stored types are left as they are.
+          contactTypes: execSearchOn(ctx.workspace) ? person.data.contact_types : undefined,
           isPriority: person.data.is_priority,
         },
         sourceOf(source.data),

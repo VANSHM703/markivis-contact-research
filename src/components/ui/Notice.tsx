@@ -88,6 +88,13 @@ const NOTICES: Record<string, { text: string; tone: "ok" | "warn" }> = {
   workflow_invalid: { text: "Couldn't save: use whole working days (priority 1 up to 20, priority 2 up to 30), a time like 08:00, a daily limit from 1 to 200, and at least one working day.", tone: "warn" },
   style_guide_saved: { text: "Style guide saved. New drafts follow it.", tone: "ok" },
   style_guide_invalid: { text: "Couldn't save: the style guide must be 40 to 4,000 characters.", tone: "warn" },
+  pack_off: { text: "That part of the product is switched off for this workspace.", tone: "warn" },
+  off_limits_added: { text: "Off-limits rule added. It applies to candidate approaches from its start date.", tone: "ok" },
+  off_limits_ended: { text: "Off-limits rule ended.", tone: "ok" },
+  placement_added: { text: "Placement recorded. Every move by this person is now priority 1.", tone: "ok" },
+  note_added: { text: "Note added. Only partners can read it.", tone: "ok" },
+  note_invalid: { text: "Couldn't add the note: write 2 to 5,000 characters.", tone: "warn" },
+  packs_saved: { text: "Packs saved.", tone: "ok" },
   action_refused: { text: "Couldn't create the action: this person must not be contacted, or the company is off-limits for this approach.", tone: "warn" },
 };
 

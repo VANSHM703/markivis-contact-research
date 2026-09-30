@@ -26,6 +26,7 @@ export interface WorkspaceBundle {
   consents: Row<typeof s.consents>[];
   fieldSources: Row<typeof s.fieldSources>[];
   personInterests: Row<typeof s.personInterests>[];
+  mandateNotes: Row<typeof s.mandateNotes>[];
 }
 
 export interface SeedBundle {
@@ -135,6 +136,8 @@ interface SeedUser {
   key: string;
   name: string;
   email: string;
+  /** Markivis platform operator (BRD 5.3): sets packs and flags. */
+  isPlatformAdmin?: boolean;
 }
 
 interface WorkspacePlan {
@@ -159,12 +162,14 @@ interface WorkspacePlan {
   contentItems: number;
   guessedEmails: number;
   offLimits: boolean;
+  /** Executive search pack (BRD 13): on for the first workspace, off for the second. */
+  execSearch: boolean;
 }
 
 const USERS: SeedUser[] = [
   { key: "partner", name: "Jordan Ellis", email: "jordan.ellis@demo-search.example.com" },
   { key: "outreach", name: "Priya Raman", email: "priya.raman@markivis.example.com" },
-  { key: "validator", name: "Sam Okafor", email: "sam.okafor@markivis.example.com" },
+  { key: "validator", name: "Sam Okafor", email: "sam.okafor@markivis.example.com", isPlatformAdmin: true },
   { key: "steward", name: "Lee Whitford", email: "lee.whitford@demo-search.example.com" },
   { key: "harbor_partner", name: "Casey Morgan", email: "casey.morgan@harbor-search.example.org" },
 ];
@@ -197,6 +202,7 @@ export const DEMO_PLAN: WorkspacePlan = {
   contentItems: 8,
   guessedEmails: 2,
   offLimits: true,
+  execSearch: true,
 };
 
 export const HARBOR_PLAN: WorkspacePlan = {
@@ -222,6 +228,7 @@ export const HARBOR_PLAN: WorkspacePlan = {
   contentItems: 2,
   guessedEmails: 0,
   offLimits: false,
+  execSearch: false,
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -230,7 +237,7 @@ export const HARBOR_PLAN: WorkspacePlan = {
 
 export function generateSeed(now: Date = new Date()): SeedBundle {
   const idRng = new Rng(1);
-  const users = USERS.map((u) => ({ id: idRng.uuid(), name: u.name, email: u.email }));
+  const users = USERS.map((u) => ({ id: idRng.uuid(), name: u.name, email: u.email, isPlatformAdmin: u.isPlatformAdmin ?? false }));
   const userIds = Object.fromEntries(USERS.map((u, i) => [u.key, users[i]!.id]));
   const userEmails = Object.fromEntries(USERS.map((u) => [u.key, u.email]));
   // Different name pools per workspace so the two never share a person.
@@ -264,8 +271,8 @@ function generateWorkspace(
     name: plan.name,
     slug: plan.slug,
     timezone: "America/New_York",
-    packs: DEFAULT_PACKS,
-    flags: DEFAULT_FLAGS,
+    packs: { ...DEFAULT_PACKS, exec_search: plan.execSearch },
+    flags: { ...DEFAULT_FLAGS, "pack.exec_search": plan.execSearch },
     settings: DEFAULT_SETTINGS,
     allowedEmailDomains: plan.allowedDomains,
   };
@@ -726,9 +733,22 @@ function generateWorkspace(
     }
   }
 
+  // --- Pack extras, generated last so they never shift the random stream above -----------------
+  const mandateNotes: WorkspaceBundle["mandateNotes"] = [];
+  if (plan.offLimits) {
+    // A rule that ends in 30 days, so the digest shows its expiry reminder today.
+    const target = companies.find((c) => c.kind === "public" && !offLimits.some((r) => r.companyId === c.id))!;
+    offLimits.push({ id: rng.uuid(), workspaceId, companyId: target.id, scope: "function", function: "Legal", reason: "contractual", startsOn: isoDate(addDays(now, -335)), endsOn: isoDate(addDays(now, 30)), setBy: partnerId });
+    const client = companies.find((c) => c.kind === "client")!;
+    mandateNotes.push({ id: rng.uuid(), workspaceId, companyId: client.id, body: "Retained search for a Chief Operating Officer. The board wants a shortlist before the spring meeting; fee and exclusivity terms are in the engagement letter.", createdBy: partnerId, createdAt: addDays(now, -21) });
+    const placed = placements[0]!;
+    mandateNotes.push({ id: rng.uuid(), workspaceId, personId: placed.personId, body: "Placed through our search. Guarantee period runs to the end of next year; do not approach as a candidate before then.", createdBy: partnerId, createdAt: addDays(now, -60) });
+  }
+
   return {
     workspace,
     members,
+    mandateNotes,
     companies: companies.map(({ kind, ...company }) => company),
     persons,
     roles,

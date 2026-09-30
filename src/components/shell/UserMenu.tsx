@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import styles from "./UserMenu.module.css";
 
@@ -9,6 +10,8 @@ interface UserMenuProps {
   roleLabel: string;
   workspaceName: string;
   signOutAction: () => Promise<void>;
+  /** Platform admins set workspace packs (BRD 5.3). */
+  packsHref?: string | null;
 }
 
 function initials(name: string): string {
@@ -20,7 +23,7 @@ function initials(name: string): string {
     .join("");
 }
 
-export function UserMenu({ name, email, roleLabel, workspaceName, signOutAction }: UserMenuProps) {
+export function UserMenu({ name, email, roleLabel, workspaceName, signOutAction, packsHref }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -74,6 +77,11 @@ export function UserMenu({ name, email, roleLabel, workspaceName, signOutAction 
               <dd>{roleLabel}</dd>
             </div>
           </dl>
+          {packsHref ? (
+            <p className={styles.signOut}>
+              <Link href={packsHref} onClick={() => setOpen(false)}>Workspace packs</Link>
+            </p>
+          ) : null}
           <form action={signOutAction} className={styles.signOut}>
             <button type="submit" className="btn btn--ghost btn--compact">
               Sign out

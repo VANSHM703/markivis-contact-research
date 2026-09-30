@@ -49,6 +49,7 @@ export function AppShell({ ctx, counts, children }: AppShellProps) {
             roleLabel={ROLE_LABELS[ctx.role]}
             workspaceName={ctx.workspace.name}
             signOutAction={signOutAction}
+            packsHref={ctx.user.isPlatformAdmin ? "/settings/packs" : null}
           />
         </div>
       </header>
