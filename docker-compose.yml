@@ -1,0 +1,38 @@
+# Local stack: docker compose up, then open http://localhost:3000/intelligence
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dmi
+      POSTGRES_PASSWORD: dmi
+      POSTGRES_DB: dmi
+    ports:
+      - "5432:5432"
+    volumes:
+      - dmi-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dmi -d dmi"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      target: web
+      args:
+        APP_BASE_PATH: /intelligence
+    environment:
+      DATABASE_URL: postgres://dmi:dmi@db:5432/dmi
+      APP_URL: http://localhost:3000
+      APP_BASE_PATH: /intelligence
+      DATA_MODE: mock
+      AUTH_SECRET: local-development-only
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dmi-db:

@@ -1,0 +1,128 @@
+/* BEAM design tokens. Copied verbatim from BEAM_DESIGN_LANGUAGE.md section 2.2.
+   This file is the single source of truth for colour, type, spacing, radius, elevation and motion.
+   Only change it when the design file changes. */
+
+:root {
+  /* Surfaces */
+  --surface-page: #F4F6FC;
+  --surface-raised: #FFFFFF;
+  --surface-sunken: #EDEFF7;
+  --surface-accent-wash: #F1EAFF;
+  --surface-lime-wash: #EFF7D4;
+
+  /* Borders */
+  --border-subtle: #E3E7F1;      /* decorative lines, card edges, dividers */
+  --border-strong: #CBD1E0;      /* table rules, ghost button edges */
+  --border-control: #858CA0;     /* [App extension] input and checkbox edges; 3.36:1 on raised, 3.11:1 on page */
+
+  /* Text */
+  --text-primary: #12151D;       /* 16.89:1 on page */
+  --text-secondary: #3A4254;     /* 9.31:1 on page */
+  --text-muted: #596073;         /* 5.81:1 on page; the lightest text allowed */
+  --text-on-accent: #FFFFFF;     /* 6.37:1 on accent-fill */
+  --text-on-lime: #22300A;       /* 9.02:1 on lime */
+
+  /* Violet */
+  --accent: #770FFF;             /* violet as ink: 5.90:1 on page, 6.37:1 on raised */
+  --accent-fill: #770FFF;        /* violet as surface */
+  --accent-fill-hover: #9F37FF;  /* fill only, never text */
+  --accent-deep: #6A0BEB;        /* pressed state; darker logo-mark stop */
+
+  /* Lime */
+  --lime: #AEE028;               /* fill only */
+  --lime-bright: #C8F135;        /* hover fill; text on dark grounds only */
+
+  /* Signals */
+  --signal-ok: #3C6B0C;          /* 6.36:1 on raised */
+  --signal-warn: #A34A08;        /* 5.17:1 on sunken, 5.93:1 on raised */
+  --signal-critical: #B42318;    /* [App extension] 6.57:1 on raised, 5.73:1 on sunken */
+  --signal-warn-wash: #FDF1E3;   /* [App extension] warn text on it: 5.33:1 */
+  --signal-critical-wash: #FDECEA; /* [App extension] critical text on it: 5.75:1 */
+
+  /* Focus */
+  --focus-ring: #770FFF;
+
+  /* Type families */
+  --font-display: 'Bricolage Grotesque', Georgia, serif;
+  --font-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Type scale: fluid on display only; body sizes are fixed */
+  --display-1: clamp(2.1rem, 5vw, 3.7rem);     /* 33.6 to 59.2 px, marketing hero only */
+  --display-2: clamp(1.7rem, 3.4vw, 2.7rem);   /* 27.2 to 43.2 px */
+  --display-3: clamp(1.35rem, 2.2vw, 1.7rem);  /* 21.6 to 27.2 px, app page titles */
+  --heading-card: 1.125rem;  /* 18 px */
+  --lede: 1.0625rem;         /* 17 px */
+  --body: 1rem;              /* 16 px */
+  --body-sm: 0.9375rem;      /* 15 px */
+  --caption: 0.875rem;       /* 14 px, the sans floor */
+  --eyebrow: 0.75rem;        /* 12 px mono, the mono floor */
+  --meta: 0.8125rem;         /* 13 px mono */
+  --button: 0.9375rem;       /* 15 px */
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 36px;
+  --space-7: 56px;
+  --space-8: 80px;
+
+  /* Radius */
+  --radius-sm: 6px;     /* chips, tags, inline code */
+  --radius-md: 9px;     /* buttons, inputs, readout rows, table containers */
+  --radius-lg: 14px;    /* cards and panels */
+  --radius-xl: 20px;    /* hero panels, drawers' outer corner on desktop */
+  --radius-pill: 999px; /* pills, badges, band chips */
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgba(18,21,29,.04), 0 8px 24px -16px rgba(18,21,29,.18);
+  --shadow-accent: 0 8px 22px -12px rgba(119,15,255,.75);  /* primary button only */
+  --shadow-panel: 0 24px 60px -32px rgba(18,21,29,.35);    /* drawers, dialogs, popovers */
+
+  /* Sizes */
+  --wrap: 1120px;           /* marketing content width */
+  --app-max: 1440px;        /* [App extension] app content max width */
+  --gutter: 24px;
+  --measure-lede: 62ch;
+  --measure-title: 22ch;
+  --tap-min: 44px;
+  --topbar-h: 60px;         /* [App extension] */
+  --sidebar-w: 232px;       /* [App extension] */
+  --drawer-w: 560px;        /* [App extension] */
+
+  /* Motion [App extension]: the site has only two animations; the app adds these durations and nothing else */
+  --dur-fast: 120ms;
+  --dur-base: 160ms;
+  --ease: cubic-bezier(.2,.7,.2,1);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --surface-page: #14161F;
+  --surface-raised: #1D2130;
+  --surface-sunken: #12141C;
+  --surface-accent-wash: #2A1D47;
+  --surface-lime-wash: #26300F;
+  --border-subtle: #2E3446;
+  --border-strong: #3E465C;
+  --border-control: #727A96;     /* 3.76:1 on raised dark */
+  --text-primary: #FFFFFF;
+  --text-secondary: #CBD1E0;
+  --text-muted: #9AA1B8;
+  --accent: #B36BFF;             /* 5.55:1 on page dark; raw #770FFF is 2.83:1 here and never used as ink */
+  --signal-ok: #C8F135;
+  --signal-warn: #F2C94C;
+  --signal-critical: #FF8A7A;    /* 6.99:1 on raised dark */
+  --signal-warn-wash: #3A2A0E;
+  --signal-critical-wash: #3A1714;
+  --focus-ring: #C18CFF;         /* 7.27:1 on dark */
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

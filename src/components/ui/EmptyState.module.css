@@ -1,0 +1,4 @@
+.empty { display: grid; gap: var(--space-4); justify-items: start; }
+.message { max-width: var(--measure-lede); color: var(--text-secondary); }
+.actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+@media (max-width: 560px) { .actions { width: 100%; } }

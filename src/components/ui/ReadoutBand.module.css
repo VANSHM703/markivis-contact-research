@@ -1,0 +1,11 @@
+.band { background: var(--surface-page); color: var(--text-primary); border-radius: var(--radius-lg); padding: var(--space-5); }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-5); margin: 0; }
+/* Value above label visually, label first in the DOM; flex-end packs items to the top in column-reverse. */
+.figure { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: var(--space-1); }
+.label { font-size: var(--caption); line-height: 1.5; color: var(--text-muted); }
+.value {
+  margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--space-3);
+  font: 800 var(--display-3)/1.1 var(--font-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+}
+.over { font: 700 var(--meta)/1.2 var(--font-mono); letter-spacing: 0; color: var(--lime-bright); }
+@media (max-width: 760px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

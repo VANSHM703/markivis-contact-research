@@ -1,0 +1,40 @@
+/* BEAM_DESIGN_LANGUAGE.md section 7. Breakpoints from section 2.4: sm 560, md 760, lg 960, xl 1200. */
+.shell { min-height: 100dvh; background: var(--surface-page); }
+
+.topbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-4);
+  height: var(--topbar-h);
+  padding: 0 max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
+  background: var(--surface-raised); border-bottom: 1px solid var(--border-subtle);
+}
+.start { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.centre { display: flex; justify-content: center; min-width: 0; }
+.end { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-3); }
+
+.body { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); }
+
+.sidebar {
+  position: sticky; top: var(--topbar-h); align-self: start;
+  height: calc(100dvh - var(--topbar-h)); overflow-y: auto;
+  padding: var(--space-5) var(--space-3);
+  background: var(--surface-page); border-right: 1px solid var(--border-subtle);
+}
+
+.content {
+  min-width: 0;
+  padding: var(--space-6) max(var(--gutter), env(safe-area-inset-right)) var(--space-7) max(var(--gutter), env(safe-area-inset-left));
+}
+.content:focus { outline: none; }
+.inner { width: 100%; max-width: var(--app-max); margin: 0 auto; }
+
+@media (max-width: 960px) {
+  .body { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { display: none; }
+}
+
+@media (max-width: 560px) {
+  .topbar { gap: var(--space-2); padding-left: max(var(--space-4), env(safe-area-inset-left)); padding-right: max(var(--space-4), env(safe-area-inset-right)); }
+  .centre { visibility: hidden; }
+  .end { gap: var(--space-2); }
+}

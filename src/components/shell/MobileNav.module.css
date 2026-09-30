@@ -1,0 +1,31 @@
+.toggle {
+  display: none; align-items: center; justify-content: center; flex: none;
+  width: var(--tap-min); height: var(--tap-min); padding: 0; margin-left: -10px;
+  background: transparent; border: 0; border-radius: var(--radius-md); color: var(--text-primary); cursor: pointer;
+}
+.toggle:hover { background: var(--surface-sunken); }
+.toggle:focus-visible { outline: 2.5px solid var(--focus-ring); outline-offset: 0; }
+
+.layer { position: fixed; inset: 0; z-index: 50; }
+.scrim { position: absolute; inset: 0; background: rgba(18, 21, 29, .4); }
+.drawer {
+  position: absolute; top: 0; bottom: 0; left: 0;
+  width: min(var(--sidebar-w) + 48px, 86vw); height: 100dvh;
+  display: flex; flex-direction: column; gap: var(--space-4);
+  padding: env(safe-area-inset-top, 0px) var(--space-3) calc(var(--space-5) + env(safe-area-inset-bottom, 0px)) max(var(--space-3), env(safe-area-inset-left));
+  background: var(--surface-page); box-shadow: var(--shadow-panel);
+  border-radius: 0 var(--radius-xl) var(--radius-xl) 0; overflow-y: auto;
+}
+.header { display: flex; align-items: center; min-height: var(--topbar-h); padding-left: var(--space-3); }
+.header .toggle { display: inline-flex; }
+.search { max-width: none; }
+.nav { flex: 1; }
+
+@media (max-width: 960px) {
+  .toggle { display: inline-flex; }
+}
+
+/* The top bar carries the search field above sm; the drawer carries it below. */
+@media (min-width: 561px) {
+  .search { display: none; }
+}
