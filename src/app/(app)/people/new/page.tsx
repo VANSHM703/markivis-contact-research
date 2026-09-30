@@ -11,10 +11,10 @@ import { allowed, pageContext, UUID_RE } from "@/server/guards";
 
 export const metadata: Metadata = { title: "Add person" };
 
-export default async function NewPersonPage({ searchParams }: { searchParams: Promise<{ company?: string }> }) {
+export default async function NewPersonPage({ searchParams }: { searchParams: Promise<{ company?: string; title?: string }> }) {
   const ctx = await pageContext();
   if (!allowed(ctx, "records.edit")) return <PermissionDenied who="partners, outreach owners and validators" />;
-  const { company } = await searchParams;
+  const { company, title } = await searchParams;
   const defaultCompany =
     company && UUID_RE.test(company)
       ? ((await withWorkspace(ctx.workspace.id, (tx) => tx.select({ id: companies.id, name: companies.name }).from(companies).where(eq(companies.id, company)).limit(1)))[0] ?? null)
@@ -22,7 +22,7 @@ export default async function NewPersonPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader title="Add person" lede="Checked against everyone in the workspace first, so the same person is never added twice." />
-      <PersonForm showContactTypes={execSearchOn(ctx.workspace)} action={createPersonAction} withRole defaultCompany={defaultCompany} submitLabel="Add person" />
+      <PersonForm showContactTypes={execSearchOn(ctx.workspace)} action={createPersonAction} withRole defaultCompany={defaultCompany} defaultTitle={title?.slice(0, 120) ?? ""} submitLabel="Add person" />
     </>
   );
 }

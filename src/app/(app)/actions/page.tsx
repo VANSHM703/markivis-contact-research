@@ -277,7 +277,14 @@ function Drawer({ detail: d, ctx, notice, closeHref, back, owners, now }: { deta
         {d.person ? (
           <section className={styles.section} aria-labelledby={`${a.id}-path`}>
             <h3 id={`${a.id}-path`} className={styles.sectionTitle}>Best path</h3>
-            <p className="t-caption t-muted">No introduction path on record yet. Write directly, or ask a colleague who knows them.</p>
+            {d.bestPath ? (
+              <>
+                <p className="t-caption">{d.bestPath.explanation}</p>
+                <p className="t-meta t-muted">Strength {d.bestPath.strength.toFixed(2)}{d.bestPath.owner_name ? ` · owner ${d.bestPath.owner_name}` : ""}</p>
+              </>
+            ) : (
+              <p className="t-caption t-muted">No warm path yet. Write directly, or ask a colleague who knows them.</p>
+            )}
           </section>
         ) : null}
 

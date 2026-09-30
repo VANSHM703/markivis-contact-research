@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const ROUTES = ["", "actions", "queue", "queue?tab=batch", "queue?tab=spot", "queue?tab=conflicts", "people", "people/new", "people/import", "companies", "companies/new", "search?q=example", "signals", "paths", "coverage", "settings", "settings/sources", "settings/workflow", "settings/email", "actions?owner=all&status=all", "settings/off-limits", "settings/off-limits/import", "people/placements/import", "settings/connections"];
+const ROUTES = ["", "actions", "queue", "queue?tab=batch", "queue?tab=spot", "queue?tab=conflicts", "people", "people/new", "people/import", "companies", "companies/new", "search?q=example", "signals", "paths", "coverage", "settings", "settings/sources", "settings/workflow", "settings/email", "actions?owner=all&status=all", "settings/off-limits", "settings/off-limits/import", "people/placements/import", "settings/connections", "settings/scoring", "settings/scoring?tab=calibration", "paths?q=Lindqvist", "coverage?tier=1"];
 
 // BEAM_DESIGN_LANGUAGE.md section 2.4: zero horizontal scroll at these widths.
 const WIDTHS = [320, 360, 390, 414, 768, 1024, 1440];
@@ -66,4 +66,14 @@ test.describe("app shell", () => {
       expect(serious.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
     });
   }
+});
+
+test.describe("filters", () => {
+  test("Apply filters keeps the base path and filters the list", async ({ page }) => {
+    await page.goto("./people");
+    await page.getByRole("combobox", { name: "Flag" }).selectOption("placed");
+    await page.getByRole("button", { name: "Apply filters" }).click();
+    await expect(page).toHaveURL(/\/intelligence\/people\?.*flag=placed/);
+    await expect(page.getByText(/people match these filters/)).toBeVisible();
+  });
 });

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { APP_BASE_PATH } from "@/config/product";
 import styles from "./FilterBar.module.css";
 
 export interface FilterSelect {
@@ -21,7 +22,7 @@ interface FilterBarProps {
 export function FilterBar({ path, searchLabel, values, selects }: FilterBarProps) {
   const active = Object.entries(values).filter(([, v]) => v);
   return (
-    <form method="get" action={path} className={styles.bar} role="search" aria-label={searchLabel ?? "Filters"}>
+    <form method="get" action={`${APP_BASE_PATH}${path}`} className={styles.bar} role="search" aria-label={searchLabel ?? "Filters"}>
       <div className={searchLabel ? styles.fields : `${styles.fields} ${styles.noSearch}`}>
         {searchLabel ? (
           <label className={styles.field}>

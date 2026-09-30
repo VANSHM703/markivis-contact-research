@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Chip } from "@/components/ui/Chip";
+import { BandPill } from "@/components/ui/Priority";
 import { DataTable } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FilterBar } from "@/components/ui/FilterBar";
@@ -10,14 +11,14 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { getRequestContext } from "@/lib/context";
 import { execSearchOn } from "@/lib/packs";
 import { localDate } from "@/lib/working-days";
-import { CONTACT_TYPE_LABELS, pageParam } from "@/lib/format/labels";
+import { formatDate, CONTACT_TYPE_LABELS, pageParam } from "@/lib/format/labels";
 import { can } from "@/lib/permissions";
 import { CONTACT_TYPE_OPTIONS, OWNERSHIP_OPTIONS, SEAT_TYPE_OPTIONS } from "@/server/forms";
 import { filterQuery, listPeople, PAGE_SIZE, parsePeopleFilters } from "@/server/records";
 
 export const metadata: Metadata = { title: "People" };
 
-const FILTER_KEYS = ["q", "contact_type", "tier", "ownership", "seat_type", "flag", "company"];
+const FILTER_KEYS = ["q", "contact_type", "tier", "ownership", "seat_type", "flag", "company", "band"];
 
 export default async function PeoplePage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const ctx = await getRequestContext();
@@ -54,9 +55,10 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
       <FilterBar
         path="/people"
         searchLabel="Name or company"
-        values={{ q: filters.q, contact_type: filters.contactType, tier: filters.tier ? String(filters.tier) : undefined, ownership: filters.ownership, seat_type: filters.seatType, flag: filters.flag }}
+        values={{ q: filters.q, contact_type: filters.contactType, tier: filters.tier ? String(filters.tier) : undefined, ownership: filters.ownership, seat_type: filters.seatType, flag: filters.flag, band: filters.band }}
         selects={[
           ...(packOn ? [{ name: "contact_type", label: "Contact type", options: CONTACT_TYPE_OPTIONS }] : []),
+          { name: "band", label: "Relationship", options: [{ value: "strong", label: "Strong" }, { value: "warm", label: "Warm" }, { value: "cooling", label: "Cooling" }, { value: "cold", label: "Cold" }, { value: "none", label: "None" }] },
           { name: "tier", label: "Target tier", options: [{ value: "1", label: "Tier 1" }, { value: "2", label: "Tier 2" }, { value: "3", label: "Tier 3" }] },
           { name: "ownership", label: "Ownership", options: OWNERSHIP_OPTIONS.filter((o) => o.value !== "unknown") },
           { name: "seat_type", label: "Seat", options: SEAT_TYPE_OPTIONS.filter((o) => o.value) },
@@ -88,6 +90,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
           columns={[
             { key: "name", label: "Name" },
             { key: "company", label: "Company" },
+            { key: "band", label: "Band" },
+            { key: "touch", label: "Last two-way touch" },
             ...(packOn ? [{ key: "types", label: "Contact type" }] : []),
             { key: "flags", label: "Flags" },
           ]}
@@ -102,6 +106,8 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
                 </>
               ),
               company: p.companyName ?? "",
+              band: <BandPill band={p.band} />,
+              touch: <span className="t-meta">{p.lastTwoWayAt ? formatDate(p.lastTwoWayAt) : "None"}</span>,
               ...(packOn ? { types: p.contactTypes.map((t) => CONTACT_TYPE_LABELS[t] ?? t).join(", ") } : {}),
               flags: (
                 <>

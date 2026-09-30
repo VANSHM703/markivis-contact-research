@@ -27,12 +27,14 @@ interface PersonFormProps {
   /** New people are added with their first role. */
   withRole?: boolean;
   defaultCompany?: { id: string; name: string } | null;
+  /** Prefilled from the coverage map's empty seat (BRD 11.8). */
+  defaultTitle?: string;
   submitLabel: string;
   /** Contact types are part of the executive search pack (BRD 13). */
   showContactTypes?: boolean;
 }
 
-export function PersonForm({ action, defaults = {}, withRole = false, defaultCompany, submitLabel, showContactTypes = true }: PersonFormProps) {
+export function PersonForm({ action, defaults = {}, withRole = false, defaultCompany, defaultTitle = "", submitLabel, showContactTypes = true }: PersonFormProps) {
   const [state, formAction] = useActionState(action, EMPTY_FORM_STATE);
   const v = (k: keyof PersonDefaults) => (state.values?.[k] as string | undefined) ?? (defaults[k] as string | undefined) ?? "";
   const e = state.fieldErrors ?? {};
@@ -69,7 +71,7 @@ export function PersonForm({ action, defaults = {}, withRole = false, defaultCom
         <FormSection title="Current role">
           <FormGrid>
             <CompanyPicker name="company" label="Company" required error={e.company ?? e.company_id} defaultCompany={defaultCompany} />
-            <TextField name="title" label="Title" required placeholder="Chief Financial Officer" defaultValue={(state.values?.title as string) ?? ""} error={e.title} />
+            <TextField name="title" label="Title" required placeholder="Chief Financial Officer" defaultValue={(state.values?.title as string) ?? defaultTitle} error={e.title} />
             <SelectField name="seat_type" label="Seat" options={SEAT_TYPE_OPTIONS} defaultValue={(state.values?.seat_type as string) ?? ""} error={e.seat_type} />
             <TextField name="business_email" label="Business email" type="email" inputMode="email" autoComplete="email" defaultValue={(state.values?.business_email as string) ?? ""} error={e.business_email} />
             <TextField name="effective_on" label="Start date" type="date" defaultValue={(state.values?.effective_on as string) ?? ""} error={e.effective_on} />

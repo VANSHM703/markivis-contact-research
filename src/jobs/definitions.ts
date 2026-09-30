@@ -63,15 +63,15 @@ export const JOBS: JobDefinition[] = [
   { name: "notifications.send", builtIn: "M5", scope: "workspace", schedules: [{ slot: "every1", cron: "* * * * *" }], notes: "Delivers queued alerts; also sent right after the event that queues them." },
   { name: "capture.mail", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }], notes: "Delta sync for every active mailbox connection in the workspace." },
   { name: "capture.calendar", builtIn: "M7", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }], notes: "The last 30 days and the next 14 days." },
-  { name: "rel.score", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "0 1 * * *" }] },
-  { name: "rel.connections", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "30 1 * * *" }] },
-  { name: "rel.quiet", builtIn: "M8", scope: "workspace", schedules: [{ slot: "daily", cron: "0 6 * * *" }] },
+  { name: "rel.score", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "0 1 * * *" }], notes: "Firm-level and per-user scores (BRD 11.4)." },
+  { name: "rel.connections", builtIn: "M8", scope: "workspace", schedules: [{ slot: "nightly", cron: "30 1 * * *" }], notes: "Connections derived from roles (BRD 11.6)." },
+  { name: "rel.quiet", builtIn: "M8", scope: "workspace", schedules: [{ slot: "daily", cron: "0 6 * * *" }], notes: "Going-quiet alerts and re-engage actions (BRD 11.5)." },
   { name: "briefs.generate", builtIn: "M9", scope: "workspace", schedules: [{ slot: "hourly", cron: "15 * * * *" }] },
   { name: "crm.sync", builtIn: "M9", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }] },
   { name: "compliance.retention", builtIn: "M10", scope: "workspace", schedules: [{ slot: "monthly", cron: "0 9 1-7 * 1" }], notes: "First Monday of the month." },
 ];
 
-const BUILT = new Set(["M3", "M4", "M5", "M7"]);
+const BUILT = new Set(["M3", "M4", "M5", "M7", "M8"]);
 export const ACTIVE_JOBS = JOBS.filter((j) => BUILT.has(j.builtIn));
 
 /** pg-boss schedule keys allow letters, digits, _ - . / only. */

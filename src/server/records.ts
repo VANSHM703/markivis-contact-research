@@ -21,6 +21,7 @@ export interface PeopleFilters {
   seatType?: string;
   flag?: "placed" | "off_limits" | "do_not_contact" | "off_list" | "no_current_role" | "priority";
   companyId?: string;
+  band?: "strong" | "warm" | "cooling" | "cold" | "none";
 }
 
 export interface CompanyFilters {
@@ -47,6 +48,7 @@ export function parsePeopleFilters(params: Params): PeopleFilters {
     seatType: ["executive", "board", "advisory", "pe_operating_partner", "pe_deal_partner", "other"].find((t) => t === one(params.seat_type)),
     flag: (["placed", "off_limits", "do_not_contact", "off_list", "no_current_role", "priority"] as const).find((f) => f === flag),
     companyId: company && UUID_RE.test(company) ? company : undefined,
+    band: (["strong", "warm", "cooling", "cold", "none"] as const).find((b) => b === one(params.band)),
   };
 }
 
@@ -85,6 +87,8 @@ export interface PersonRow {
   isPlaced: boolean;
   isOffLimits: boolean;
   isPriority: boolean;
+  band: string | null;
+  lastTwoWayAt: Date | null;
   country: string | null;
 }
 
@@ -105,6 +109,7 @@ function peopleWhere(f: PeopleFilters, today: string): SQL | undefined {
   if (f.flag === "no_current_role") clauses.push(eq(persons.status, "no_current_role"));
   if (f.flag === "off_list") clauses.push(eq(persons.isOffList, true));
   if (f.flag === "priority") clauses.push(eq(persons.isPriority, true));
+  if (f.band) clauses.push(sql`coalesce((select rs.band::text from dmi.relationship_scores rs where rs.person_id = ${persons}.id and rs.user_id is null), 'none') = ${f.band}`);
   return and(...clauses);
 }
 
@@ -133,6 +138,8 @@ export async function listPeople(workspaceId: string, page = 1, filters: PeopleF
         // Correlated subqueries use explicit aliases: Drizzle renders bare column names inside raw SQL.
         isPlaced: sql<boolean>`exists (select 1 from ${placements} pl where pl.person_id = ${persons}.id)`,
         isOffLimits: sql<boolean>`${offLimitsCoversSql(sql`${persons}.id`, today)}`,
+        band: sql<string | null>`(select rs.band::text from dmi.relationship_scores rs where rs.person_id = ${persons}.id and rs.user_id is null)`,
+        lastTwoWayAt: sql<Date | null>`(select rs.last_two_way_at from dmi.relationship_scores rs where rs.person_id = ${persons}.id and rs.user_id is null)`,
       })
       .from(persons)
       .leftJoin(roles, and(eq(roles.personId, persons.id), eq(roles.isPrimary, true)))

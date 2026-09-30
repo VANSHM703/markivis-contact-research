@@ -6,6 +6,7 @@ import { OPEN_STATUSES } from "@/domain/actions";
 import { evaluateChecks, loadCheckFacts, ruleActive, type CheckResult } from "@/domain/checks";
 import { sentToday } from "@/domain/action-flow";
 import { bandFor, firmBands, type BandInfo } from "@/domain/relationships";
+import { findPaths, type WarmPath } from "@/domain/paths";
 import { endOfLocalDay, escalatesAt, localDate } from "@/lib/working-days";
 import { UUID_RE } from "./guards";
 
@@ -164,6 +165,8 @@ export interface ActionDetail {
   maxPerDay: number;
   history: { at: Date; action: string; actor: string | null; after: unknown }[];
   escalated: boolean;
+  /** The stored path for an introduction request, else the best current path to the person (BRD 12.3). */
+  bestPath: WarmPath | null;
 }
 
 export async function getActionDetail(workspaceId: string, actionId: string, timeZone: string, now = new Date()): Promise<ActionDetail | null> {
@@ -249,6 +252,7 @@ export async function getActionDetail(workspaceId: string, actionId: string, tim
       maxPerDay: Number(settings.send?.max_per_day ?? 25),
       history,
       escalated: open && (!!action.escalatedAt || now >= escalatesAt(action.dueAt, timeZone)),
+      bestPath: (action.bestPath as WarmPath | null) ?? (person ? ((await findPaths(tx, person.id, today))[0] ?? null) : null),
     };
   });
 }

@@ -18,8 +18,9 @@ Relationship intelligence inside BEAM: one trusted record of every senior decisi
 | M5 Actions: action cards, pre-action checks, drafting, approval, Today, digest, service levels | Done |
 | M6 Executive search pack: contact types, off-limits, placements, confidential notes, succession watch | Done |
 | M7 Capture: Microsoft 365 mail and calendar, Google (P1), privacy controls | Done |
-| M8 Relationships: scoring, calibration, going quiet, connections, paths, coverage | Next |
-| M9 and M10 | Not started |
+| M8 Relationships: scoring, calibration, going quiet, connections, paths, coverage | Done |
+| M9 Outputs and sync: briefs, sending from the mailbox, reply detection, outcomes, HubSpot (P1) | Next |
+| M10 | Not started |
 
 ## Run it locally
 
@@ -73,6 +74,10 @@ Collected items go through the pipeline (BRD 9): a name match, AI extraction, ma
 ## Actions, Today and the digest
 
 Confirmed priority 1 and 2 changes create actions with an AI draft, after the pre-action checks (BRD 12.2): do not contact, opt-outs, a lawful basis for EU, EEA and UK contacts, and off-limits for candidate approaches. Actions opens each one in a drawer: edit the draft, submit it for approval (outreach owners), approve and send (partners), mark it done or dismiss it with a reason, and record the outcome. In mock mode sending uses a mock mailbox and logs the outbound email on the person. The daily digest and alerts are listed in Settings, Email log; in mock mode nothing leaves the machine, and in live mode they need `SMTP_URL` and `MAIL_FROM`. Service levels, the digest time, the daily send limit and the style guide are in Settings, Service levels and style guide.
+
+## Relationships
+
+Every night each tracked person gets a relationship score from 0 to 100 (firm level and per team member) and a band: strong, warm, cooling, cold or none. The person page shows why: recency, frequency, reciprocity, depth and tenure in words. Connections are derived from shared boards and overlapping executive roles, or added by hand. Paths finds who can introduce you to someone and drafts the introduction request to that connector. Coverage shows target companies against key seats, tinted by band. Priority people who go quiet for 90 days get a re-engage action. The partner sets the weights and runs the calibration under Settings, Scoring.
 
 ## Mailbox and calendar capture
 

@@ -130,6 +130,9 @@ test.describe("a platform admin switches the pack", () => {
     await expect(page.getByText("Packs saved.")).toBeVisible();
     expect(await harborPeopleHasContactTypes(browser)).toBe(true);
 
+    // Reload without the notice, so the next "Packs saved." belongs to the second save.
+    await page.goto("./settings/packs");
+    await expect(page.getByRole("checkbox", { name: /Executive search/ })).toBeChecked();
     await page.getByRole("checkbox", { name: /Executive search/ }).uncheck();
     await page.getByRole("button", { name: "Save packs" }).click();
     await expect(page.getByText("Packs saved.")).toBeVisible();

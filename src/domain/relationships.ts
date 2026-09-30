@@ -1,12 +1,13 @@
 /**
- * Relationship band lookups for actions, Today and the digest. Scores themselves are computed in
- * M8 (BRD 11.4); until a score exists the band is null and treated as unknown, not as cold.
+ * Relationship scores (BRD 11.4): lookups for actions, Today and the digest, and the nightly
+ * recompute. Before the first run a person has no score, shown as "Not scored", not as cold.
  */
 import { and, eq, inArray, isNull, or } from "drizzle-orm";
-import type { Tx } from "@/db/client";
-import { relationshipScores } from "@/db/schema";
+import { withWorkspace, type Tx } from "@/db/client";
+import { interactions, persons, relationshipScores, workspaces } from "@/db/schema";
+import { computeScore, scoringSettings, type Band, type ScoringSettings } from "./scoring";
 
-export type Band = "strong" | "warm" | "cooling" | "cold" | "none";
+export type { Band };
 
 export interface BandInfo {
   band: Band;
@@ -35,3 +36,61 @@ export async function firmBands(tx: Tx, personIds: string[]): Promise<Map<string
 }
 
 export const isWarmOrStrong = (band: Band | null | undefined) => band === "strong" || band === "warm";
+
+// ---------------------------------------------------------------------------------------------
+// Recomputing scores (BRD 11.4, rel.score nightly)
+// ---------------------------------------------------------------------------------------------
+
+export interface ScoreRow {
+  personId: string;
+  ourUserId: string | null;
+  channel: string;
+  direction: string;
+  occurredAt: Date;
+  threadKey: string | null;
+}
+
+async function interactionRows(tx: Tx, personIds?: string[]): Promise<ScoreRow[]> {
+  return tx
+    .select({ personId: interactions.personId, ourUserId: interactions.ourUserId, channel: interactions.channel, direction: interactions.direction, occurredAt: interactions.occurredAt, threadKey: interactions.threadKey })
+    .from(interactions)
+    .where(personIds ? inArray(interactions.personId, personIds) : undefined);
+}
+
+/**
+ * Firm-level and per-user scores for every tracked person, from all their interactions. Per-user
+ * scores use only the interactions that user took part in. Idempotent: rows are replaced.
+ */
+export async function recomputeScores(workspaceId: string, now = new Date()): Promise<{ people: number; firm: Record<Band, number> }> {
+  return withWorkspace(workspaceId, async (tx) => {
+    const [ws] = await tx.select({ settings: workspaces.settings }).from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
+    const settings = scoringSettings(ws!.settings as Record<string, unknown>);
+    const people = await tx.select({ id: persons.id }).from(persons).where(and(eq(persons.isTracked, true), isNull(persons.mergedIntoId)));
+    const byPerson = new Map<string, ScoreRow[]>();
+    for (const r of await interactionRows(tx)) byPerson.set(r.personId, [...(byPerson.get(r.personId) ?? []), r]);
+
+    const firm: Record<Band, number> = { strong: 0, warm: 0, cooling: 0, cold: 0, none: 0 };
+    const rows: (typeof relationshipScores.$inferInsert)[] = [];
+    for (const { id } of people) {
+      const list = byPerson.get(id) ?? [];
+      const result = computeScore(list, now, settings);
+      firm[result.band]++;
+      rows.push({ workspaceId, personId: id, userId: null, score: result.score, band: result.band, factors: result.factors, lastTwoWayAt: result.lastTwoWayAt, computedAt: now });
+      const users = new Set(list.map((r) => r.ourUserId).filter((u): u is string => !!u));
+      for (const userId of users) {
+        const mine = computeScore(list.filter((r) => r.ourUserId === userId), now, settings);
+        rows.push({ workspaceId, personId: id, userId, score: mine.score, band: mine.band, factors: mine.factors, lastTwoWayAt: mine.lastTwoWayAt, computedAt: now });
+      }
+    }
+    await tx.delete(relationshipScores);
+    for (let i = 0; i < rows.length; i += 250) await tx.insert(relationshipScores).values(rows.slice(i, i + 250));
+    return { people: people.length, firm };
+  });
+}
+
+/** The firm-level score as of an earlier date, recomputed from the interactions up to then. */
+export function scoreAsOf(rows: ScoreRow[], asOf: Date, settings: ScoringSettings) {
+  return computeScore(rows, asOf, settings);
+}
+
+export { interactionRows };

@@ -21,7 +21,7 @@ const SECTIONS: Section[] = [
   { title: "Members and roles", body: "Invite people and set their roles.", later: "M10" },
   { title: "Mailbox and calendar", body: "Connect your mailbox and calendar for activity capture, and choose what is never captured.", href: "/settings/connections" },
   { title: "Signal priorities", body: "Priority by signal type, with dismissal counts.", later: "M10" },
-  { title: "Scoring", body: "Relationship score weights and calibration.", later: "M8" },
+  { title: "Scoring", body: "Relationship score weights, bands and calibration.", href: "/settings/scoring" },
   { title: "Service levels and style guide", body: "Due dates, the digest time, the daily send limit and how drafts are written.", href: "/settings/workflow" },
   { title: "Email log", body: "Digests and alerts, with their delivery status.", href: "/settings/email" },
   { title: "Topics and content", body: "Topic vocabulary and the content library.", later: "M9" },

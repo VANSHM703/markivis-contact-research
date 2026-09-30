@@ -18,6 +18,8 @@ export default async function globalSetup(config: FullConfig) {
   await runPipeline(demo);
   const { stageDemoCapture } = await import("../../src/db/seed/demo-capture");
   await stageDemoCapture(demo);
+  const { stageDemoRelationships } = await import("../../src/db/seed/demo-relationships");
+  await stageDemoRelationships(demo);
   const { stageDemoActions } = await import("../../src/db/seed/demo-actions");
   await stageDemoActions(demo);
   await closeDatabase();

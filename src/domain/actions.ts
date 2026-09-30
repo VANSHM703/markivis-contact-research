@@ -221,6 +221,8 @@ export interface ManualActionInput {
   ownerUserId: string;
   dueAt: Date;
   headline?: string | null;
+  /** The warm path this action follows, for an introduction request (BRD 11.7). */
+  bestPath?: Record<string, unknown> | null;
 }
 
 /** "Create action" on a person page (BRD 12.1). Checks 1 to 4 apply; an explicit request is never merged. */
@@ -243,6 +245,7 @@ export async function createManualAction(tx: Tx, actor: { workspaceId: string; u
       ownerUserId: input.ownerUserId,
       dueAt: input.dueAt,
       blockedReason: check.kind === "blocked" ? check.note : null,
+      bestPath: input.bestPath ?? null,
       whyItMatters: null,
     })
     .returning({ id: actions.id });
@@ -265,6 +268,13 @@ export function postCheck(body: string, context: string, knownNames: { companies
   for (const c of knownNames.companies) if (body.includes(c) && !context.includes(c)) issues.push(`Company not in context: ${c}`);
   for (const p of knownNames.people) if (body.includes(p) && !context.includes(p)) issues.push(`Person not in context: ${p}`);
   return issues;
+}
+
+/** The part of a stored warm path the draft may use (BRD 17.3: connector name and explanation). */
+function pathForDraft(stored: unknown): DraftInput["bestPath"] {
+  const p = stored as { kind?: string; connector_name?: string; explanation?: string } | null;
+  if (!p?.kind || !p.explanation) return null;
+  return { kind: p.kind, connectorName: p.connector_name, explanation: p.explanation };
 }
 
 export type DraftOutcome =
@@ -341,7 +351,7 @@ export async function draftForAction(workspaceId: string, actionId: string, opti
       person: { preferredName: person!.preferredName ?? person!.fullName.split(" ")[0]!, fullName: person!.fullName, role: role?.title ?? null, company: role?.company ?? null, contactTypes: person!.contactTypes, country: person!.country },
       signal: signal ? { headline: signal.headline, type: signal.type, eventOn: signal.eventOn, effectiveOn: signal.effectiveOn, sourceTitle: source?.title ?? null } : null,
       suggestedAction: action.type,
-      bestPath: null,
+      bestPath: pathForDraft(action.bestPath),
       recentInteractions: recent.map((r) => ({ channel: r.channel, date: r.occurredAt.toISOString().slice(0, 10), direction: r.direction, subject: r.isPrivate ? null : r.subject })),
       band: band?.band ?? null,
       contentItem: content ? { title: content.title, description: content.description, url: content.url } : null,

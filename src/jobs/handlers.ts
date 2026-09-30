@@ -5,6 +5,10 @@ import { withWorkspace } from "@/db/client";
 import { persons, roles } from "@/db/schema";
 import { recomputePrimaryRole, refreshPersonStatus } from "@/domain/records";
 import { runSla } from "@/domain/sla";
+import { draftForAction } from "@/domain/actions";
+import { deriveConnections } from "@/domain/connections";
+import { raiseGoingQuiet } from "@/domain/quiet";
+import { recomputeScores } from "@/domain/relationships";
 import { runDigest } from "@/digest/digest";
 import { runCalendarCapture, runMailCapture } from "@/capture/capture";
 import { deliverQueued } from "@/mail/notify";
@@ -83,7 +87,13 @@ export async function registerWorkers(boss: PgBoss): Promise<void> {
         else if (job.name === "actions.sla") result = await runSla(ws);
         else if (job.name === "digest.daily") result = await runDigest(ws);
         else if (job.name === "notifications.send") result = await deliverQueued(ws);
-        else if (job.name === "capture.mail") result = await runMailCapture(ws, { connectionId: item.data.connectionId });
+        else if (job.name === "rel.score") result = await recomputeScores(ws);
+        else if (job.name === "rel.connections") result = await deriveConnections(ws);
+        else if (job.name === "rel.quiet") {
+          const quiet = await raiseGoingQuiet(ws);
+          for (const id of quiet.toDraft) await draftForAction(ws, id).catch(() => undefined);
+          result = { checked: quiet.checked, raised: quiet.raised };
+        } else if (job.name === "capture.mail") result = await runMailCapture(ws, { connectionId: item.data.connectionId });
         else if (job.name === "capture.calendar") result = await runCalendarCapture(ws, { connectionId: item.data.connectionId });
         log.info("job.completed", { job: job.name, jobId: item.id, ms: Date.now() - started, result });
         return result;

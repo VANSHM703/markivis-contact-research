@@ -110,6 +110,13 @@ const NOTICES: Record<string, { text: string; tone: "ok" | "warn" }> = {
   person_private: { text: "Contact marked private. Only partners see subjects and summaries.", tone: "ok" },
   person_public: { text: "Contact visible to the team again.", tone: "ok" },
   interaction_logged: { text: "Interaction logged.", tone: "ok" },
+  connection_added: { text: "Connection added. It counts toward warm paths from now on.", tone: "ok" },
+  connection_removed: { text: "Connection removed.", tone: "ok" },
+  scoring_saved: { text: "Weights saved and every score recomputed.", tone: "ok" },
+  weights_invalid: { text: "Couldn't save: each weight is between 0 and 1, and the five add up to 1.00.", tone: "warn" },
+  bands_invalid: { text: "Couldn't save: band thresholds are whole numbers, strong above warm above cooling above cold, and cold at least 1.", tone: "warn" },
+  calibration_saved: { text: "Ranking saved. The correlation below compares it with the computed scores.", tone: "ok" },
+  calibration_invalid: { text: "Couldn't save: rank at least 5 people, using each number from 1 to 30 once.", tone: "warn" },
   action_refused: { text: "Couldn't create the action: this person must not be contacted, or the company is off-limits for this approach.", tone: "warn" },
 };
 

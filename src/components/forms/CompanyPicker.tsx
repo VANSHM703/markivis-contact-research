@@ -20,10 +20,13 @@ interface CompanyPickerProps {
   defaultCompany?: { id: string; name: string } | null;
   /** Off for forms that must name a company already on the list, such as an off-limits rule. */
   allowNew?: boolean;
+  /** Search people instead of companies (never offers "add new"). */
+  kind?: "company" | "person";
 }
 
 /** Searchable company combobox with "Add as a new company" (design file 8.3, ARIA combobox pattern). */
-export function CompanyPicker({ name, label, required, error, defaultCompany, allowNew = true }: CompanyPickerProps) {
+export function CompanyPicker({ name, label, required, error, defaultCompany, allowNew: allowNewProp = true, kind = "company" }: CompanyPickerProps) {
+  const allowNew = allowNewProp && kind === "company";
   const inputId = useId();
   const listId = useId();
   const [query, setQuery] = useState(defaultCompany?.name ?? "");
@@ -41,10 +44,15 @@ export function CompanyPicker({ name, label, required, error, defaultCompany, al
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const response = await fetch(`${APP_BASE_PATH}/api/v1/companies/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
+        const response = await fetch(`${APP_BASE_PATH}/api/v1/${kind === "person" ? "people" : "companies"}/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });
         if (!response.ok) return;
-        const body = (await response.json()) as { data: { id: string; name: string; domain: string | null; industry: string | null }[] };
-        setOptions(body.data.map((c) => ({ id: c.id, name: c.name, detail: c.domain ?? c.industry })));
+        if (kind === "person") {
+          const body = (await response.json()) as { data: { id: string; fullName: string; title: string | null; companyName: string | null }[] };
+          setOptions(body.data.map((p) => ({ id: p.id, name: p.fullName, detail: [p.title, p.companyName].filter(Boolean).join(", ") || null })));
+        } else {
+          const body = (await response.json()) as { data: { id: string; name: string; domain: string | null; industry: string | null }[] };
+          setOptions(body.data.map((c) => ({ id: c.id, name: c.name, detail: c.domain ?? c.industry })));
+        }
         setAnswered(query);
         setActive(-1);
       } catch {
@@ -55,7 +63,7 @@ export function CompanyPicker({ name, label, required, error, defaultCompany, al
       clearTimeout(timer);
       controller.abort();
     };
-  }, [query, open, selected]);
+  }, [query, open, selected, kind]);
 
   useEffect(() => {
     function onPointerDown(event: PointerEvent) {
@@ -96,11 +104,11 @@ export function CompanyPicker({ name, label, required, error, defaultCompany, al
     }
   }
 
-  const status = selected ? (selected.id ? "Existing company" : "New company, created when you save") : null;
+  const status = selected ? (kind === "person" ? "Chosen" : selected.id ? "Existing company" : "New company, created when you save") : null;
 
   return (
     <div ref={rootRef} className={styles.root}>
-      <FieldShell id={inputId} label={label} required={required} error={error} help={status ?? "Type to search companies in this workspace."}>
+      <FieldShell id={inputId} label={label} required={required} error={error} help={status ?? `Type to search ${kind === "person" ? "people" : "companies"} in this workspace.`}>
         <div className={styles.control}>
         <input
             id={inputId}
