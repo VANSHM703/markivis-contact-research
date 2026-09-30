@@ -96,6 +96,8 @@ export const queueItemKind = dmi.enum("queue_item_kind", ["data_conflict", "poss
 export const queueItemStatus = dmi.enum("queue_item_status", ["pending", "resolved"]);
 export const aiCallStatus = dmi.enum("ai_call_status", ["ok", "error"]);
 export const interestSource = dmi.enum("interest_source", ["first_party", "manual", "ai", "apollo"]);
+export const importKind = dmi.enum("import_kind", ["target_list", "placements", "off_limits", "content_library", "newsletter_events"]);
+export const importStatus = dmi.enum("import_status", ["previewed", "committed", "discarded"]);
 
 // ---------------------------------------------------------------------------------------------
 // Shared column helpers
@@ -122,6 +124,8 @@ export const workspaces = dmi.table("workspaces", {
   settings: jsonb().notNull().default({}),
   /** Email domains allowed to sign in (BRD 5.2). Invited addresses are workspace_members rows. */
   allowedEmailDomains: textArray(),
+  /** Per-workspace salt for suppression hashes (BRD 6.6). Never leaves the database layer. */
+  suppressionSalt: text().notNull().default(sql`replace(gen_random_uuid()::text, '-', '')`),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -177,6 +181,8 @@ export const persons = dmi.table(
   },
   (t) => [
     index().on(t.workspaceId, t.nameNormalised),
+    index("persons_name_trgm").using("gin", t.nameNormalised.op("gin_trgm_ops")),
+    index().on(t.workspaceId, t.city),
     index().on(t.workspaceId, t.linkedinUrl),
     uniqueIndex("persons_workspace_linkedin_unique").on(t.workspaceId, t.linkedinUrl).where(sql`${t.linkedinUrl} is not null`),
     index().on(t.relationshipOwnerId),
@@ -215,6 +221,8 @@ export const companies = dmi.table(
     uniqueIndex("companies_workspace_domain_unique").on(t.workspaceId, t.domain).where(sql`${t.domain} is not null`),
     index().on(t.workspaceId, t.secCik),
     index().on(t.workspaceId, t.nameNormalised),
+    index("companies_name_trgm").using("gin", t.nameNormalised.op("gin_trgm_ops")),
+    index("companies_aliases_gin").using("gin", t.aliases),
     check("companies_target_tier", sql`${t.targetTier} is null or ${t.targetTier} in (1, 2, 3)`),
     check("companies_sec_cik_format", sql`${t.secCik} is null or ${t.secCik} ~ '^[0-9]{10}$'`),
   ],
@@ -855,4 +863,26 @@ export const queueItems = dmi.table(
     updatedAt: updatedAt(),
   },
   (t) => [index().on(t.workspaceId, t.status, t.createdAt), index().on(t.resolvedBy)],
+);
+
+/**
+ * A CSV import between preview and commit (BRD 16.4). Holds the parsed rows and, once
+ * committed, the report of created, matched, conflicting and rejected rows. Not in BRD 6.
+ */
+export const importBatches = dmi.table(
+  "import_batches",
+  {
+    id: id(),
+    workspaceId: workspaceRef(),
+    kind: importKind().notNull(),
+    filename: text().notNull(),
+    status: importStatus().notNull().default("previewed"),
+    rows: jsonb().notNull(),
+    report: jsonb(),
+    createdBy: uuid().notNull().references(() => users.id),
+    committedAt: timestamp(tz),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index().on(t.workspaceId, t.createdAt), index().on(t.createdBy)],
 );

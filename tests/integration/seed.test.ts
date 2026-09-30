@@ -1,5 +1,5 @@
 /** The seed workspace matches BRD section 21 exactly. */
-import { and, count, eq, gte, lt, sql } from "drizzle-orm";
+import { and, count, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { closeDatabase, withWorkspace } from "@/db/client";
 import * as s from "@/db/schema";
@@ -19,8 +19,16 @@ describe("seed workspace: Demo Search Partners", () => {
     expect((ws[0]?.packs as Record<string, boolean>).exec_search).toBe(true);
   });
 
-  it("has 4 users: partner, outreach owner, validator, data steward", async () => {
-    const roles = await withWorkspace(demo.id, (tx) => tx.select({ role: s.workspaceMembers.role }).from(s.workspaceMembers));
+  it("has 4 seeded users: partner, outreach owner, validator, data steward", async () => {
+    // Other tests sign new people in, so count the seeded users by email rather than all members.
+    const seeded = ["jordan.ellis@demo-search.example.com", "priya.raman@markivis.example.com", "sam.okafor@markivis.example.com", "lee.whitford@demo-search.example.com"];
+    const roles = await withWorkspace(demo.id, (tx) =>
+      tx
+        .select({ email: s.users.email, role: s.workspaceMembers.role })
+        .from(s.workspaceMembers)
+        .innerJoin(s.users, eq(s.users.id, s.workspaceMembers.userId))
+        .where(inArray(s.users.email, seeded)),
+    );
     expect(roles.map((r) => r.role).sort()).toEqual(["data_steward", "outreach_owner", "partner", "validator"]);
   });
 

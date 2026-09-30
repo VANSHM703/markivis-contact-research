@@ -1,0 +1,6 @@
+.region:empty { display: none; }
+.region { margin-bottom: var(--space-5); }
+.notice { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); font-size: var(--body-sm); }
+.ok { background: var(--surface-raised); border: 1px solid var(--border-subtle); color: var(--signal-ok); box-shadow: var(--shadow-card); }
+.ok::before { content: "✓ "; font-family: var(--font-mono); }
+.warn { background: var(--signal-warn-wash); color: var(--signal-warn); }

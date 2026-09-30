@@ -15,7 +15,7 @@ export default async function globalSetup(config: FullConfig) {
   const baseURL = config.projects[0]!.use.baseURL!;
   mkdirSync("tests/e2e/.auth", { recursive: true });
   const browser = await chromium.launch();
-  for (const [file, name] of [["partner", "Jordan Ellis"], ["validator", "Sam Okafor"]] as const) {
+  for (const [file, name] of [["partner", "Jordan Ellis"], ["validator", "Sam Okafor"], ["harbor", "Casey Morgan"]] as const) {
     const page = await browser.newPage({ baseURL });
     await page.goto("sign-in");
     await page.getByRole("button", { name: new RegExp(name) }).click();

@@ -19,7 +19,7 @@ interface DataTableProps {
   caption: string;
   columns: Column[];
   rows: TableRow[];
-  pagination?: { page: number; total: number; pageSize: number; path: string };
+  pagination?: { page: number; total: number; pageSize: number; path: string; query?: string };
 }
 
 const formatter = new Intl.NumberFormat("en-US");
@@ -70,7 +70,8 @@ export function DataTable({ caption, columns, rows, pagination }: DataTableProps
   );
 }
 
-function Pagination({ page, total, pageSize, path }: { page: number; total: number; pageSize: number; path: string }) {
+function Pagination({ page, total, pageSize, path, query }: { page: number; total: number; pageSize: number; path: string; query?: string }) {
+  const href = (p: number) => `${path}?${query ? `${query}&` : ""}page=${p}`;
   const first = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const last = Math.min(total, page * pageSize);
   const pages = Math.max(1, Math.ceil(total / pageSize));
@@ -81,14 +82,14 @@ function Pagination({ page, total, pageSize, path }: { page: number; total: numb
       </p>
       <div className={styles.pageButtons}>
         {page > 1 ? (
-          <Link className="btn btn--ghost btn--compact" href={`${path}?page=${page - 1}`}>
+          <Link className="btn btn--ghost btn--compact" href={href(page - 1)}>
             Previous
           </Link>
         ) : (
           <span className="btn btn--ghost btn--compact" aria-disabled="true">Previous</span>
         )}
         {page < pages ? (
-          <Link className="btn btn--ghost btn--compact" href={`${path}?page=${page + 1}`}>
+          <Link className="btn btn--ghost btn--compact" href={href(page + 1)}>
             Next
           </Link>
         ) : (

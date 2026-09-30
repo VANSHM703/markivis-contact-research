@@ -39,3 +39,23 @@ export async function dbError(promise: Promise<unknown>): Promise<string> {
   }
   return "no error";
 }
+
+class Rollback extends Error {}
+
+/**
+ * Runs fn in a workspace-scoped transaction and rolls it back afterwards, so tests that change
+ * records never disturb the seed that other tests count.
+ */
+export async function inRolledBackWorkspace<T>(workspaceId: string, fn: (tx: import("@/db/client").Tx) => Promise<T>): Promise<T> {
+  const { withWorkspace } = await import("@/db/client");
+  let result: T | undefined;
+  try {
+    await withWorkspace(workspaceId, async (tx) => {
+      result = await fn(tx);
+      throw new Rollback();
+    });
+  } catch (error) {
+    if (!(error instanceof Rollback)) throw error;
+  }
+  return result as T;
+}

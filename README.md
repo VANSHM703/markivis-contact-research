@@ -12,8 +12,9 @@ Relationship intelligence inside BEAM: one trusted record of every senior decisi
 |---|---|
 | M0 Orientation: stack, CI, Docker, design tokens, app shell | Done |
 | M1 Foundations: tenancy, auth, roles, audit log, schema, seed data | Done |
-| M2 Records: people, companies, roles, field sources, manual entry, CSV imports, matching | Next |
-| M3 to M10 | Not started |
+| M2 Records: people, companies, roles, field sources, manual entry, CSV imports, matching | Done |
+| M3 Ingestion: source adapters and the job scheduler | Next |
+| M4 to M10 | Not started |
 
 ## Run it locally
 
@@ -55,6 +56,10 @@ npm run test:e2e    # Playwright against dmi_e2e: sign-in, layout at 320 to 1440
 
 CI runs all of these on every push and pull request (`.github/workflows/ci.yml`).
 
+## Importing a target list
+
+People, then "Import target list". Download the template from that page for the columns (only `company_name` is required). The preview shows what will happen to every row before anything is saved; possible duplicates and conflicting values go to Queue, under "Conflicts and duplicates".
+
 ## Configuration
 
 Copy `.env.example` to `.env`. The full list of variables is in BRD section 20.1. The app is served under `APP_BASE_PATH` (default `/intelligence`) so it can sit behind the BEAM reverse proxy.
@@ -69,6 +74,7 @@ scripts/          migrate, setup (compose), demo:reset
 src/
   app/            (app) signed-in routes, (auth) sign-in, api/v1 JSON routes
   db/             schema, scoped query layer, seed generator
+  domain/         matching, provenance, records, merge, suppression, titles, CSV imports
   components/
     shell/        top bar, brand lockup, sidebar, mobile drawer, search, user menu
     ui/           page header, empty state, readout band

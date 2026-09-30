@@ -1,0 +1,9 @@
+.tabs { display: flex; gap: var(--space-5); margin-bottom: var(--space-5); border-bottom: 1px solid var(--border-subtle); overflow-x: auto; }
+.tab {
+  display: inline-flex; align-items: center; min-height: var(--tap-min); white-space: nowrap;
+  font: 500 var(--body-sm)/1 var(--font-sans); color: var(--text-secondary); text-decoration: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab:hover { color: var(--text-primary); }
+.tab:focus-visible { outline: 2.5px solid var(--focus-ring); outline-offset: 2px; }
+.active { color: var(--text-primary); font-weight: 600; border-bottom-color: var(--accent); }

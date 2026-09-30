@@ -34,7 +34,7 @@ export function GlobalSearch({ shortcut = false, className }: GlobalSearchProps)
   }, [shortcut]);
 
   return (
-    <form role="search" action={`${APP_BASE_PATH}/people`} method="get" className={`${styles.search} ${className ?? ""}`}>
+    <form role="search" action={`${APP_BASE_PATH}/search`} method="get" className={`${styles.search} ${className ?? ""}`}>
       <label htmlFor={id} className="visually-hidden">
         Search people and companies
       </label>
