@@ -30,7 +30,7 @@ test.describe("app shell", () => {
   for (const width of WIDTHS) {
     test(`has no horizontal page scroll at ${width} px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
-      for (const route of ROUTES) {
+      for (const route of [...ROUTES, "people?page=2"]) {
         await page.goto(`./${route}`);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
         expect(overflow, `/${route} at ${width} px`).toBeLessThanOrEqual(0);

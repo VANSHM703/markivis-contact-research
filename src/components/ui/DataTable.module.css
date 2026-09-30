@@ -1,0 +1,46 @@
+/* Design file 9.2 */
+.wrap { display: grid; gap: var(--space-4); }
+.container {
+  background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg);
+  overflow-x: auto; max-height: 75dvh; overflow-y: auto;
+}
+.table { width: 100%; border-collapse: collapse; font-size: var(--body-sm); line-height: 1.55; }
+.table thead th {
+  position: sticky; top: 0; z-index: 1; height: 40px; padding: 0 var(--space-4);
+  background: var(--surface-sunken); color: var(--text-secondary);
+  font: 600 var(--caption)/1.2 var(--font-sans); text-align: left; white-space: nowrap;
+}
+.table tbody tr { position: relative; }
+.table tbody th, .table tbody td {
+  height: 52px; padding: var(--space-3) var(--space-4); text-align: left; vertical-align: middle;
+  border-top: 1px solid var(--border-subtle); font-weight: 400; color: var(--text-secondary);
+}
+.linked:hover { background: var(--surface-sunken); }
+.primary { min-width: 200px; }
+.primary :global(.cell-title) { display: block; color: var(--text-primary); font-weight: 600; }
+.primary :global(.cell-sub) { display: block; font-size: var(--caption); color: var(--text-muted); }
+.rowLink { color: inherit; text-decoration: none; }
+/* The whole row is the link target. */
+.rowLink::after { content: ""; position: absolute; inset: 0; }
+.rowLink:focus-visible { outline: none; }
+.rowLink:focus-visible::after { outline: 2.5px solid var(--focus-ring); outline-offset: -3px; border-radius: var(--radius-sm); }
+.numeric { text-align: right !important; font: 400 var(--meta)/1.45 var(--font-mono); font-variant-numeric: tabular-nums; }
+.table thead .numeric { font: 600 var(--caption)/1.2 var(--font-sans); }
+.pagination { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+.pageButtons { display: flex; gap: var(--space-3); }
+
+/* Below sm, rows become stacked cards with no horizontal scroll. */
+@media (max-width: 560px) {
+  .container { background: transparent; border: 0; overflow: visible; max-height: none; }
+  .table, .table tbody, .table tr, .table th, .table td { display: block; width: 100%; }
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .table tbody tr {
+    margin-bottom: var(--space-3); padding: var(--space-4); background: var(--surface-raised);
+    border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+  }
+  .table tbody th, .table tbody td { height: auto; padding: var(--space-1) 0; border: 0; }
+  .table tbody td { display: grid; grid-template-columns: 40% 1fr; gap: var(--space-3); }
+  .table tbody td::before { content: attr(data-label); color: var(--text-muted); font: 400 var(--caption)/1.5 var(--font-sans); }
+  .numeric { text-align: left !important; }
+  .primary { min-width: 0; padding-bottom: var(--space-2) !important; }
+}

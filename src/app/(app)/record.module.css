@@ -1,0 +1,14 @@
+.header { display: grid; gap: var(--space-2); margin-bottom: var(--space-6); }
+.timeline { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; gap: var(--space-4); position: relative; }
+/* The step component turned vertical (design file 8.6). */
+.timeline::before { content: ""; position: absolute; left: 6px; top: 6px; bottom: 6px; width: 1px; background: var(--border-strong); }
+.timeline li { position: relative; padding-left: var(--space-6); }
+.timeline li::before {
+  content: ""; position: absolute; left: 0; top: 5px; width: 14px; height: 14px; border-radius: var(--radius-pill);
+  background: var(--accent-fill); box-shadow: 0 0 0 3px var(--surface-raised);
+}
+.timeline li.ended::before { background: var(--surface-raised); border: 1.5px solid var(--border-strong); }
+.itemTitle { font-weight: 600; }
+.seats { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; gap: var(--space-3); }
+.seats li { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-subtle); }
+.facts { display: flex; flex-wrap: wrap; gap: var(--space-2); }

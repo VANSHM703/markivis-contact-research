@@ -8,6 +8,7 @@ interface UserMenuProps {
   email: string;
   roleLabel: string;
   workspaceName: string;
+  signOutAction: () => Promise<void>;
 }
 
 function initials(name: string): string {
@@ -19,7 +20,7 @@ function initials(name: string): string {
     .join("");
 }
 
-export function UserMenu({ name, email, roleLabel, workspaceName }: UserMenuProps) {
+export function UserMenu({ name, email, roleLabel, workspaceName, signOutAction }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -73,6 +74,11 @@ export function UserMenu({ name, email, roleLabel, workspaceName }: UserMenuProp
               <dd>{roleLabel}</dd>
             </div>
           </dl>
+          <form action={signOutAction} className={styles.signOut}>
+            <button type="submit" className="btn btn--ghost btn--compact">
+              Sign out
+            </button>
+          </form>
           <p className={`t-caption t-muted ${styles.footer}`}>BEAM by Markivis</p>
         </div>
       ) : null}

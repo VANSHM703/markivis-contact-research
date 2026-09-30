@@ -8,24 +8,40 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
     env:
       NEXT_TELEMETRY_DISABLED: 1
       DATA_MODE: mock
+      PGPASSWORD: postgres
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
+      - name: Create database roles and databases
+        run: psql -h localhost -U postgres -v ON_ERROR_STOP=1 -f db/bootstrap.sql
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
-      - run: npm test
+      - name: Unit and integration tests
+        run: npm test
       - name: Dependency scan (fail on critical)
         run: npm audit --audit-level=critical
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report

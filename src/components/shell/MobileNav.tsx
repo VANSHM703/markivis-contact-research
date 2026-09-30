@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import type { NavItem } from "@/config/navigation";
@@ -11,12 +11,14 @@ import styles from "./MobileNav.module.css";
 interface MobileNavProps {
   items: readonly NavItem[];
   counts?: NavCounts;
+  /** Controls that move from the top bar into the drawer below the sm breakpoint. */
+  extra?: ReactNode;
 }
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /** Below the lg breakpoint the sidebar becomes a burger and a left drawer (design file section 7). */
-export function MobileNav({ items, counts }: MobileNavProps) {
+export function MobileNav({ items, counts, extra }: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const [lastPathname, setLastPathname] = useState(pathname);
@@ -97,6 +99,7 @@ export function MobileNav({ items, counts }: MobileNavProps) {
               </button>
             </div>
             <GlobalSearch className={styles.search} />
+            {extra ? <div className={styles.extra}>{extra}</div> : null}
             <nav aria-label="Primary" className={styles.nav}>
               <SidebarNav items={items} counts={counts} onNavigate={() => setOpen(false)} />
             </nav>

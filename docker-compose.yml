@@ -1,20 +1,40 @@
 # Local stack: docker compose up, then open http://localhost:3000/intelligence
+# Mock mode with the seeded demo workspaces (BRD 21, acceptance scenario 24).
+x-app-env: &app-env
+  DATABASE_URL: postgres://dmi_app:dmi_app@db:5432/dmi
+  DATABASE_MIGRATE_URL: postgres://dmi:dmi@db:5432/dmi
+  APP_URL: http://localhost:3000
+  APP_BASE_PATH: /intelligence
+  DATA_MODE: mock
+  AUTH_SECRET: local-development-only
+
 services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: dmi
-      POSTGRES_PASSWORD: dmi
-      POSTGRES_DB: dmi
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     volumes:
       - dmi-db:/var/lib/postgresql/data
+      # Creates the dmi, dmi_app and dmi_system roles and the databases on first start.
+      - ./db/bootstrap.sql:/docker-entrypoint-initdb.d/01-bootstrap.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dmi -d dmi"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dmi"]
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 20
+
+  setup:
+    build:
+      context: .
+      target: tools
+    environment: *app-env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 
   web:
     build:
@@ -22,17 +42,12 @@ services:
       target: web
       args:
         APP_BASE_PATH: /intelligence
-    environment:
-      DATABASE_URL: postgres://dmi:dmi@db:5432/dmi
-      APP_URL: http://localhost:3000
-      APP_BASE_PATH: /intelligence
-      DATA_MODE: mock
-      AUTH_SECRET: local-development-only
+    environment: *app-env
     ports:
       - "3000:3000"
     depends_on:
-      db:
-        condition: service_healthy
+      setup:
+        condition: service_completed_successfully
 
 volumes:
   dmi-db:

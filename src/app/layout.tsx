@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { AppShell } from "@/components/shell/AppShell";
 import { PRODUCT_NAME } from "@/config/product";
-import { getSessionUser } from "@/lib/session";
 import { bricolage, instrumentSans, spaceMono } from "./fonts";
 import "@/styles/globals.css";
 
@@ -21,13 +19,10 @@ export const viewport: Viewport = {
   themeColor: "#F4F6FC",
 };
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
-  const user = await getSessionUser();
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en-US" className={`${bricolage.variable} ${instrumentSans.variable} ${spaceMono.variable}`}>
-      <body>
-        <AppShell user={user}>{children}</AppShell>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -27,5 +27,5 @@
 
 /* The top bar carries the search field above sm; the drawer carries it below. */
 @media (min-width: 561px) {
-  .search { display: none; }
+  .search, .extra { display: none; }
 }
