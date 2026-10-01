@@ -6,6 +6,8 @@
 -- dmi_system  no login, BYPASSRLS; dmi_app may SET ROLE to it for the few operations that
 --             must span workspaces (sign-in identity lookup, scheduler, seeding). See DECISIONS.md.
 -- dmi_jobs    the job queue's login (pg-boss). Owns only schema pgboss and cannot read schema dmi.
+-- dmi_backup  read-only login with BYPASSRLS, for pg_dump: forced row-level security applies even
+--             to the schema owner, so the owner cannot take a complete dump (docs/admin-guide.md).
 
 DO $$
 BEGIN
@@ -20,6 +22,9 @@ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'dmi_jobs') THEN
     CREATE ROLE dmi_jobs LOGIN PASSWORD 'dmi_jobs' NOSUPERUSER NOBYPASSRLS;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'dmi_backup') THEN
+    CREATE ROLE dmi_backup LOGIN PASSWORD 'dmi_backup' NOSUPERUSER BYPASSRLS;
   END IF;
 END
 $$;

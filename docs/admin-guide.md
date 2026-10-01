@@ -77,3 +77,27 @@ Before anyone other than validators sees signals, run all live ingestion for 14 
 3. The Shadow tab reports raw items and signals per week by lane and priority, the auto-confirm share, the reject share by feed, and the projected review time a week against the validator's hours (Settings value `validator_hours_per_week`).
 4. If the projection is over the validator's time, tighten the noisy feeds (Settings, Sources) and run 7 more days. Record the result in DECISIONS.md.
 5. When it fits, press Go live: shadow signals from the last 7 days move into their lanes (auto-confirm ones are confirmed, with their actions), older ones are discarded, and the final report is kept.
+
+## Backups and restore
+
+BRD 19 asks for daily backups kept 30 days, point-in-time recovery where the host supports it, and a restore procedure tested before launch.
+
+- **Primary:** the database host's automated backups, kept 30 days, with point-in-time recovery. They copy storage, so row-level security does not get in their way.
+- **Portable copy**, and the method without a managed host: a daily `pg_dump` as `dmi_backup`, a read-only login that bypasses row-level security (created by `db/bootstrap.sql`, granted by migration 0009). The schema owner cannot take a complete dump, because the row-level security is forced even for the owner. Give `dmi_backup` a strong password in production.
+
+```bash
+pg_dump "postgres://dmi_backup:<password>@<host>:5432/dmi" --format=custom --schema=dmi --schema=drizzle --file=dmi-$(date +%F).dump
+```
+
+Restore into an empty database, on a cluster that has the roles from `db/bootstrap.sql`, as a superuser, so the rows load past row-level security and every object keeps its owner and grants:
+
+```bash
+createdb --owner=dmi dmi_restored
+psql -d dmi_restored -c "create extension if not exists pg_trgm with schema public"
+pg_restore --dbname=dmi_restored --exit-on-error dmi-2026-10-01.dump
+DATABASE_MIGRATE_URL=postgres://dmi:<password>@<host>:5432/dmi_restored npm run db:migrate
+```
+
+The last step does nothing when the versions match. Then check that the counts of people and audit entries match the source, that `select count(*) from dmi.persons` as `dmi_app` returns 0 (no workspace scope, so row-level security shows nothing), and that you can sign in and open a person. Point `DATABASE_URL` and `DATABASE_MIGRATE_URL` at the restored database to switch over. The job queue (schema `pgboss`) is not in the copy: the worker creates it again on start, and the scheduler restores the schedule.
+
+Tested on 2026-10-01 against the demo database: matching counts, all 39 row-level security policies, the migration journal, and no rows visible without a scope. Repeat the test on the production host before launch (BRD 24.3).

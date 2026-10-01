@@ -20,7 +20,7 @@ test("the composed stack opens with the demo populated and the Mock data badge",
   await page.goto("queue");
   await expect(page.locator("main nav a[href*='item=']").first()).toBeVisible();
   await page.goto("signals");
-  await expect(page.locator("main table tbody tr").first()).toBeVisible();
+  await expect(page.locator("main li.card").first()).toBeVisible();
   await page.goto("actions?owner=all&status=all");
   await expect(page.locator("[data-action-row]").first()).toBeVisible();
   await page.goto("coverage");
