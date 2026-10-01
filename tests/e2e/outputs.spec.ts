@@ -23,7 +23,7 @@ test("a meeting brief opens from Today with all seven headings, and a new one ca
     await page.getByRole("link", { name: "Brief", exact: true }).click();
   } else await brief.click();
   const card = page.getByRole("region", { name: "Meeting brief" });
-  await card.getByRole("button", { name: /Prepare (a new )?brief/ }).click();
+  await card.getByRole("button", { name: /^Prepare a (new )?brief$/ }).click();
   await expect(page.getByText("Brief ready.")).toBeVisible();
   for (const h of HEADINGS) await expect(page.getByRole("region", { name: "Meeting brief" }).getByRole("heading", { name: h, exact: true })).toBeVisible();
   expect(await axe(page)).toEqual([]);

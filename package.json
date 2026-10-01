@@ -22,7 +22,8 @@
     "demo:reset": "tsx --env-file-if-exists=.env scripts/demo-reset.ts",
     "db:setup": "tsx --env-file-if-exists=.env scripts/setup.ts",
     "worker": "tsx --env-file-if-exists=.env src/worker/index.ts",
-    "fixtures:generate": "tsx scripts/generate-fixtures.ts"
+    "fixtures:generate": "tsx scripts/generate-fixtures.ts",
+    "perf": "playwright test --config tests/perf/perf.config.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.129.0",

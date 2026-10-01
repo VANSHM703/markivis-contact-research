@@ -29,8 +29,11 @@ GRANT dmi_system TO dmi_app;
 SELECT 'CREATE DATABASE dmi OWNER dmi' WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'dmi')\gexec
 SELECT 'CREATE DATABASE dmi_test OWNER dmi' WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'dmi_test')\gexec
 SELECT 'CREATE DATABASE dmi_e2e OWNER dmi' WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'dmi_e2e')\gexec
+-- The performance check (npm run perf) fills its own database with 50,000 people.
+SELECT 'CREATE DATABASE dmi_perf OWNER dmi' WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'dmi_perf')\gexec
 
 -- pg-boss creates and migrates its own schema on start, so the jobs role needs CREATE on each database.
 GRANT CREATE ON DATABASE dmi TO dmi_jobs;
 GRANT CREATE ON DATABASE dmi_test TO dmi_jobs;
 GRANT CREATE ON DATABASE dmi_e2e TO dmi_jobs;
+GRANT CREATE ON DATABASE dmi_perf TO dmi_jobs;

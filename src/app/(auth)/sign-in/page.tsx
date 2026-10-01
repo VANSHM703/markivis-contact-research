@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { BrandLockup } from "@/components/shell/BrandLockup";
 import { isMockSignInEnabled } from "@/lib/auth";
-import { getRequestContext, ROLE_LABELS } from "@/lib/context";
+import { getRequestContext, getSignedInUser, ROLE_LABELS } from "@/lib/context";
 import { listMockSignInUsers } from "@/lib/identity";
 import { mockSignInAction, providerSignInAction } from "@/server/session-actions";
 import styles from "./page.module.css";
@@ -16,6 +16,8 @@ const ERRORS: Record<string, string> = {
 
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   if (await getRequestContext()) redirect("/");
+  // A platform admin in no workspace lands on the platform page (BRD 5.3).
+  if ((await getSignedInUser())?.isPlatformAdmin) redirect("/platform");
   const { error } = await searchParams;
   const mock = isMockSignInEnabled();
   const mockUsers = mock ? await listMockSignInUsers() : [];
@@ -69,7 +71,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
                     <button type="submit" className={styles.user}>
                       <span className={styles.userName}>{u.name}</span>
                       <span className="t-caption t-muted">
-                        {ROLE_LABELS[u.role]}, {u.workspaceName}
+                        {u.role ? `${ROLE_LABELS[u.role]}, ${u.workspaceName}` : "Platform admin, no workspace"}
                       </span>
                       <span className={`${styles.arrow} t-meta`} aria-hidden="true">→</span>
                     </button>

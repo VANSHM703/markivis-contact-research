@@ -1,0 +1,10 @@
+.shell { min-height: 100dvh; background: var(--surface-page); }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); height: var(--topbar-h);
+  padding: 0 max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left));
+  background: var(--surface-raised); border-bottom: 1px solid var(--border-subtle);
+}
+.end { display: flex; align-items: center; gap: var(--space-3); }
+.content { width: 100%; max-width: var(--app-max); margin: 0 auto; padding: var(--space-6) max(var(--gutter), env(safe-area-inset-right)) var(--space-7) max(var(--gutter), env(safe-area-inset-left)); }
+.content:focus { outline: none; }
+@media (max-width: 560px) { .topbar { padding: 0 var(--space-4); gap: var(--space-2); } .end { gap: var(--space-2); } }

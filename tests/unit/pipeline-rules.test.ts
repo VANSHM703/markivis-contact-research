@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { postCheck } from "@/domain/actions";
 import { addWorkingDays, isoWeek, weekStart } from "@/lib/working-days";
 import { normaliseText, prefilter, type WorkspaceIndex } from "@/pipeline/prefilter";
-import { combineConfidence, dedupeKey, laneOf, priorityOf, sourceStrength, withinDays } from "@/pipeline/rules";
+import { basePriority, combineConfidence, dedupeKey, laneOf, priorityOf, priorityOverrides, sourceStrength, withinDays } from "@/pipeline/rules";
 
 const ctx = { companyDomain: "example.com", reputableOutlets: ["news.example.org"] };
 const src = (sourceType: string, url: string | null, quoted = true) => ({ rawItemId: url, sourceType, url, quoted });
@@ -45,6 +45,16 @@ describe("priority (BRD 9.3, 7.3)", () => {
     expect(priorityOf({ type: "person_promotion", personIsPlaced: true, offList: false }).priority).toBe(1);
     expect(priorityOf({ type: "person_joined", personIsPlaced: false, offList: true }).priority).toBe(2);
     expect(priorityOf({ type: "company_layoffs", personIsPlaced: true, offList: false }).priority).toBe(2);
+  });
+
+  it("takes the workspace's priority for a type, and still puts a placed executive's move first", () => {
+    const overrides = priorityOverrides({ signal_priorities: { person_promotion: 3, company_layoffs: 1, person_award: 7, not_a_type: 1 } });
+    expect(overrides).toEqual({ person_promotion: 3, company_layoffs: 1 });
+    expect(priorityOf({ type: "company_layoffs", personIsPlaced: false, offList: false, overrides })).toEqual({ priority: 1, reason: "Workspace priority for company layoffs" });
+    expect(priorityOf({ type: "person_promotion", personIsPlaced: false, offList: false, overrides }).priority).toBe(3);
+    expect(priorityOf({ type: "person_promotion", personIsPlaced: true, offList: false, overrides }).priority).toBe(1);
+    expect(basePriority("person_award", overrides)).toBe(3);
+    expect(priorityOverrides(null)).toEqual({});
   });
 });
 

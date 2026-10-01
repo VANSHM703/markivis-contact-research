@@ -92,3 +92,8 @@
   .facts, .editGrid { grid-template-columns: minmax(0, 1fr); }
   .help { display: none; }
 }
+
+/* Shadow run report (BRD 24.1). */
+.shadowCard { display: grid; gap: var(--space-4); margin-bottom: var(--space-5); }
+.shadowHead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.shadowHead > div { min-width: 0; flex: 1 1 260px; }

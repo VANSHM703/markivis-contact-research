@@ -12,7 +12,7 @@ import styles from "@/components/settings/Settings.module.css";
 
 export const metadata: Metadata = { title: "Email log" };
 
-const KIND_LABELS: Record<string, string> = { digest: "Daily digest", p1_change: "Priority 1 alert", auto_confirm_suspended: "Auto-confirm suspended", budget_80: "Budget at 80%" };
+const KIND_LABELS: Record<string, string> = { digest: "Daily digest", p1_change: "Priority 1 alert", auto_confirm_suspended: "Auto-confirm suspended", budget_80: "Budget at 80%", brief: "Meeting brief", break_glass: "Break-glass access", invitation: "Invitation", retention_review: "Retention review" };
 
 export default async function EmailLogPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const ctx = await pageContext();

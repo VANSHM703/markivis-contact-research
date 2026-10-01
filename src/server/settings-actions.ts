@@ -9,6 +9,7 @@ import { workspaces } from "@/db/schema";
 import { audit } from "@/lib/audit";
 import { getRequestContext } from "@/lib/context";
 import { can } from "@/lib/permissions";
+import { SIGNAL_RULES } from "@/pipeline/rules";
 
 const PAGE = "/settings/workflow";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -68,4 +69,23 @@ export async function saveStyleGuideAction(formData: FormData): Promise<void> {
     await audit(tx, { workspaceId: ctx.workspace.id, actorUserId: ctx.user.id, actorKind: "user", action: "settings.style_guide_changed", entityType: "workspace", entityId: ctx.workspace.id, before: { style_guide: before.style_guide }, after: { style_guide: text } });
   });
   redirect(`${PAGE}?notice=style_guide_saved`);
+}
+
+const PRIORITY_VALUES = new Set(["1", "2", "3"]);
+
+/** Signal priorities (BRD 16 Settings): a workspace priority per type, or the default. */
+export async function savePrioritiesAction(formData: FormData): Promise<void> {
+  const ctx = await requireSettings();
+  const next: Record<string, 1 | 2 | 3> = {};
+  for (const type of Object.keys(SIGNAL_RULES)) {
+    const value = String(formData.get(`priority_${type}`) ?? "default");
+    if (PRIORITY_VALUES.has(value) && Number(value) !== SIGNAL_RULES[type as keyof typeof SIGNAL_RULES].priority) next[type] = Number(value) as 1 | 2 | 3;
+  }
+  await withWorkspace(ctx.workspace.id, async (tx) => {
+    const [ws] = await tx.select({ settings: workspaces.settings }).from(workspaces).where(eq(workspaces.id, ctx.workspace.id)).limit(1);
+    const before = ws!.settings as Record<string, unknown>;
+    await tx.update(workspaces).set({ settings: { ...before, signal_priorities: next } }).where(eq(workspaces.id, ctx.workspace.id));
+    await audit(tx, { workspaceId: ctx.workspace.id, actorUserId: ctx.user.id, actorKind: "user", action: "settings.priorities_changed", entityType: "workspace", entityId: ctx.workspace.id, before: { signal_priorities: before.signal_priorities ?? {} }, after: { signal_priorities: next } });
+  });
+  redirect("/settings/priorities?notice=priorities_saved");
 }

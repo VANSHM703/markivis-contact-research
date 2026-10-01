@@ -6,7 +6,9 @@
  *   - POST /crm/v3/objects/contacts/search for changes since a time (the search API has its own,
  *     stricter rate limit);
  *   - POST /crm/v3/objects/notes with an association to the contact (type 202, note to contact);
- *   - GET and POST /crm/v3/properties/contacts for the two custom properties written here.
+ *   - GET and POST /crm/v3/properties/contacts for the two custom properties written here;
+ *   - POST /crm/v3/objects/contacts/gdpr-delete with the contact id, for an erasure: a permanent
+ *     delete, where the plain DELETE only moves the contact to the recycling bin for 90 days.
  * Private apps get 100 requests per 10 seconds on Free and Starter (190 on Professional and
  * Enterprise), so requests are paced and a 429 stops the run for the next schedule to retry.
  */
@@ -71,6 +73,13 @@ export function createHubSpotAdapter(http: HttpClient, token: string): CrmAdapte
       });
       if (!result?.id) throw new HttpError("HubSpot did not return the note.", null);
       return result.id;
+    },
+
+    async deleteContact(crmId) {
+      const response = await http.request({ method: "POST", url: `${HUBSPOT}/crm/v3/objects/contacts/gdpr-delete`, headers: { authorization: `Bearer ${token}`, "content-type": "application/json", accept: "application/json" }, body: { objectId: crmId } });
+      if (response.status === 404) return false;
+      assertOk(response, "HubSpot");
+      return true;
     },
 
     async contactsModifiedSince(since) {

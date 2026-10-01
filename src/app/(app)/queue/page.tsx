@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SubmitButton } from "@/components/forms/SubmitButton";
 import { ConflictsLane } from "@/components/queue/ConflictsLane";
+import { ShadowRunCard } from "@/components/queue/ShadowRunCard";
 import { QueueKeyboard } from "@/components/queue/QueueKeyboard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Notice } from "@/components/ui/Notice";
@@ -49,9 +50,11 @@ export default async function QueuePage({ searchParams }: { searchParams: Promis
     );
   }
   const params = await searchParams;
-  const tab = (TABS.some((t) => t.key === params.tab) ? params.tab : "review") as QueueTab;
   const counts = await queueCounts(ctx.workspace.id);
-  const tabs = TABS.filter((t) => t.key !== "shadow" || counts.shadow > 0 || ctx.workspace.flags["pipeline.shadow"]);
+  // Shadow signals are for validators and platform admins only until go-live (BRD 24.1).
+  const seesShadow = ctx.role === "validator" || ctx.user.isPlatformAdmin;
+  const tabs = TABS.filter((t) => t.key !== "shadow" || (seesShadow && (counts.shadow > 0 || ctx.workspace.flags["pipeline.shadow"] || ctx.user.isPlatformAdmin)));
+  const tab = (tabs.some((t) => t.key === params.tab) ? params.tab : "review") as QueueTab;
   const now = new Date();
 
   return (
@@ -60,6 +63,7 @@ export default async function QueuePage({ searchParams }: { searchParams: Promis
       {params.notice === "batch_approved" && params.count ? <p className="visually-hidden" role="status">{params.count} confirmed.</p> : null}
       <PageHeader title="Queue" lede={`${counts.review} to review, ${counts.batch} in the weekly batch. Priority first, then oldest first.`} />
       <Tabs label="Queue lanes" current={tab} tabs={tabs.map((t) => ({ key: t.key, label: counts[t.key] ? `${t.label} (${counts[t.key]})` : t.label, href: `/queue?tab=${t.key}` }))} />
+      {tab === "shadow" ? <ShadowRunCard workspaceId={ctx.workspace.id} isPlatformAdmin={ctx.user.isPlatformAdmin} now={now} /> : null}
       {tab === "conflicts" ? (
         <ConflictsLane workspaceId={ctx.workspace.id} canMerge={can(ctx.role, "persons.merge")} />
       ) : tab === "batch" && !(params.item && UUID_RE.test(params.item)) ? (
@@ -251,6 +255,18 @@ function Detail({ detail, tab }: { detail: DetailData; tab: QueueTab }) {
               <SubmitButton variant="ghost">Incorrect</SubmitButton>
             </form>
           </>
+        ) : tab === "shadow" && signal.status === "shadow" ? (
+          <details id="reject-menu" className={styles.reject}>
+            <summary className="btn btn--ghost">Reject</summary>
+            <form action={rejectSignalAction.bind(null, signal.id, "shadow")} className={styles.reasons}>
+              <p className={styles.label}>Why? It counts in the report and will not go live.</p>
+              {REJECT_REASONS.map((r, i) => (
+                <button key={r} type="submit" name="reason" value={r} className={styles.reason}>
+                  <kbd className={styles.key}>{i + 1}</kbd> {REASON_LABELS[r]}
+                </button>
+              ))}
+            </form>
+          </details>
         ) : decidable ? (
           <>
             <form id="confirm-form" action={confirmSignalAction.bind(null, signal.id, tab as "review")}>

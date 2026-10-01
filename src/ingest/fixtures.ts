@@ -8,7 +8,8 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
-export const FIXTURES_ROOT = path.resolve(process.env.FIXTURES_DIR ?? "fixtures");
+// Resolved at run time; the Docker web image copies /fixtures next to the server (see Dockerfile).
+export const FIXTURES_ROOT = path.resolve(/* turbopackIgnore: true */ process.env.FIXTURES_DIR ?? "fixtures");
 
 const DAY = 86_400_000;
 
@@ -23,7 +24,7 @@ export function resolveTokens(text: string, now: Date): string {
 }
 
 export async function readFixture(relativePath: string, now: Date): Promise<string | undefined> {
-  const full = path.resolve(FIXTURES_ROOT, relativePath);
+  const full = path.resolve(/* turbopackIgnore: true */ FIXTURES_ROOT, relativePath);
   if (!full.startsWith(FIXTURES_ROOT + path.sep)) return undefined;
   try {
     return resolveTokens(await readFile(full, "utf8"), now);

@@ -6,6 +6,7 @@ import { Chip } from "@/components/ui/Chip";
 import { Notice } from "@/components/ui/Notice";
 import { Tabs } from "@/components/ui/Tabs";
 import { BriefTab } from "@/components/briefs/BriefTab";
+import { PrivacyTab } from "@/components/compliance/PrivacyTab";
 import { Interactions } from "@/components/capture/Interactions";
 import { ConnectionsTab } from "@/components/relationships/ConnectionsTab";
 import { PathList } from "@/components/relationships/PathList";
@@ -80,7 +81,8 @@ export default async function PersonPage({ params, searchParams }: Props) {
   const canNotes = packOn && can(ctx.role, "mandate_notes.view");
   const rel = await personRelationship(ctx, person.id);
   const canCreateAction = can(ctx.role, "messages.send") && !mergedInto && person.status !== "do_not_contact" && person.isTracked;
-  const tab = query.tab === "record" ? "record" : query.tab === "notes" && canNotes ? "notes" : query.tab === "interactions" ? "interactions" : query.tab === "connections" ? "connections" : query.tab === "brief" || query.brief ? "brief" : "overview";
+  const canPrivacy = can(ctx.role, "compliance.manage") && !mergedInto;
+  const tab = query.tab === "record" ? "record" : query.tab === "notes" && canNotes ? "notes" : query.tab === "privacy" && canPrivacy ? "privacy" : query.tab === "interactions" ? "interactions" : query.tab === "connections" ? "connections" : query.tab === "brief" || query.brief ? "brief" : "overview";
   const primary = roles.find((r) => r.isPrimary);
   const editor = can(ctx.role, "records.edit") && !mergedInto;
   const merger = can(ctx.role, "persons.merge");
@@ -144,6 +146,7 @@ export default async function PersonPage({ params, searchParams }: Props) {
           { key: "brief", label: "Brief", href: `/people/${person.id}?tab=brief` },
           { key: "record", label: "Record", href: `/people/${person.id}?tab=record` },
           ...(canNotes ? [{ key: "notes", label: "Notes", href: `/people/${person.id}?tab=notes` }] : []),
+          ...(canPrivacy ? [{ key: "privacy", label: "Consent and privacy", href: `/people/${person.id}?tab=privacy` }] : []),
         ]}
       />
 
@@ -237,6 +240,8 @@ export default async function PersonPage({ params, searchParams }: Props) {
         <ConnectionsTab personId={person.id} connections={rel.connections} canEdit={editor} />
       ) : tab === "interactions" ? (
         <Interactions ctx={ctx} personId={person.id} />
+      ) : tab === "privacy" ? (
+        <PrivacyTab workspaceId={ctx.workspace.id} personId={person.id} tz={ctx.workspace.timezone} />
       ) : tab === "notes" ? (
         <MandateNotes actor={{ workspaceId: ctx.workspace.id, userId: ctx.user.id, role: ctx.role }} target={{ personId: person.id }} kind="person" id={person.id} tz={ctx.workspace.timezone} />
       ) : (

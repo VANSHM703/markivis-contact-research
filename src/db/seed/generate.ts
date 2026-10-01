@@ -172,6 +172,8 @@ const USERS: SeedUser[] = [
   { key: "validator", name: "Sam Okafor", email: "sam.okafor@markivis.example.com", isPlatformAdmin: true },
   { key: "steward", name: "Lee Whitford", email: "lee.whitford@demo-search.example.com" },
   { key: "harbor_partner", name: "Casey Morgan", email: "casey.morgan@harbor-search.example.org" },
+  // A Markivis operator in no workspace: reads workspace data only through break-glass access.
+  { key: "platform", name: "Alex Moreau", email: "alex.moreau@markivis.example.com", isPlatformAdmin: true },
 ];
 
 export const DEMO_PLAN: WorkspacePlan = {

@@ -20,7 +20,9 @@ Relationship intelligence inside BEAM: one trusted record of every senior decisi
 | M7 Capture: Microsoft 365 mail and calendar, Google (P1), privacy controls | Done |
 | M8 Relationships: scoring, calibration, going quiet, connections, paths, coverage | Done |
 | M9 Outputs and sync: briefs, sending from the mailbox, reply detection, outcomes, HubSpot (P1) | Done |
-| M10 Compliance and hardening: consent, suppression, erasure, export, retention, security, performance, accessibility | Next |
+| M10 Compliance and hardening: consent, suppression, erasure, export, retention, members, audit log, break-glass, shadow run, security, performance, accessibility | Done |
+
+All ten milestones are built. Before live use, work through the launch prerequisites in BRD section 24.2 and [`docs/admin-guide.md`](docs/admin-guide.md).
 
 ## Run it locally
 
@@ -28,7 +30,7 @@ Requires Node 20.9 or later and PostgreSQL 16.
 
 ```bash
 brew install postgresql@16 && brew services start postgresql@16
-psql -d postgres -f db/bootstrap.sql   # roles dmi, dmi_app, dmi_system; databases dmi, dmi_test, dmi_e2e
+psql -d postgres -f db/bootstrap.sql   # roles dmi, dmi_app, dmi_system; databases dmi, dmi_test, dmi_e2e, dmi_perf
 cp .env.example .env                   # then set AUTH_SECRET
 npm install
 npm run demo:reset                     # migrate from scratch and load the demo workspaces
@@ -45,6 +47,7 @@ Open http://localhost:3000/intelligence. In mock mode (`DATA_MODE=mock`, the def
 | Sam Okafor | Validator, in both workspaces (shows the workspace switcher); also the platform admin, who sets packs |
 | Lee Whitford | Data steward, Demo Search Partners |
 | Casey Morgan | Partner, Harbor Search Group |
+| Alex Moreau | Markivis platform admin in no workspace: sees usage, and reads a workspace only through break-glass access |
 
 With Docker:
 
@@ -57,8 +60,9 @@ docker compose up
 ```bash
 npm run lint        # ESLint
 npm run typecheck   # TypeScript, strict
-npm test            # Vitest: unit tests, plus integration tests against dmi_test (tenancy, seed, sign-in)
-npm run test:e2e    # Playwright against dmi_e2e: sign-in, layout at 320 to 1440 px, workspace switching, axe
+npm test            # Vitest: unit tests, plus integration tests against dmi_test (tenancy, erasure, pipeline and more)
+npm run test:e2e    # Playwright against a production build and dmi_e2e: every screen at 320 to 1440 px, axe, the main flows
+npm run perf        # Playwright against dmi_perf filled to 50,000 people: the BRD 19 speed checks and the full export
 ```
 
 CI runs all of these on every push and pull request (`.github/workflows/ci.yml`).
@@ -113,24 +117,30 @@ src/
   app/            (app) signed-in routes, (auth) sign-in, api/v1 JSON routes
   db/             schema, scoped query layer, seed generator
   domain/         matching, provenance, records, merge, suppression, titles, CSV imports, secrets,
-                  actions, pre-action checks, the action flow, service levels
+                  actions, pre-action checks, the action flow, service levels, erasure, exports,
+                  consent, retention, members, break-glass access, the shadow run, content library
   ai/             AI adapter (Anthropic Messages API, and a mock), prompt contracts, budget
   pipeline/       pre-filter, extraction, resolve, dedupe, confidence, priority, lanes, validation
   ingest/         source adapters (SEC, wires, alerts, pages, Apollo, newsletter), transports, run loop
   digest/         the daily digest
   mail/           platform email: the notifications outbox, SMTP or mock, alerts
   capture/        mailbox and calendar capture: Graph, Gmail and mock providers, OAuth, privacy
-  outreach/       sending approved drafts from the partner's mailbox (mock now; Graph and Gmail in M9)
+  outreach/       sending approved drafts from the partner's mailbox: Graph, Gmail and mock
+  crm/            HubSpot sync, including deletes for erased people
   jobs/           pg-boss queue, schedule (BRD 8.9), handlers
   worker/         the worker process
   components/
     shell/        top bar, brand lockup, sidebar, mobile drawer, search, user menu
     ui/           page header, empty state, readout band
   config/         product name, base path, DATA_MODE, navigation
-  lib/            auth, request context, identity, permissions, audit, normalisation
+  lib/            auth, request context, identity, permissions, audit, normalisation, export
+                  (streaming ZIP and CSV)
   server/         read queries and server actions
   styles/         tokens.css (verbatim from the design file), globals.css
 tests/
   unit/           Vitest
+  integration/    Vitest, against a real database (tenancy, pipeline, erasure and more)
   e2e/            Playwright
+  perf/           Playwright, 50,000 people (npm run perf)
+  compose/        Playwright, against docker compose (the CI compose job)
 ```

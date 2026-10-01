@@ -68,10 +68,11 @@ export const JOBS: JobDefinition[] = [
   { name: "rel.quiet", builtIn: "M8", scope: "workspace", schedules: [{ slot: "daily", cron: "0 6 * * *" }], notes: "Going-quiet alerts and re-engage actions (BRD 11.5)." },
   { name: "briefs.generate", builtIn: "M9", scope: "workspace", schedules: [{ slot: "hourly", cron: "15 * * * *" }], notes: "Meetings 20 to 26 hours ahead with a tracked attendee (BRD 12.6)." },
   { name: "crm.sync", builtIn: "M9", scope: "workspace", schedules: [{ slot: "every15", cron: "*/15 * * * *" }], notes: "HubSpot, when crm.hubspot is on and a token is saved (BRD 15, P1)." },
-  { name: "compliance.retention", builtIn: "M10", scope: "workspace", schedules: [{ slot: "monthly", cron: "0 9 1-7 * 1" }], notes: "First Monday of the month." },
+  // "1#1" is the first Monday. "0 9 1-7 * 1" would also run every Monday: cron ORs the two day fields.
+  { name: "compliance.retention", builtIn: "M10", scope: "workspace", schedules: [{ slot: "monthly", cron: "0 9 * * 1#1" }], notes: "First Monday of the month (BRD 18.2)." },
 ];
 
-const BUILT = new Set(["M3", "M4", "M5", "M7", "M8", "M9"]);
+const BUILT = new Set(["M3", "M4", "M5", "M7", "M8", "M9", "M10"]);
 export const ACTIVE_JOBS = JOBS.filter((j) => BUILT.has(j.builtIn));
 
 /** pg-boss schedule keys allow letters, digits, _ - . / only. */

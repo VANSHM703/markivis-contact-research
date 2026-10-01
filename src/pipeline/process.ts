@@ -17,7 +17,7 @@ import { actionsToDraft, draftForAction } from "@/domain/actions";
 import { log } from "@/lib/log";
 import { execSearchOn } from "@/lib/packs";
 import { buildIndex, prefilter, type PrefilterResult, type WorkspaceIndex } from "./prefilter";
-import { combineConfidence, dedupeKey, eventDateOf, laneOf, priorityOf, SIGNAL_RULES, withinDays, type SourceFacts } from "./rules";
+import { combineConfidence, dedupeKey, eventDateOf, laneOf, priorityOf, priorityOverrides, SIGNAL_RULES, withinDays, type SourceFacts } from "./rules";
 import { confirmSignal } from "./validation";
 
 export const BATCH_SIZE = 25;
@@ -283,7 +283,7 @@ export async function processRawItem(workspaceId: string, itemId: string, ai: Ai
     const confidence = combineConfidence([source], { companyDomain: resolved.companyDomain, reputableOutlets });
     // The placement override belongs to the executive search pack (BRD 7.3, 13).
     const [placed] = resolved.personId && execSearchOn(ws) ? await tx.select({ id: placements.id }).from(placements).where(eq(placements.personId, resolved.personId)).limit(1) : [];
-    const priority = priorityOf({ type: resolved.type, personIsPlaced: !!placed, offList: resolved.offList });
+    const priority = priorityOf({ type: resolved.type, personIsPlaced: !!placed, offList: resolved.offList, overrides: priorityOverrides(ws.settings) });
     const suspended = Object.keys(suspendedSources(ws.settings)).includes(item.sourceType);
     const matchScore = extraction && !aiNote ? extraction.match_confidence : 0;
     const lane = laneOf({ type: resolved.type, priority: priority.priority, confidence, matchScore, strongMatch: resolved.strongMatch, sourceSuspended: suspended, batchP3: ws.flags["validation.batch_p3"] !== false });
@@ -313,7 +313,7 @@ export async function processRawItem(workspaceId: string, itemId: string, ai: Ai
         status: shadow ? "shadow" : "pending",
         dedupeKey: key,
         proposedChanges: resolved.proposed,
-        explanation: { prefilter: pre.reason, confidence: confidence.reason, priority: priority.reason, lane: lane.reason, ...(aiNote ? { note: aiNote } : {}) },
+        explanation: { prefilter: pre.reason, confidence: confidence.reason, priority: priority.reason, lane: lane.reason, ...(aiNote ? { note: aiNote } : {}), ...(shadow ? { shadow_run: true } : {}) },
       })
       .returning();
     await tx.insert(signalSources).values({ workspaceId, signalId: signal!.id, rawItemId: item.id, sourceType: item.sourceType, url: item.url, title: item.title, publishedAt: item.publishedAt });

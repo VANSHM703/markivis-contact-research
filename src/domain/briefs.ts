@@ -65,7 +65,7 @@ export async function buildBriefInput(tx: Tx, personId: string, now: Date, meeti
     signals: signalRows.map((s) => ({ headline: s.headline, date: s.date ?? (s.confirmedAt ? day(s.confirmedAt) : null), about: s.personId ? "person" : "company" })),
     interactions: interactionRows.map((i) => ({ channel: i.channel, date: day(i.occurredAt), direction: i.direction, subject: i.isPrivate ? null : i.subject })),
     relationship: score && factors
-      ? { band: score.band, score: score.score, factors: [`last two-way touch ${factors.recency.raw.daysSinceLastTwoWay ?? "never"} days ago`, `${factors.frequency.raw.twoWayTouches12m} two-way touches in 12 months`, `${factors.depth.raw.meetings} meetings in 12 months`] }
+      ? { band: score.band, score: score.score, factors: factors?.recency?.raw && factors.frequency?.raw && factors.depth?.raw ? [`last two-way touch ${factors.recency.raw.daysSinceLastTwoWay ?? "never"} days ago`, `${factors.frequency.raw.twoWayTouches12m} two-way touches in 12 months`, `${factors.depth.raw.meetings} meetings in 12 months`] : [] }
       : null,
     paths: (await findPaths(tx, personId, day(now))).filter((p) => p.kind === "one_hop").map((p) => ({ explanation: p.explanation })),
     interests: interests.map((i) => ({ topic: i.topic, source: i.source })),

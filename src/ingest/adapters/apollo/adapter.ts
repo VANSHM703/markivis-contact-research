@@ -11,6 +11,7 @@ import { and, eq, isNotNull, isNull } from "drizzle-orm";
 import { companies, persons, roles } from "@/db/schema";
 import { observeField } from "@/domain/provenance";
 import { readWorkspaceSecret } from "@/domain/secrets";
+import { isSuppressed } from "@/domain/suppression";
 import { updateCompany } from "@/domain/records";
 import { readJsonFixture } from "../../fixtures";
 import { assertOk, HttpError, mockHttp, ok, type HttpClient } from "../../http";
@@ -82,6 +83,8 @@ export function createApolloAdapter(http: HttpClient, runOptions: ApolloRunOptio
         for (const [index, person] of batch.entries()) {
           const match = matches[index];
           if (!match) continue;
+          // An erased or opted-out address is never stored, whichever record it came back for.
+          if (await isSuppressed(ctx.tx, ctx.workspaceId, { emails: [match.email], linkedinUrls: [match.linkedin_url] })) continue;
           const source = { sourceType: "apollo" as const, sourceUrl: null };
 
           // Email through provenance, with Apollo's verification status.

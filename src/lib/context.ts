@@ -6,10 +6,10 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import { withWorkspace } from "@/db/client";
-import { users, workspaces } from "@/db/schema";
+import { workspaces } from "@/db/schema";
 import type { WorkspaceRole } from "@/config/navigation";
 import { auth } from "./auth";
-import { listMemberships, type Membership } from "./identity";
+import { isPlatformAdmin, loadAccess, type Membership } from "./identity";
 import { can, type Capability } from "./permissions";
 
 /** Remembers the chosen workspace for users with more than one. Path-scoped like every cookie. */
@@ -20,26 +20,26 @@ export interface RequestContext {
   workspace: { id: string; name: string; slug: string; timezone: string; packs: Record<string, boolean>; flags: Record<string, boolean>; settings: Record<string, unknown> };
   role: WorkspaceRole;
   memberships: Membership[];
+  /** Set while a platform admin works through break-glass access; the role is then read-only. */
+  breakGlass: Membership["breakGlass"] | null;
 }
 
-export const ROLE_LABELS: Record<WorkspaceRole, string> = {
-  partner: "Partner",
-  outreach_owner: "Outreach owner",
-  validator: "Validator",
-  account_lead: "Account lead",
-  data_steward: "Data steward",
-};
+export { ROLE_LABELS } from "./format/labels";
 
 /** Builds the context for a user, preferring the given workspace when they belong to it. */
 export async function buildContext(userId: string, preferredWorkspaceId?: string | null): Promise<RequestContext | null> {
-  const memberships = await listMemberships(userId);
-  const membership = memberships.find((m) => m.workspaceId === preferredWorkspaceId) ?? memberships[0];
+  const access = await loadAccess(userId);
+  if (!access) return null;
+  const direct = access.memberships;
+  const memberships = [...direct, ...access.grants.filter((g) => !direct.some((m) => m.workspaceId === g.workspaceId))];
+  // Break-glass access is used only when chosen; a member's own workspaces come first.
+  const membership = memberships.find((m) => m.workspaceId === preferredWorkspaceId) ?? direct[0];
   if (!membership) return null;
 
   return withWorkspace(membership.workspaceId, async (tx) => {
     const [ws] = await tx.select().from(workspaces).where(eq(workspaces.id, membership.workspaceId)).limit(1);
-    const [user] = await tx.select().from(users).where(eq(users.id, userId)).limit(1);
-    if (!ws || !user) return null;
+    if (!ws) return null;
+    const user = access.user;
     return {
       user: { id: user.id, name: user.name, email: user.email, isPlatformAdmin: user.isPlatformAdmin },
       workspace: {
@@ -53,6 +53,7 @@ export async function buildContext(userId: string, preferredWorkspaceId?: string
       },
       role: membership.role,
       memberships,
+      breakGlass: membership.breakGlass ?? null,
     };
   });
 }
@@ -64,6 +65,14 @@ export const getRequestContext = cache(async (): Promise<RequestContext | null> 
   if (!userId) return null;
   const preferred = (await cookies()).get(WORKSPACE_COOKIE)?.value;
   return buildContext(userId, preferred);
+});
+
+/** The signed-in user's id, with or without a workspace, for the platform pages. Cached per request. */
+export const getSignedInUser = cache(async (): Promise<{ id: string; isPlatformAdmin: boolean } | null> => {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return null;
+  return { id: userId, isPlatformAdmin: await isPlatformAdmin(userId) };
 });
 
 export function contextCan(ctx: RequestContext, capability: Capability): boolean {

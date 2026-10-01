@@ -13,6 +13,7 @@ import { actions, persons, signals, workspaces } from "@/db/schema";
 import { actionsToDraft, createActionForSignal, OPEN_STATUSES } from "./actions";
 import { interactionRows, type ScoreRow } from "./relationships";
 import { computeScore, scoringSettings, type ScoringSettings } from "./scoring";
+import { basePriority, priorityOverrides } from "@/pipeline/rules";
 
 const DAY = 86_400_000;
 export const QUIET_LOOKBACK_DAYS = 180;
@@ -36,6 +37,7 @@ export async function raiseGoingQuiet(workspaceId: string, now = new Date()): Pr
     if ((ws!.flags as Record<string, boolean>)["rel.quiet"] === false) return { checked: 0, raised: 0, toDraft: [] };
     const settings = ws!.settings as Record<string, unknown>;
     const scoring = scoringSettings(settings);
+    const overrides = priorityOverrides(settings);
     const quietDays = Number(settings.quiet_days ?? 90);
     const people = await tx
       .select({ id: persons.id, name: persons.fullName })
@@ -57,7 +59,7 @@ export async function raiseGoingQuiet(workspaceId: string, now = new Date()): Pr
         .values({
           workspaceId, subjectType: "person", personId: p.id, type: "internal_relationship_quiet",
           headline: `${p.name}: no two-way contact for ${verdict.daysSilent} days`.slice(0, 140),
-          foundAt: now, foundBy: "feed_rule", confidence: "high", priority: 2, lane: "auto_confirm", status: "confirmed", confirmedAt: now,
+          foundAt: now, foundBy: "feed_rule", confidence: "high", priority: basePriority("internal_relationship_quiet", overrides), lane: "auto_confirm", status: "confirmed", confirmedAt: now,
           dedupeKey: `${p.id}:internal_relationship_quiet:${now.toISOString().slice(0, 10)}`, eventOn: now.toISOString().slice(0, 10),
           explanation: { rule: `Warm or strong in the last ${QUIET_LOOKBACK_DAYS} days; no two-way touch for ${quietDays} days (BRD 11.5)` },
         })

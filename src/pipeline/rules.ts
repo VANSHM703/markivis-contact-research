@@ -143,18 +143,34 @@ export function withinDays(a: string, b: string, days: number): boolean {
 // Priority (BRD 9.3 and 7.3)
 // ---------------------------------------------------------------------------------------------
 
+/** A workspace's own priority per signal type (Settings, Signal priorities), over the defaults. */
+export type PriorityOverrides = Partial<Record<SignalType, 1 | 2 | 3>>;
+
+export function priorityOverrides(settings: unknown): PriorityOverrides {
+  const raw = (settings as { signal_priorities?: Record<string, unknown> } | null)?.signal_priorities ?? {};
+  const out: PriorityOverrides = {};
+  for (const [type, value] of Object.entries(raw)) if (type in SIGNAL_RULES && (value === 1 || value === 2 || value === 3)) out[type as SignalType] = value;
+  return out;
+}
+
+export function basePriority(type: SignalType, overrides: PriorityOverrides = {}): 1 | 2 | 3 {
+  return overrides[type] ?? SIGNAL_RULES[type].priority;
+}
+
 export interface PriorityFacts {
   type: SignalType;
   personIsPlaced: boolean;
   /** The move is to a company outside the target list. */
   offList: boolean;
+  overrides?: PriorityOverrides;
 }
 
 export function priorityOf(f: PriorityFacts): { priority: 1 | 2 | 3; reason: string } {
-  const base = SIGNAL_RULES[f.type].priority;
+  const overridden = f.overrides?.[f.type] !== undefined;
+  const base = basePriority(f.type, f.overrides);
   if (f.personIsPlaced && MOVEMENT_TYPES.includes(f.type)) return { priority: 1, reason: "A placed executive: every move is priority 1" };
   if (f.offList && MOVEMENT_TYPES.includes(f.type) && base < 2) return { priority: 2, reason: "A move to a company outside the target list" };
-  return { priority: base, reason: `Default for ${f.type.replace(/_/g, " ")}` };
+  return { priority: base, reason: overridden ? `Workspace priority for ${f.type.replace(/_/g, " ")}` : `Default for ${f.type.replace(/_/g, " ")}` };
 }
 
 // ---------------------------------------------------------------------------------------------

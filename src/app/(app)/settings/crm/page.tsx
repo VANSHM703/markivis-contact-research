@@ -40,7 +40,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
             <div><dt>Sync</dt><dd>{on ? <StatePill tone="ok">On</StatePill> : <StatePill tone="neutral">Off</StatePill>}</dd></div>
             <div><dt>Private app token</dt><dd>{mock ? "Not needed in mock mode" : token.set ? `Saved ${token.updatedAt ? formatDateIn(token.updatedAt, tz) : ""}` : "Not saved"}</dd></div>
             <div><dt>Last sync</dt><dd className="t-meta">{last ? `${formatDateIn(last, tz)} ${formatTimeIn(last, tz)}` : "Never"}</dd></div>
-            {state.last_result ? <div><dt>Last result</dt><dd className="t-meta">{state.last_result.contacts ?? 0} contacts, {state.last_result.notes ?? 0} notes, {state.last_result.optOuts ?? 0} unsubscribes, {state.last_result.conflicts ?? 0} conflicts</dd></div> : null}
+            {state.last_result ? <div><dt>Last result</dt><dd className="t-meta">{state.last_result.contacts ?? 0} contacts, {state.last_result.notes ?? 0} notes, {state.last_result.optOuts ?? 0} unsubscribes, {state.last_result.conflicts ?? 0} conflicts{state.last_result.erased ? `, ${state.last_result.erased} erased contacts deleted` : ""}</dd></div> : null}
           </dl>
           {!on ? <p className="t-caption t-muted">A platform admin switches HubSpot sync on, on Settings, Packs.</p> : null}
           {state.last_error ? <p className={styles.warnText}>Last error: {state.last_error}</p> : null}

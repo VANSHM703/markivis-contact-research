@@ -8,6 +8,8 @@ export interface WorkspaceFixture {
   personIds: string[];
   companyIds: string[];
   partnerUserId: string;
+  /** The data steward, where the workspace has one: the only role that can export. */
+  stewardUserId: string | null;
 }
 
 /** Reads both seeded workspaces, as the system role, for use in assertions. */
@@ -23,7 +25,12 @@ export async function loadFixtures(): Promise<{ demo: WorkspaceFixture; harbor: 
         .from(workspaceMembers)
         .innerJoin(users, eq(users.id, workspaceMembers.userId))
         .where(and(eq(workspaceMembers.workspaceId, ws.id), eq(workspaceMembers.role, "partner")));
-      return { id: ws.id, slug, personIds: ps.map((p) => p.id), companyIds: cs.map((c) => c.id), partnerUserId: partner!.id };
+      const [steward] = await tx
+        .select({ id: users.id })
+        .from(workspaceMembers)
+        .innerJoin(users, eq(users.id, workspaceMembers.userId))
+        .where(and(eq(workspaceMembers.workspaceId, ws.id), eq(workspaceMembers.role, "data_steward")));
+      return { id: ws.id, slug, personIds: ps.map((p) => p.id), companyIds: cs.map((c) => c.id), partnerUserId: partner!.id, stewardUserId: steward?.id ?? null };
     };
     return { demo: await read("demo-search-partners"), harbor: await read("harbor-search-group") };
   });

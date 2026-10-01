@@ -13,3 +13,5 @@ next-env.d.ts
 tests/e2e/.auth/
 .claude/
 fixtures/recorded/
+tests/perf/.auth/
+tests/perf/results.json

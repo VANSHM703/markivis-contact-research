@@ -37,6 +37,7 @@ export function mockHubSpotHttp(now: () => Date = () => new Date()): HttpClient 
       return ok(JSON.stringify({ status: "COMPLETE", results: inputs.map((i) => ({ id: id(i.id), properties: { email: i.id } })) }));
     }
     if (path === "/crm/v3/objects/notes") return ok(JSON.stringify({ id: id(JSON.stringify(req.body)) }));
+    if (path === "/crm/v3/objects/contacts/gdpr-delete") return { status: 204, headers: {}, text: "" };
     if (path === "/crm/v3/objects/contacts/search") {
       const file = await readJsonFixture<{ results: unknown[] }>("crm/hubspot/contacts.json", now());
       return ok(JSON.stringify(file ?? { results: [] }));
@@ -86,6 +87,34 @@ export interface CrmRunResult {
   notes: number;
   optOuts: number;
   conflicts: number;
+  erased: number;
+}
+
+/**
+ * Carries out the delete instructions an erasure leaves (src/domain/erasure.ts): each contact of
+ * an erased person is permanently deleted in the CRM, then its link goes. Runs straight after an
+ * erasure and at the start of every sync, so a CRM that was unreachable is retried.
+ */
+export async function deleteErasedContacts(workspaceId: string, options: { http?: HttpClient; now?: Date; crm?: CrmAdapter | null } = {}): Promise<{ deleted: number; pending: number }> {
+  const marked = await withWorkspace(workspaceId, (tx) => tx.select({ id: crmLinks.id, crmId: crmLinks.crmId }).from(crmLinks).where(and(eq(crmLinks.provider, PROVIDER), eq(crmLinks.entityType, "erased_person"))));
+  if (marked.length === 0) return { deleted: 0, pending: 0 };
+  const crm = options.crm === undefined ? await crmAdapterFor(workspaceId, options) : options.crm;
+  if (!crm) return { deleted: 0, pending: marked.length };
+  let deleted = 0;
+  for (const link of marked) {
+    try {
+      await crm.deleteContact(link.crmId);
+    } catch (error) {
+      log.error("crm.erase_failed", { workspaceId, error: (error as Error).message.slice(0, 300) });
+      break;
+    }
+    await withWorkspace(workspaceId, async (tx) => {
+      await tx.delete(crmLinks).where(eq(crmLinks.id, link.id));
+      await audit(tx, { workspaceId, actorUserId: null, actorKind: "system", action: "crm.contact_erased", entityType: "crm_link", entityId: link.id, after: { provider: PROVIDER } });
+    });
+    deleted++;
+  }
+  return { deleted, pending: marked.length - deleted };
 }
 
 export async function runCrmSync(workspaceId: string, options: { http?: HttpClient; now?: Date } = {}): Promise<CrmRunResult | { skipped: string }> {
@@ -93,6 +122,7 @@ export async function runCrmSync(workspaceId: string, options: { http?: HttpClie
   const crm = await crmAdapterFor(workspaceId, options);
   if (!crm) return { skipped: "HubSpot is not connected for this workspace." };
   try {
+    const erased = (await deleteErasedContacts(workspaceId, { crm })).deleted;
     await crm.ensureProperties();
     const state = await withWorkspace(workspaceId, async (tx) => (((await tx.select({ s: workspaces.settings }).from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1))[0]!.s as { crm?: CrmState }).crm ?? {}));
 
@@ -169,9 +199,9 @@ export async function runCrmSync(workspaceId: string, options: { http?: HttpClie
           if (result.outcome === "conflict") conflicts++;
         }
       }
-      await saveState(tx, workspaceId, { last_out_at: now.toISOString(), last_in_at: now.toISOString(), last_error: null, last_result: { contacts: ids.size, notes, optOuts, conflicts } });
+      await saveState(tx, workspaceId, { last_out_at: now.toISOString(), last_in_at: now.toISOString(), last_error: null, last_result: { contacts: ids.size, notes, optOuts, conflicts, erased } });
     });
-    return { contacts: ids.size, notes, optOuts, conflicts };
+    return { contacts: ids.size, notes, optOuts, conflicts, erased };
   } catch (error) {
     const message = (error as Error).message.slice(0, 300);
     await withWorkspace(workspaceId, (tx) => saveState(tx, workspaceId, { last_error: message }));

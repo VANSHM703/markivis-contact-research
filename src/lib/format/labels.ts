@@ -1,4 +1,13 @@
 /** Interface labels for stored values. Sentence case, US English (design file 12). */
+import type { WorkspaceRole } from "@/config/navigation";
+
+export const ROLE_LABELS: Record<WorkspaceRole, string> = {
+  partner: "Partner",
+  outreach_owner: "Outreach owner",
+  validator: "Validator",
+  account_lead: "Account lead",
+  data_steward: "Data steward",
+};
 
 export const CONTACT_TYPE_LABELS: Record<string, string> = {
   prospective_client: "Prospective client",
@@ -106,6 +115,7 @@ export const DISMISS_REASON_LABELS: Record<string, string> = {
   already_known: "Already known",
   wrong_timing: "Wrong timing",
   off_limits: "Off-limits",
+  do_not_contact: "Do not contact",
 };
 
 export const OUTCOME_LABELS: Record<string, string> = {
@@ -127,3 +137,8 @@ export function formatDateIn(value: Date, timeZone: string): string {
 export function formatTimeIn(value: Date, timeZone: string): string {
   return new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone }).format(value);
 }
+
+export const CONSENT_CHANNEL_LABELS: Record<string, string> = { email: "Email", newsletter: "Newsletter", linkedin: "LinkedIn", phone: "Phone" };
+export const CONSENT_PURPOSE_LABELS: Record<string, string> = { outreach: "Outreach", newsletter: "Newsletter" };
+export const CONSENT_STATUS_LABELS: Record<string, string> = { opted_in: "Opted in", opted_out: "Opted out", legitimate_interest: "Legitimate interest", unknown: "Unknown" };
+export const SUPPRESSION_REASON_LABELS: Record<string, string> = { erasure: "Erasure", opt_out: "Opt-out", do_not_contact: "Do not contact" };

@@ -2,9 +2,9 @@
  * Sign-in identity resolution (BRD 5.2). Runs as dmi_system because it has to look across
  * workspaces before the user has one.
  */
-import { and, eq, inArray, sql } from "drizzle-orm";
-import { withSystem } from "@/db/client";
-import { users, workspaceMembers, workspaces } from "@/db/schema";
+import { and, eq, gt, inArray, isNull, sql } from "drizzle-orm";
+import { withSystem, type Tx } from "@/db/client";
+import { breakGlassGrants, users, workspaceMembers, workspaces } from "@/db/schema";
 import type { WorkspaceRole } from "@/config/navigation";
 import { audit } from "./audit";
 
@@ -46,7 +46,8 @@ export async function resolveSignIn(input: SignInInput): Promise<SignInResult> {
       .from(workspaces)
       .where(sql`${domain} = any(${workspaces.allowedEmailDomains})`);
 
-    if (memberships.length === 0 && domainWorkspaces.length === 0) return { ok: false, reason: "not_allowed" };
+    // A platform admin may sign in without a workspace: they reach data only through break-glass access.
+    if (memberships.length === 0 && domainWorkspaces.length === 0 && !user?.isPlatformAdmin) return { ok: false, reason: "not_allowed" };
 
     if (!user) {
       [user] = await tx
@@ -82,7 +83,8 @@ export async function resolveSignIn(input: SignInInput): Promise<SignInResult> {
 
     await tx.update(users).set({ lastSignInAt: new Date(), lastAmr: input.amr ?? null }).where(eq(users.id, userId));
 
-    for (const workspaceId of memberOf) {
+    // A platform admin in no workspace signs in at platform level.
+    for (const workspaceId of memberOf.size ? memberOf : [null]) {
       await audit(tx, {
         workspaceId,
         actorUserId: userId,
@@ -109,28 +111,75 @@ export interface Membership {
   workspaceName: string;
   workspaceSlug: string;
   role: WorkspaceRole;
+  /** Set for a platform admin's break-glass access, which is read-only (src/domain/break-glass.ts). */
+  breakGlass?: { grantId: string; expiresAt: Date; reason: string };
+}
+
+function membershipsIn(tx: Tx, userId: string): Promise<Membership[]> {
+  return tx
+    .select({
+      workspaceId: workspaces.id,
+      workspaceName: workspaces.name,
+      workspaceSlug: workspaces.slug,
+      role: workspaceMembers.role,
+    })
+    .from(workspaceMembers)
+    .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
+    .where(and(eq(workspaceMembers.userId, userId), eq(workspaceMembers.status, "active")))
+    .orderBy(workspaces.name);
+}
+
+async function grantsIn(tx: Tx, userId: string, now: Date): Promise<Membership[]> {
+  const rows = await tx
+    .select({ grantId: breakGlassGrants.id, workspaceId: workspaces.id, workspaceName: workspaces.name, workspaceSlug: workspaces.slug, expiresAt: breakGlassGrants.expiresAt, reason: breakGlassGrants.reason })
+    .from(breakGlassGrants)
+    .innerJoin(workspaces, eq(workspaces.id, breakGlassGrants.workspaceId))
+    .innerJoin(users, and(eq(users.id, breakGlassGrants.userId), eq(users.isPlatformAdmin, true)))
+    .where(and(eq(breakGlassGrants.userId, userId), isNull(breakGlassGrants.endedAt), gt(breakGlassGrants.expiresAt, now)))
+    .orderBy(workspaces.name);
+  return rows.map((g) => ({ workspaceId: g.workspaceId, workspaceName: g.workspaceName, workspaceSlug: g.workspaceSlug, role: "account_lead" as const, breakGlass: { grantId: g.grantId, expiresAt: g.expiresAt, reason: g.reason } }));
 }
 
 export async function listMemberships(userId: string): Promise<Membership[]> {
-  return withSystem("identity", async (tx) =>
-    tx
-      .select({
-        workspaceId: workspaces.id,
-        workspaceName: workspaces.name,
-        workspaceSlug: workspaces.slug,
-        role: workspaceMembers.role,
-      })
-      .from(workspaceMembers)
-      .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
-      .where(and(eq(workspaceMembers.userId, userId), eq(workspaceMembers.status, "active")))
-      .orderBy(workspaces.name),
-  );
+  return withSystem("identity", (tx) => membershipsIn(tx, userId));
 }
 
-/** Users who can use the mock-mode sign-in bypass: every active member of any workspace. */
-export async function listMockSignInUsers() {
-  return withSystem("identity", async (tx) =>
-    tx
+/** Break-glass grants in force for a platform admin, as read-only memberships. Empty for anyone else. */
+export async function listBreakGlassMemberships(userId: string, now = new Date()): Promise<Membership[]> {
+  return withSystem("identity", (tx) => grantsIn(tx, userId, now));
+}
+
+export interface Access {
+  user: { id: string; name: string; email: string; isPlatformAdmin: boolean };
+  memberships: Membership[];
+  /** Break-glass grants in force, for a platform admin, as read-only memberships. */
+  grants: Membership[];
+}
+
+/**
+ * Everything the request context needs about a user, in one system-scoped read: a user who is in
+ * a workspace only through break-glass access is not a member, so a workspace scope cannot see them.
+ */
+export async function loadAccess(userId: string, now = new Date()): Promise<Access | null> {
+  return withSystem("identity", async (tx) => {
+    const [user] = await tx.select({ id: users.id, name: users.name, email: users.email, isPlatformAdmin: users.isPlatformAdmin }).from(users).where(eq(users.id, userId)).limit(1);
+    if (!user) return null;
+    return { user, memberships: await membershipsIn(tx, userId), grants: user.isPlatformAdmin ? await grantsIn(tx, userId, now) : [] };
+  });
+}
+
+export async function isPlatformAdmin(userId: string): Promise<boolean> {
+  const [row] = await withSystem("identity", (tx) => tx.select({ admin: users.isPlatformAdmin }).from(users).where(eq(users.id, userId)).limit(1));
+  return row?.admin === true;
+}
+
+/**
+ * Users who can use the mock-mode sign-in bypass: every active member of any workspace, and
+ * platform admins who belong to none (role null).
+ */
+export async function listMockSignInUsers(): Promise<{ email: string; name: string; role: WorkspaceRole | null; workspaceName: string | null }[]> {
+  return withSystem("identity", async (tx) => {
+    const members = await tx
       .selectDistinctOn([users.email], {
         email: users.email,
         name: users.name,
@@ -141,6 +190,12 @@ export async function listMockSignInUsers() {
       .innerJoin(workspaceMembers, eq(workspaceMembers.userId, users.id))
       .innerJoin(workspaces, eq(workspaces.id, workspaceMembers.workspaceId))
       .where(eq(workspaceMembers.status, "active"))
-      .orderBy(users.email, workspaces.name),
-  );
+      .orderBy(users.email, workspaces.name);
+    const admins = await tx
+      .select({ email: users.email, name: users.name })
+      .from(users)
+      .where(and(eq(users.isPlatformAdmin, true), sql`not exists (select 1 from dmi.workspace_members m where m.user_id = ${users.id} and m.status = 'active')`))
+      .orderBy(users.email);
+    return [...members, ...admins.map((a) => ({ ...a, role: null, workspaceName: null }))];
+  });
 }

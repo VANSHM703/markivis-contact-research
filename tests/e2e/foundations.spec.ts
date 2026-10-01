@@ -36,11 +36,14 @@ test.describe("signed out", () => {
 });
 
 test.describe("seed workspace", () => {
-  test("People lists the 150 seeded people, 50 per page", async ({ page }) => {
+  test("People lists the seeded people, 50 per page", async ({ page }) => {
+    // 150 seeded, plus the former executives the demo stages for the retention review; the
+    // compliance tests erase one of those in parallel, so the total is read, not assumed.
     await page.goto("./people");
-    await expect(page.getByText("Showing 1 to 50 of 150")).toBeVisible();
+    const total = Number((await page.getByText(/^Showing 1 to 50 of \d+$/).textContent())!.match(/of (\d+)/)![1]);
+    expect(total).toBeGreaterThanOrEqual(150);
     await page.getByRole("link", { name: "Next" }).click();
-    await expect(page.getByText("Showing 51 to 100 of 150")).toBeVisible();
+    await expect(page.getByText(/^Showing 51 to 100 of \d+$/)).toBeVisible();
   });
 
   test("Companies lists the 40 seeded companies", async ({ page }) => {
@@ -79,7 +82,8 @@ test.describe("workspace switcher", () => {
   test("switches between workspaces and never shows the other workspace's people", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("./people");
-    await expect(page.getByText("of 150")).toBeVisible();
+    const demoTotal = (await page.getByText(/^Showing 1 to 50 of \d+$/).textContent())!.match(/of (\d+)/)![1]!;
+    expect(Number(demoTotal)).toBeGreaterThanOrEqual(150);
     const demoPersonUrl = await page.getByRole("table").getByRole("link").first().getAttribute("href");
 
     await page.getByRole("button", { name: /Switch workspace/ }).click();
@@ -90,7 +94,7 @@ test.describe("workspace switcher", () => {
     await page.goto("./people");
     // Harbor's count changes as the records tests add people there, so check the scope instead.
     await expect(page.getByText(/Showing 1 to \d+ of \d+/)).toBeVisible();
-    await expect(page.getByText("of 150")).toHaveCount(0);
+    await expect(page.getByText(new RegExp(`of ${demoTotal}$`))).toHaveCount(0);
 
     // A Demo person's page is not found from inside Harbor.
     const response = await page.goto(`.${demoPersonUrl!.replace(/^\/intelligence/, "")}`);

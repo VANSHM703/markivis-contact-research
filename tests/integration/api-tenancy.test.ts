@@ -9,6 +9,7 @@ import { globSync } from "node:fs";
 import path from "node:path";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { closeDatabase } from "@/db/client";
+import { unzip } from "../helpers/unzip";
 import { loadFixtures, type WorkspaceFixture } from "./helpers";
 
 const contextState = vi.hoisted(() => ({ userId: null as string | null, workspaceId: null as string | null }));
@@ -50,6 +51,12 @@ function discoverRoutes(): RouteCase[] {
 }
 
 /** Which of the other workspace's records to aim each dynamic segment at. */
+/** The response as text; a ZIP export is unpacked, so a leak inside it is still found. */
+async function readBody(response: Response): Promise<string> {
+  if (response.headers.get("content-type") !== "application/zip") return response.text();
+  return [...unzip(Buffer.from(await response.arrayBuffer())).values()].map((b) => b.toString("utf8")).join("\n");
+}
+
 const PARAM_SOURCES: Record<string, (w: WorkspaceFixture) => string[]> = {
   "people:id": (w) => w.personIds.slice(0, 5),
   "companies:id": (w) => w.companyIds.slice(0, 5),
@@ -85,17 +92,20 @@ describe("API tenancy isolation", () => {
           paramSets.splice(0, paramSets.length, ...paramSets.flatMap((set) => values.map((v) => ({ ...set, [param]: v }))));
         }
 
-        contextState.userId = viewer.partnerUserId;
-        contextState.workspaceId = viewer.id;
-        for (const method of handlers) {
-          for (const params of paramSets) {
-            const handler = mod[method] as (req: Request, seg: { params: Promise<Record<string, string>> }) => Promise<Response>;
-            const request = new Request(`http://localhost/intelligence${route.urlPath}`, { method });
-            const response = await handler(request, { params: Promise.resolve(params) });
-            const body = await response.text();
-            if (route.params.length > 0) expect([403, 404], `${method} ${route.urlPath} ${JSON.stringify(params)}`).toContain(response.status);
-            const leaked = forbidden.filter((id) => body.includes(id));
-            expect(leaked, `${method} ${route.urlPath} as ${viewer.slug}`).toEqual([]);
+        // As the partner, and as the data steward, who alone can reach the export routes.
+        for (const userId of [viewer.partnerUserId, viewer.stewardUserId].filter((u): u is string => !!u)) {
+          contextState.userId = userId;
+          contextState.workspaceId = viewer.id;
+          for (const method of handlers) {
+            for (const params of paramSets) {
+              const handler = mod[method] as (req: Request, seg: { params: Promise<Record<string, string>> }) => Promise<Response>;
+              const request = new Request(`http://localhost/intelligence${route.urlPath}`, { method });
+              const response = await handler(request, { params: Promise.resolve(params) });
+              const body = await readBody(response);
+              if (route.params.length > 0) expect([403, 404], `${method} ${route.urlPath} ${JSON.stringify(params)}`).toContain(response.status);
+              const leaked = forbidden.filter((id) => body.includes(id));
+              expect(leaked, `${method} ${route.urlPath} as ${viewer.slug}`).toEqual([]);
+            }
           }
         }
       }

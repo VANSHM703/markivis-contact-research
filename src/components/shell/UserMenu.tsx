@@ -14,6 +14,8 @@ interface UserMenuProps {
   packsHref?: string | null;
   /** Partners and outreach owners connect their own mailbox (BRD 5.4). */
   connectionsHref?: string | null;
+  /** Platform admins: every workspace, usage and break-glass access (BRD 5.3). */
+  platformHref?: string | null;
 }
 
 function initials(name: string): string {
@@ -25,7 +27,7 @@ function initials(name: string): string {
     .join("");
 }
 
-export function UserMenu({ name, email, roleLabel, workspaceName, signOutAction, packsHref, connectionsHref }: UserMenuProps) {
+export function UserMenu({ name, email, roleLabel, workspaceName, signOutAction, packsHref, connectionsHref, platformHref }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -87,6 +89,11 @@ export function UserMenu({ name, email, roleLabel, workspaceName, signOutAction,
           {packsHref ? (
             <p className={styles.signOut}>
               <Link href={packsHref} onClick={() => setOpen(false)}>Workspace packs</Link>
+            </p>
+          ) : null}
+          {platformHref ? (
+            <p className={styles.signOut}>
+              <Link href={platformHref} onClick={() => setOpen(false)}>Platform</Link>
             </p>
           ) : null}
           <form action={signOutAction} className={styles.signOut}>

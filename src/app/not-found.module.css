@@ -1,0 +1,2 @@
+.page { min-height: 100dvh; display: grid; place-items: center; padding: var(--space-6) max(var(--gutter), env(safe-area-inset-right)) var(--space-6) max(var(--gutter), env(safe-area-inset-left)); background: var(--surface-page); color: var(--text-primary); }
+.panel { display: grid; gap: var(--space-4); width: 100%; max-width: 440px; }

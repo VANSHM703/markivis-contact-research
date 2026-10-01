@@ -7,6 +7,7 @@ import { recomputePrimaryRole, refreshPersonStatus } from "@/domain/records";
 import { runSla } from "@/domain/sla";
 import { runBriefs } from "@/domain/briefs";
 import { runCrmSync } from "@/crm/sync";
+import { runRetentionReview } from "@/domain/retention";
 import { draftForAction } from "@/domain/actions";
 import { deriveConnections } from "@/domain/connections";
 import { raiseGoingQuiet } from "@/domain/quiet";
@@ -91,6 +92,7 @@ export async function registerWorkers(boss: PgBoss): Promise<void> {
         else if (job.name === "notifications.send") result = await deliverQueued(ws);
         else if (job.name === "briefs.generate") result = await runBriefs(ws);
         else if (job.name === "crm.sync") result = await runCrmSync(ws);
+        else if (job.name === "compliance.retention") result = await runRetentionReview(ws);
         else if (job.name === "rel.score") result = await recomputeScores(ws);
         else if (job.name === "rel.connections") result = await deriveConnections(ws);
         else if (job.name === "rel.quiet") {

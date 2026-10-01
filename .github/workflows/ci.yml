@@ -47,3 +47,31 @@ jobs:
           name: playwright-traces
           path: test-results
           retention-days: 7
+
+  # Acceptance scenario 24: a fresh clone, docker compose up, populated screens and the Mock badge.
+  compose:
+    runs-on: ubuntu-latest
+    env:
+      NEXT_TELEMETRY_DISABLED: 1
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and start the stack
+        run: docker compose up -d --build
+      - name: Wait for the app (it starts once setup has migrated, seeded and staged the demo)
+        run: |
+          for i in $(seq 1 120); do
+            if curl -fsS http://localhost:3000/intelligence/api/health > /dev/null; then exit 0; fi
+            sleep 5
+          done
+          docker compose ps
+          exit 1
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --config tests/compose/compose.config.ts
+      - name: Stack logs
+        if: failure()
+        run: docker compose logs --no-color

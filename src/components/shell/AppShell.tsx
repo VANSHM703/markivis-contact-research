@@ -4,6 +4,7 @@ import { isAnyAdapterMock } from "@/config/env";
 import { ROLE_LABELS, type RequestContext } from "@/lib/context";
 import { signOutAction, switchWorkspaceAction } from "@/server/session-actions";
 import { BrandLockup } from "./BrandLockup";
+import { BreakGlassBanner } from "./BreakGlassBanner";
 import { GlobalSearch } from "./GlobalSearch";
 import { MobileNav } from "./MobileNav";
 import { SidebarNav, type NavCounts } from "./SidebarNav";
@@ -22,7 +23,7 @@ interface AppShellProps {
 export function AppShell({ ctx, counts, children }: AppShellProps) {
   const items = navItemsForRole(ctx.role);
   const mock = isAnyAdapterMock();
-  const workspaceOptions = ctx.memberships.map((m) => ({ id: m.workspaceId, name: m.workspaceName, roleLabel: ROLE_LABELS[m.role] }));
+  const workspaceOptions = ctx.memberships.map((m) => ({ id: m.workspaceId, name: m.workspaceName, roleLabel: m.breakGlass ? "Break-glass, read-only" : ROLE_LABELS[m.role] }));
   const switcher = (placement: "bar" | "drawer") =>
     ctx.memberships.length > 1 ? (
       <WorkspaceSwitcher current={ctx.workspace.id} workspaces={workspaceOptions} switchAction={switchWorkspaceAction} placement={placement} />
@@ -47,11 +48,12 @@ export function AppShell({ ctx, counts, children }: AppShellProps) {
           <UserMenu
             name={ctx.user.name}
             email={ctx.user.email}
-            roleLabel={ROLE_LABELS[ctx.role]}
+            roleLabel={ctx.breakGlass ? "Break-glass, read-only" : ROLE_LABELS[ctx.role]}
             workspaceName={ctx.workspace.name}
             signOutAction={signOutAction}
             packsHref={ctx.user.isPlatformAdmin ? "/settings/packs" : null}
             connectionsHref={can(ctx.role, "mailbox.connect") ? "/settings/connections" : null}
+            platformHref={ctx.user.isPlatformAdmin ? "/platform" : null}
           />
         </div>
       </header>
@@ -60,7 +62,10 @@ export function AppShell({ ctx, counts, children }: AppShellProps) {
           <SidebarNav items={items} counts={counts} />
         </nav>
         <main id="main" className={styles.content} tabIndex={-1}>
-          <div className={styles.inner}>{children}</div>
+          <div className={styles.inner}>
+            {ctx.breakGlass ? <BreakGlassBanner workspaceName={ctx.workspace.name} grant={ctx.breakGlass} timezone={ctx.workspace.timezone} /> : null}
+            {children}
+          </div>
         </main>
       </div>
     </div>

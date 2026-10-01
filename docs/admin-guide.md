@@ -1,4 +1,6 @@
-# Admin guide: mailbox and calendar capture
+# Admin guide
+
+Mailbox and calendar capture, sending, HubSpot, the data steward's work (consent, suppression, access requests, erasure, retention, exports, members and the audit log), the platform admin, and going live.
 
 Activity capture reads mailbox and calendar metadata for the partners and outreach owners who connect their own accounts (BRD 11). It never reads message bodies or attachments. Each user connects from their account menu, under Mailbox and calendar.
 
@@ -42,3 +44,36 @@ Sending uses the partner's own mailbox and a separate permission, asked for only
 1. In HubSpot, create a private app with the scopes `crm.objects.contacts.read`, `crm.objects.contacts.write` and `crm.schemas.contacts.write` (for the two custom properties the sync creates: `dmi_relationship_band` and `dmi_last_two_way_touch`).
 2. A platform admin switches on "HubSpot sync" on Settings, Packs.
 3. A partner or data steward saves the token on Settings, CRM, and presses Sync now. After that it runs every 15 minutes.
+4. When a person is erased here, their HubSpot contact is deleted with HubSpot's GDPR delete, which is permanent. It needs the same contacts write scope. Confirm with the client before switching sync on that this is what they want for erasure requests.
+
+## Data steward
+
+Everything here is on Settings (Consent and suppression, Retention review, Data export, Members and roles, Audit log) or on a person's page, under Consent and privacy.
+
+- **Consent:** record consent per channel and purpose, with the jurisdiction and proof. An opt-in needs proof (where and when it was given). EU, EEA and UK contacts stay blocked from drafting and sending until a lawful basis is recorded.
+- **Do not contact:** blocks every draft and send to the person, puts their addresses on the suppression list and dismisses their open actions. Clearing it does not remove an opt-out or an erasure.
+- **Suppression list:** holds salted hashes only, so it cannot be read back as addresses. Check an address, or add one for an opt-out that came in by phone or email. Entries from an erasure cannot be removed.
+- **Access request:** on the person's page, Export everything held downloads one ZIP with JSON and a CSV per section. The download is written to the audit log.
+- **Erasure:** on the person's page, Erase this person. Type their full name to confirm. It deletes the person, any record merged into them and any other record with one of their addresses, with everything about them, removes the personal data from audit entries about them, deletes their HubSpot contact, and puts every address they held on the suppression list. The audit log keeps one entry with counts only. It cannot be undone.
+- **Retention review:** people with no current role and no contact for 24 months. Keep takes someone off the list for 12 months; Erase opens their page. You are emailed the count on the first Monday of each month.
+- **Workspace export:** Settings, Data export downloads every table as CSV and JSON, with a schema description. Tokens, stored credentials and the suppression salt are left out. With 50,000 people it takes under a minute (see DECISIONS.md, M10).
+- **Members and roles:** invite by work email with a role, change a role, remove access. A workspace always keeps one partner, and nobody changes their own membership.
+- **Audit log:** filter by what, who, record type and when. Entries cannot be changed or deleted.
+
+## Platform admin
+
+Platform admins are users with `users.is_platform_admin` set (by Markivis, in the database). One with no workspace membership signs in to Platform: every workspace with its members, packs, AI spend and Apollo credits this month, and no workspace data.
+
+To read a workspace for support, open **Break-glass access** on its row: give the reason (for example the ticket number and what you need to check) and how long you need (30 minutes to 2 hours). Access is read-only, a banner shows on every page until it ends, and End access now closes it at once. Opening and ending it are written to that workspace's audit log, and its data stewards are emailed straight away.
+
+Packs and flags are set on Settings, Packs, by a platform admin who is a member of the workspace.
+
+## Going live: the shadow run
+
+Before anyone other than validators sees signals, run all live ingestion for 14 days (BRD 24.1):
+
+1. A platform admin opens Queue, Shadow and presses Start shadow run. New signals are created as shadow signals; only validators and platform admins see them.
+2. Validators reject the shadow signals that are wrong, so the report shows each feed's reject share. They cannot confirm them yet.
+3. The Shadow tab reports raw items and signals per week by lane and priority, the auto-confirm share, the reject share by feed, and the projected review time a week against the validator's hours (Settings value `validator_hours_per_week`).
+4. If the projection is over the validator's time, tighten the noisy feeds (Settings, Sources) and run 7 more days. Record the result in DECISIONS.md.
+5. When it fits, press Go live: shadow signals from the last 7 days move into their lanes (auto-confirm ones are confirmed, with their actions), older ones are discarded, and the final report is kept.

@@ -1,11 +1,13 @@
 /**
- * Deploy-time setup: apply migrations, then in mock mode load the seed if the database is empty.
+ * Deploy-time setup: apply migrations, then in mock mode, if the database is empty, load the seed
+ * and stage the demo.
  * Used by docker compose (the "setup" service) and safe to run repeatedly.
  */
 import { sql } from "drizzle-orm";
 import { getDataMode } from "@/config/env";
 import { closeDatabase, withSystem } from "@/db/client";
 import { loadSeed } from "@/db/seed";
+import { stageDemo } from "@/db/seed/demo";
 import { runMigrations } from "./migrate";
 
 async function main() {
@@ -20,8 +22,10 @@ async function main() {
     console.log("Seed already loaded.");
     return;
   }
-  await loadSeed();
-  console.log("Seed workspaces loaded. Open /intelligence/sign-in to continue as a demo user.");
+  const bundle = await loadSeed();
+  // Acceptance scenario 24: a fresh clone opens with every screen populated.
+  await stageDemo(bundle.workspaces[0]!.workspace.id, (line) => console.log(line));
+  console.log("Seed workspaces loaded and the demo staged. Open /intelligence/sign-in to continue as a demo user.");
 }
 
 main()

@@ -1,19 +1,25 @@
 /**
  * Signals raised by rules rather than extraction (BRD 9.3): first-party content engagement, from
  * the interests the newsletter adapter records (BRD 8.6), and CEO tenure past the threshold. Both
- * are priority 3 and go to the weekly batch. Idempotent: each fires once per subject. CEO tenure
+ * are priority 3 and go to the weekly batch, unless the workspace set their priority. Idempotent: each fires once per subject. CEO tenure
  * (succession watch) runs only with the executive search pack on.
  */
 import { and, eq, sql } from "drizzle-orm";
 import type { Tx } from "@/db/client";
 import { companies, personInterests, persons, roles, signals, workspaces } from "@/db/schema";
 import { execSearchOn } from "@/lib/packs";
+import { basePriority, priorityOverrides } from "./rules";
 
 export async function raiseDerivedSignals(tx: Tx, workspaceId: string, now = new Date()): Promise<number> {
   const [ws] = await tx.select().from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
   const settings = (ws!.settings ?? {}) as { ceo_tenure_years?: number };
   const flags = ws!.flags as Record<string, boolean>;
-  const lane = flags["validation.batch_p3"] === false ? "review" : "weekly_batch";
+  const overrides = priorityOverrides(ws!.settings);
+  // Priority 3 goes to the weekly batch; a workspace that raised the type sends it to review.
+  const placing = (type: "person_content_engagement" | "company_ceo_tenure_threshold") => {
+    const priority = basePriority(type, overrides);
+    return { priority, lane: priority <= 2 || flags["validation.batch_p3"] === false ? ("review" as const) : ("weekly_batch" as const) };
+  };
   const status = flags["pipeline.shadow"] ? "shadow" : "pending";
   const today = now.toISOString().slice(0, 10);
   let raised = 0;
@@ -32,8 +38,8 @@ export async function raiseDerivedSignals(tx: Tx, workspaceId: string, now = new
     await tx.insert(signals).values({
       workspaceId, subjectType: "person", personId: i.personId, type: "person_content_engagement",
       headline: `${i.name} is reading about ${i.topic.toLowerCase()}`.slice(0, 140), foundAt: now, foundBy: "feed_rule",
-      confidence: "medium", priority: 3, lane, status, dedupeKey: key, eventOn: today,
-      explanation: { rule: "Three or more newsletter clicks on one topic within 30 days (BRD 8.6)" },
+      confidence: "medium", ...placing("person_content_engagement"), status, dedupeKey: key, eventOn: today,
+      explanation: { rule: "Three or more newsletter clicks on one topic within 30 days (BRD 8.6)", ...(status === "shadow" ? { shadow_run: true } : {}) },
     });
     raised++;
   }
@@ -55,8 +61,8 @@ export async function raiseDerivedSignals(tx: Tx, workspaceId: string, now = new
     await tx.insert(signals).values({
       workspaceId, subjectType: "company", companyId: c.companyId, personId: c.personId, roleId: c.roleId, type: "company_ceo_tenure_threshold",
       headline: `${c.name} has led ${c.company} for more than ${years} years`.slice(0, 140), foundAt: now, foundBy: "feed_rule",
-      confidence: "high", priority: 3, lane, status, dedupeKey: key, eventOn: today,
-      explanation: { rule: `Current CEO tenure past ${years} years (BRD 9.3)` },
+      confidence: "high", ...placing("company_ceo_tenure_threshold"), status, dedupeKey: key, eventOn: today,
+      explanation: { rule: `Current CEO tenure past ${years} years (BRD 9.3)`, ...(status === "shadow" ? { shadow_run: true } : {}) },
     });
     raised++;
   }

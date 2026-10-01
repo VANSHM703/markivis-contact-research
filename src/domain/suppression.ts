@@ -16,7 +16,8 @@ export function suppressionHash(salt: string, kind: SuppressionKind, value: stri
   return createHash("sha256").update(`${salt}:${kind}:${normalised}`).digest("hex");
 }
 
-async function salt(tx: Tx, workspaceId: string): Promise<string> {
+/** The workspace's salt. It never leaves the database layer or appears in an export. */
+export async function workspaceSalt(tx: Tx, workspaceId: string): Promise<string> {
   const [ws] = await tx.select({ salt: workspaces.suppressionSalt }).from(workspaces).where(eq(workspaces.id, workspaceId)).limit(1);
   if (!ws) throw new Error("Workspace not found in this scope.");
   return ws.salt;
@@ -35,7 +36,7 @@ export async function isSuppressed(
   workspaceId: string,
   ids: { emails?: (string | null | undefined)[]; linkedinUrls?: (string | null | undefined)[] },
 ): Promise<boolean> {
-  const s = await salt(tx, workspaceId);
+  const s = await workspaceSalt(tx, workspaceId);
   const email = (ids.emails ?? []).flatMap((v) => (v ? [suppressionHash(s, "email", v)] : [])).filter((h): h is string => !!h);
   const linkedin = (ids.linkedinUrls ?? []).flatMap((v) => (v ? [suppressionHash(s, "linkedin", v)] : [])).filter((h): h is string => !!h);
   const hashes = [...email, ...linkedin];
@@ -51,7 +52,7 @@ export async function addSuppression(
   value: string,
   reason: "erasure" | "opt_out" | "do_not_contact",
 ): Promise<boolean> {
-  const hash = suppressionHash(await salt(tx, workspaceId), kind, value);
+  const hash = suppressionHash(await workspaceSalt(tx, workspaceId), kind, value);
   if (!hash) return false;
   const existing = await tx.select({ id: suppressions.id }).from(suppressions).where(and(eq(suppressions.kind, kind), eq(suppressions.hash, hash))).limit(1);
   if (existing.length === 0) await tx.insert(suppressions).values({ workspaceId, kind, hash, reason });

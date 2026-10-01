@@ -1,0 +1,26 @@
+/* Compliance and administration screens (BRD 18): the design file's cards, forms and tables. */
+.stack { display: grid; gap: var(--space-5); }
+.stack > :global(.card) { display: grid; gap: var(--space-3); align-content: start; }
+.plain { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.plain li { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-width: 0; }
+.identifier { font: 400 var(--meta)/1.45 var(--font-mono); overflow-wrap: anywhere; }
+.inline summary, .danger summary { display: inline-flex; align-items: center; min-height: var(--tap-min); color: var(--accent); cursor: pointer; font-size: var(--body-sm); }
+.inline[open] summary, .danger[open] summary { margin-bottom: var(--space-3); }
+.danger summary { color: var(--signal-critical); }
+.eraseBody { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--signal-critical); border-radius: var(--radius-md); background: var(--signal-critical-wash); }
+.counts { margin: 0; padding-left: var(--space-5); display: grid; gap: var(--space-1); font-size: var(--body-sm); }
+.figures { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--space-3); margin: 0; }
+.figures div { display: grid; gap: 2px; padding: var(--space-3) var(--space-4); background: var(--surface-sunken); border-radius: var(--radius-md); }
+.figures dt { font-size: var(--caption); color: var(--text-muted); }
+.figures dd { margin: 0; font: 600 var(--body)/1.3 var(--font-mono); font-variant-numeric: tabular-nums; }
+.result { font-size: var(--body-sm); overflow-wrap: anywhere; }
+.row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; }
+.row > :first-child { flex: 1 1 260px; min-width: 0; }
+.filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: var(--space-3); align-items: end; }
+.json { margin: var(--space-2) 0 0; padding: var(--space-3); background: var(--surface-sunken); border-radius: var(--radius-md); font: 400 var(--meta)/1.5 var(--font-mono); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 240px; overflow-y: auto; }
+.cellActions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.cellActions select { min-width: 0; }
+.back { margin-bottom: var(--space-4); }
+/* Selects inside table cells keep their full option text. */
+select.select { width: auto; min-width: 12.5rem; max-width: 100%; }
+@media (max-width: 560px) { select.select { min-width: 0; width: 100%; } }

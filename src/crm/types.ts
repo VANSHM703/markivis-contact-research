@@ -37,4 +37,6 @@ export interface CrmAdapter {
   createNote(note: CrmNoteOut): Promise<string>;
   /** Contacts changed since a time, for sync in. */
   contactsModifiedSince(since: Date): Promise<CrmContactIn[]>;
+  /** Permanently deletes a contact, for an erasure (BRD 18.2). False when the CRM no longer has it. */
+  deleteContact(crmId: string): Promise<boolean>;
 }

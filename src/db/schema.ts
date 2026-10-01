@@ -78,13 +78,13 @@ export const actionType = dmi.enum("action_type", [
 export const actionStatus = dmi.enum("action_status", [
   "open", "drafted", "awaiting_approval", "approved", "sent", "done", "dismissed", "expired",
 ]);
-export const dismissReason = dmi.enum("dismiss_reason", ["not_relevant", "already_known", "wrong_timing", "off_limits"]);
+export const dismissReason = dmi.enum("dismiss_reason", ["not_relevant", "already_known", "wrong_timing", "off_limits", "do_not_contact"]);
 export const actionOutcome = dmi.enum("action_outcome", ["none", "no_reply", "replied", "meeting", "mandate"]);
 export const draftChannel = dmi.enum("draft_channel", ["email", "linkedin_message"]);
 export const draftAuthor = dmi.enum("draft_author", ["ai", "user"]);
 /** Whether an action approaches the person as a client contact or as a candidate (BRD 12.2 step 4). */
 export const actionPurpose = dmi.enum("action_purpose", ["client", "candidate"]);
-export const notificationKind = dmi.enum("notification_kind", ["digest", "p1_change", "auto_confirm_suspended", "budget_80", "brief"]);
+export const notificationKind = dmi.enum("notification_kind", ["digest", "p1_change", "auto_confirm_suspended", "budget_80", "brief", "break_glass", "invitation", "retention_review"]);
 export const notificationStatus = dmi.enum("notification_status", ["queued", "sent", "failed"]);
 export const band = dmi.enum("band", ["strong", "warm", "cooling", "cold", "none"]);
 export const offLimitsScope = dmi.enum("off_limits_scope", ["company", "function", "level_and_above"]);
@@ -180,6 +180,8 @@ export const persons = dmi.table(
     isOffList: boolean().notNull().default(false),
     isPriority: boolean().notNull().default(false),
     mergedIntoId: uuid().references((): AnyPgColumn => persons.id),
+    /** When the data steward last chose to keep this person in the retention review (BRD 18.2). */
+    retentionReviewedAt: timestamp(tz),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -1005,4 +1007,24 @@ export const crmLinks = dmi.table(
     updatedAt: updatedAt(),
   },
   (t) => [uniqueIndex().on(t.workspaceId, t.provider, t.entityType, t.entityId), index().on(t.workspaceId, t.provider, t.crmId)],
+);
+
+/**
+ * Break-glass access (BRD 5.3, 18.3): a platform admin who is not a member reads a workspace only
+ * through one of these, with a stated reason, for a limited time, and read-only. Starting and
+ * ending one is written to the workspace's audit log and emailed to its data stewards. Not in BRD 6.
+ */
+export const breakGlassGrants = dmi.table(
+  "break_glass_grants",
+  {
+    id: id(),
+    workspaceId: workspaceRef(),
+    userId: uuid().notNull().references(() => users.id, { onDelete: "cascade" }),
+    reason: text().notNull(),
+    expiresAt: timestamp(tz).notNull(),
+    endedAt: timestamp(tz),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [index().on(t.userId, t.expiresAt), index().on(t.workspaceId, t.createdAt), check("break_glass_reason_length", sql`char_length(${t.reason}) between 10 and 500`)],
 );
