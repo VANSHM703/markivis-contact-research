@@ -44,7 +44,7 @@ export default async function PathsPage({ searchParams }: { searchParams: Promis
             {matches.map((m) => (
               <li key={m.id} className={styles.match}>
                 <Link href={`/paths?person=${m.id}`}>{m.fullName}</Link>
-                <span className="t-caption t-muted">{[m.title, m.companyName].filter(Boolean).length ? `, ${[m.title, m.companyName].filter(Boolean).join(", ")}` : ""}</span>
+                {m.title || m.companyName ? <span className="t-caption t-muted">{[m.title, m.companyName].filter(Boolean).join(", ")}</span> : null}
               </li>
             ))}
           </ul>
